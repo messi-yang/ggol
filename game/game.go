@@ -29,11 +29,11 @@ func (e *ErrCoordinateIsOutsideBorder) Error() string {
 }
 
 type Game interface {
-	ReviveCell(int, int)
-	KillCell(int, int)
+	ReviveCell(int, int) error
+	KillCell(int, int) error
 	Evolve()
-	GetCell(int, int) bool
-	GetGeneration() [][]bool
+	GetCell(int, int) (*bool, error)
+	GetGeneration() *[][]bool
 }
 
 type gameInfo struct {
