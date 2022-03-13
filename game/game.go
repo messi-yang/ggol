@@ -1,5 +1,33 @@
 package game
 
+import (
+	"fmt"
+)
+
+type ErrSizeInNotValid struct {
+	width  int
+	height int
+}
+
+func (e *ErrSizeInNotValid) Error() string {
+	return fmt.Sprintf("The game size (%v x %v) is not valid.", e.height, e.width)
+}
+
+type ErrSeedDoesNotMatchSize struct{}
+
+func (e *ErrSeedDoesNotMatchSize) Error() string {
+	return "The seed does not match game size."
+}
+
+type ErrCoordinateIsOutsideBorder struct {
+	x int
+	y int
+}
+
+func (e *ErrCoordinateIsOutsideBorder) Error() string {
+	return fmt.Sprintf("Coordinate (%v, %v) is outside game border.", e.x, e.y)
+}
+
 type Game interface {
 	ReviveCell(int, int)
 	KillCell(int, int)
@@ -20,7 +48,10 @@ type coord struct {
 	y int
 }
 
-func NewGame(width int, height int, seed *[][]bool) gameInfo {
+func NewGame(width int, height int, seed *[][]bool) (*gameInfo, error) {
+	if width < 0 || height < 0 {
+		return nil, &ErrSizeInNotValid{width, height}
+	}
 	generation := make([][]bool, height)
 	liveNbrsCount := make([][]int, height)
 	for i := 0; i < height; i++ {
@@ -34,7 +65,13 @@ func NewGame(width int, height int, seed *[][]bool) gameInfo {
 	newG := gameInfo{generation, liveNbrsCount, width, height}
 
 	if seed != nil {
+		if len((*seed)) != height {
+			return nil, &ErrSeedDoesNotMatchSize{}
+		}
 		for i := 0; i < newG.height; i++ {
+			if len((*seed)[i]) != width {
+				return nil, &ErrSeedDoesNotMatchSize{}
+			}
 			for j := 0; j < newG.width; j++ {
 				alive := (*seed)[i][j]
 				if alive {
@@ -44,7 +81,7 @@ func NewGame(width int, height int, seed *[][]bool) gameInfo {
 		}
 	}
 
-	return newG
+	return &newG, nil
 }
 
 func (g gameInfo) isOutsideBorder(x int, y int) bool {
@@ -79,20 +116,30 @@ func (g gameInfo) subLiveNbrsCountAround(x int, y int) {
 	}
 }
 
-func (g gameInfo) ReviveCell(x int, y int) {
+func (g gameInfo) ReviveCell(x int, y int) error {
+	if g.isOutsideBorder(x, y) {
+		return &ErrCoordinateIsOutsideBorder{x, y}
+	}
 	if g.generation[x][y] {
-		return
+		return nil
 	}
 	g.generation[x][y] = true
 	g.addLiveNbrsCountAround(x, y)
+
+	return nil
 }
 
-func (g gameInfo) KillCell(x int, y int) {
+func (g gameInfo) KillCell(x int, y int) error {
+	if g.isOutsideBorder(x, y) {
+		return &ErrCoordinateIsOutsideBorder{x, y}
+	}
 	if !g.generation[x][y] {
-		return
+		return nil
 	}
 	g.generation[x][y] = false
 	g.subLiveNbrsCountAround(x, y)
+
+	return nil
 }
 
 func (g gameInfo) Evolve() {
@@ -120,10 +167,13 @@ func (g gameInfo) Evolve() {
 	}
 }
 
-func (g gameInfo) GetGeneration() [][]bool {
-	return g.generation
+func (g gameInfo) GetGeneration() *[][]bool {
+	return &g.generation
 }
 
-func (g gameInfo) GetCell(x int, y int) bool {
-	return g.generation[x][y]
+func (g gameInfo) GetCell(x int, y int) (*bool, error) {
+	if g.isOutsideBorder(x, y) {
+		return nil, &ErrCoordinateIsOutsideBorder{x, y}
+	}
+	return &g.generation[x][y], nil
 }

@@ -18,8 +18,8 @@ func isBinaryMatrixEqual(a [][]bool, b [][]bool) bool {
 func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
-	g := NewGame(width, height, nil)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, nil)
+	generation := *g.GetGeneration()
 
 	if len(generation) == height && len(generation[0]) == width {
 		t.Log("Passed")
@@ -36,8 +36,8 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 		{true, true, true},
 		{true, false, true},
 	}
-	g := NewGame(width, height, &seed)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, &seed)
+	generation := *g.GetGeneration()
 	expectedBinaryBoard := [][]bool{
 		{true, true, true},
 		{true, true, true},
@@ -51,18 +51,43 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 	}
 }
 
+func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
+	width := -1
+	height := 3
+	_, err := NewGame(width, height, nil)
+
+	if err == nil {
+		t.Fatalf("Should get error when giving invalid size.")
+	}
+	t.Log("Passed")
+}
+
+func shouldThrowErrorWhenSeedNotMatchesSize(t *testing.T) {
+	width := 2
+	height := 2
+	_, err := NewGame(width, height, &[][]bool{{true, true, false}, {true, true}})
+
+	if err == nil {
+		t.Fatalf("Should get error when seed not matches the size.")
+	}
+	t.Log("Passed")
+}
+
 func TestNewGame(t *testing.T) {
 	shouldInitializeGameWithCorrectSize(t)
 	shouldInitializeGameWithGiveSeed(t)
+	shouldThrowErrorWhenSizeIsInvalid(t)
+	shouldThrowErrorWhenSeedNotMatchesSize(t)
 }
 
 func shouldReviveCell(t *testing.T) {
 	width := 2
 	height := 2
-	g := NewGame(width, height, nil)
+	g, _ := NewGame(width, height, nil)
 	g.ReviveCell(1, 1)
+	cell, _ := g.GetCell(1, 1)
 
-	if g.GetCell(1, 1) {
+	if *cell {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Cell on %v, %v should be alive.", 1, 1)
@@ -81,8 +106,8 @@ func shouldReviveCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 		{true, true, false},
 		{false, false, false},
 	}
-	g := NewGame(width, height, &seed)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, &seed)
+	generation := *g.GetGeneration()
 	expectedBinaryBoard := [][]bool{
 		{false, true, false},
 		{true, true, false},
@@ -103,11 +128,12 @@ func TestReviveCells(t *testing.T) {
 func shouldKillCell(t *testing.T) {
 	width := 2
 	height := 2
-	g := NewGame(width, height, nil)
+	g, _ := NewGame(width, height, nil)
 	g.ReviveCell(1, 1)
 	g.KillCell(1, 1)
+	cell, _ := g.GetCell(1, 1)
 
-	if !g.GetCell(1, 1) {
+	if !(*cell) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Cell on %v, %v should be dead.", 1, 1)
@@ -126,9 +152,9 @@ func testBlockEvolvement(t *testing.T) {
 		{true, true, false},
 		{false, false, false},
 	}
-	g := NewGame(width, height, &seed)
+	g, _ := NewGame(width, height, &seed)
 	g.Evolve()
-	nextGeneration := g.GetGeneration()
+	nextGeneration := *g.GetGeneration()
 	expectedNextGeneration := [][]bool{
 		{true, true, false},
 		{true, true, false},
@@ -150,8 +176,8 @@ func testBlinkerEvolvement(t *testing.T) {
 		{true, true, true},
 		{false, false, false},
 	}
-	g := NewGame(width, height, &seed)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, &seed)
+	generation := *g.GetGeneration()
 	expectedNextGenerationOne := [][]bool{
 		{false, true, false},
 		{false, true, false},
@@ -184,8 +210,8 @@ func testGliderEvolvement(t *testing.T) {
 		{false, true, true, false, false},
 		{false, false, false, false, false},
 	}
-	g := NewGame(width, height, &seed)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, &seed)
+	generation := *g.GetGeneration()
 
 	expectedGenerationOne := [][]bool{
 		{false, false, false, false, false},
@@ -253,8 +279,8 @@ func TestGetGeneration(t *testing.T) {
 		{true, true, false},
 		{false, false, false},
 	}
-	g := NewGame(width, height, &seed)
-	generation := g.GetGeneration()
+	g, _ := NewGame(width, height, &seed)
+	generation := *g.GetGeneration()
 	expectedBinaryBoard := [][]bool{
 		{false, true, false},
 		{true, true, false},
