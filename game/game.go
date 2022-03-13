@@ -1,4 +1,4 @@
-package main
+package game
 
 type Game interface {
 	ReviveCell(int, int)
