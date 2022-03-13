@@ -1,17 +1,15 @@
-package game
+package main
 
 type Game interface {
 	ReviveCell(int, int)
-	ReviveCells(int, int, [][]bool)
 	KillCell(int, int)
 	Evolve()
 	GetCell(int, int) bool
-	GetBoard() [][]bool
-	GetBinaryBoard() [][]int
+	GetGeneration() [][]bool
 }
 
 type gameInfo struct {
-	board         [][]bool
+	generation    [][]bool
 	liveNbrsCount [][]int
 	width         int
 	height        int
@@ -22,18 +20,18 @@ type coord struct {
 	y int
 }
 
-func New(width int, height int, seed *[][]bool) gameInfo {
-	board := make([][]bool, height)
+func NewGame(width int, height int, seed *[][]bool) gameInfo {
+	generation := make([][]bool, height)
 	liveNbrsCount := make([][]int, height)
 	for i := 0; i < height; i++ {
-		board[i] = make([]bool, width)
+		generation[i] = make([]bool, width)
 		liveNbrsCount[i] = make([]int, width)
 		for j := 0; j < width; j++ {
-			board[i][j] = false
+			generation[i][j] = false
 			liveNbrsCount[i][j] = 0
 		}
 	}
-	newG := gameInfo{board, liveNbrsCount, width, height}
+	newG := gameInfo{generation, liveNbrsCount, width, height}
 
 	if seed != nil {
 		for i := 0; i < newG.height; i++ {
@@ -82,32 +80,18 @@ func (g gameInfo) subLiveNbrsCountAround(x int, y int) {
 }
 
 func (g gameInfo) ReviveCell(x int, y int) {
-	if g.board[x][y] {
+	if g.generation[x][y] {
 		return
 	}
-	g.board[x][y] = true
+	g.generation[x][y] = true
 	g.addLiveNbrsCountAround(x, y)
 }
 
-func (g gameInfo) ReviveCells(x int, y int, pattern [][]bool) {
-	for i := 0; i < len(pattern); i++ {
-		for j := 0; j < len(pattern[i]); j++ {
-			if !pattern[j][i] {
-				continue
-			}
-			if g.isOutsideBorder(x+j, y+i) {
-				continue
-			}
-			g.ReviveCell(x+j, y+i)
-		}
-	}
-}
-
 func (g gameInfo) KillCell(x int, y int) {
-	if !g.board[x][y] {
+	if !g.generation[x][y] {
 		return
 	}
-	g.board[x][y] = false
+	g.generation[x][y] = false
 	g.subLiveNbrsCountAround(x, y)
 }
 
@@ -118,7 +102,7 @@ func (g gameInfo) Evolve() {
 	for i := 0; i < g.height; i++ {
 		for j := 0; j < g.width; j++ {
 			liveNbrsCount := g.liveNbrsCount[i][j]
-			alive := g.board[i][j]
+			alive := g.generation[i][j]
 			coord := coord{x: i, y: j}
 			if liveNbrsCount == 3 && !alive {
 				cellsToRevive = append(cellsToRevive, coord)
@@ -136,30 +120,10 @@ func (g gameInfo) Evolve() {
 	}
 }
 
-func (g gameInfo) GetBoard() [][]bool {
-	return g.board
+func (g gameInfo) GetGeneration() [][]bool {
+	return g.generation
 }
 
 func (g gameInfo) GetCell(x int, y int) bool {
-	return g.board[x][y]
-}
-
-func (g gameInfo) GetLiveNbrsCount(x int, y int) int {
-	return g.liveNbrsCount[x][y]
-}
-
-func (g gameInfo) GetBinaryBoard() [][]int {
-	binaryBoard := make([][]int, g.height)
-
-	for i := 0; i < g.height; i++ {
-		binaryBoard[i] = make([]int, g.width)
-		for j := 0; j < g.width; j++ {
-			if g.board[i][j] {
-				binaryBoard[i][j] = 1
-			} else {
-				binaryBoard[i][j] = 0
-			}
-		}
-	}
-	return binaryBoard
+	return g.generation[x][y]
 }
