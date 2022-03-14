@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DumDumGeniuss/ggol/game"
+	"github.com/DumDumGeniuss/goways-game-of-life/game"
 	"github.com/gin-gonic/gin"
 )
 
