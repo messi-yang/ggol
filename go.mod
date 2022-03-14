@@ -20,3 +20,9 @@ require (
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+// Incorrect builds
+retract (
+	v1.0.1
+	v1.0.0
+)
