@@ -1,7 +1,7 @@
 # Goways Game of Life
 
-![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/ggol.svg)
-![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)
+[![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/ggol.svg)](https://pkg.go.dev/github.com/DumDumGeniuss/ggol)
+[![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)](https://goreportcard.com/report/github.com/DumDumGeniuss/ggol)
 
 Goways Game of Life is a go package that provides fundamental functions of a Conway's Game of Life, and it's **cocurrently safe**.
 
@@ -58,4 +58,4 @@ go run ./demo/main.go
 
 And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
 
-![demo](./imgs/demo.png)
+![demo](./assets/demo.png)
