@@ -50,6 +50,6 @@ func main() {
 			"generation": *g.GetGeneration(),
 		})
 	})
-	route.Static("/public", "./public")
+	route.Static("/demo", "./demo")
 	route.Run(":8000")
 }

@@ -4,10 +4,10 @@ Goways Game of Life is a go package that provides fundamental functions of a Con
 
 The goal is to help you build a Conway's Game of Life in the way you like.
 
-## Get Started
+## Installed This Package
 
 ```bash
-go get github.com/DumDumGeniuss/ggol/game
+go get github.com/DumDumGeniuss/goways-game-of-life/game
 ```
 
 ## Initialize A New Game
@@ -18,7 +18,7 @@ package main
 import {
     "fmt"
     
-    "github.com/DumDumGeniuss/ggol/game"
+    "github.com/DumDumGeniuss/goways-game-of-life/game"
 )
 
 main() {
@@ -40,3 +40,19 @@ main() {
     // }
 }
 ```
+
+## Demo
+
+You can see a quick demo by cloning this repo to your local machine.
+
+```bash
+git clone https://github.com/DumDumGeniuss/goways-game-of-life.git
+cd goways-game-of-life
+go mod tidy
+go run main.go
+# [GIN-debug] Listening and serving HTTP on :8000
+```
+
+And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
+
+![demo](./demo/demo.png)
