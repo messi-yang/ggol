@@ -1,5 +1,8 @@
 # Goways Game of Life
 
+![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/goways-game-of-life.svg)
+![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/goways-game-of-life)
+
 Goways Game of Life is a go package that provides fundamental functions of a Conway's Game of Life, and it's **cocurrently safe**.
 
 The goal is to help you build a Conway's Game of Life in the way you like.
