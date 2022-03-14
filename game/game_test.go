@@ -1,6 +1,7 @@
 package game
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -265,10 +266,53 @@ func testGliderEvolvement(t *testing.T) {
 	t.Log("Passed")
 }
 
+func testEvolvementWithConcurrency(t *testing.T) {
+	width := 200
+	height := 200
+	g, _ := NewGame(width, height, nil)
+
+	// Build a glider pattern
+	g.ReviveCell(0, 0)
+	g.ReviveCell(1, 1)
+	g.ReviveCell(1, 2)
+	g.ReviveCell(2, 0)
+	g.ReviveCell(2, 1)
+
+	wg := sync.WaitGroup{}
+
+	step := 100
+
+	wg.Add(step)
+	for i := 0; i < step; i++ {
+		// Let the glider fly to digonal cell in four steps.
+		go func() {
+			g.Evolve()
+			g.Evolve()
+			g.Evolve()
+			g.Evolve()
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+
+	cellOne, _ := g.GetCell(0+step, 0+step)
+	cellTwo, _ := g.GetCell(1+step, 1+step)
+	cellThree, _ := g.GetCell(1+step, 2+step)
+	cellFour, _ := g.GetCell(2+step, 0+step)
+	cellFive, _ := g.GetCell(2+step, 1+step)
+
+	if !*cellOne || !*cellTwo || !*cellThree || !*cellFour || !*cellFive {
+		t.Fatalf("Should still be a glider pattern.")
+	}
+
+	t.Log("Passed")
+}
+
 func TestEvolve(t *testing.T) {
 	testBlockEvolvement(t)
 	testBlinkerEvolvement(t)
 	testGliderEvolvement(t)
+	testEvolvementWithConcurrency(t)
 }
 
 func TestGetGeneration(t *testing.T) {

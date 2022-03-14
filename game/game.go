@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"sync"
 )
 
 type ErrSizeInNotValid struct {
@@ -48,6 +49,7 @@ type gameInfo struct {
 	liveNbrsCount [][]int
 	width         int
 	height        int
+	locker        sync.RWMutex
 }
 
 func NewGame(width int, height int, seed *[][]bool) (*gameInfo, error) {
@@ -64,7 +66,7 @@ func NewGame(width int, height int, seed *[][]bool) (*gameInfo, error) {
 			liveNbrsCount[i][j] = 0
 		}
 	}
-	newG := gameInfo{generation, liveNbrsCount, width, height}
+	newG := gameInfo{generation, liveNbrsCount, width, height, sync.RWMutex{}}
 
 	if seed != nil {
 		if len((*seed)) != newG.height {
@@ -118,33 +120,48 @@ func (g *gameInfo) subLiveNbrsCountAround(x int, y int) {
 	}
 }
 
+func (g *gameInfo) setCellToAlive(x int, y int) {
+	g.generation[x][y] = true
+	g.addLiveNbrsCountAround(x, y)
+}
+
+func (g *gameInfo) setCellToDead(x int, y int) {
+	g.generation[x][y] = false
+	g.subLiveNbrsCountAround(x, y)
+}
+
 func (g *gameInfo) ReviveCell(x int, y int) error {
+	g.locker.Lock()
+	defer g.locker.Unlock()
 	if g.isOutsideBorder(x, y) {
 		return &ErrCoordinateIsOutsideBorder{x, y}
 	}
 	if g.generation[x][y] {
 		return nil
 	}
-	g.generation[x][y] = true
-	g.addLiveNbrsCountAround(x, y)
+	g.setCellToAlive(x, y)
 
 	return nil
 }
 
 func (g *gameInfo) KillCell(x int, y int) error {
+	g.locker.Lock()
+	defer g.locker.Unlock()
 	if g.isOutsideBorder(x, y) {
 		return &ErrCoordinateIsOutsideBorder{x, y}
 	}
 	if !g.generation[x][y] {
 		return nil
 	}
-	g.generation[x][y] = false
-	g.subLiveNbrsCountAround(x, y)
+	g.setCellToDead(x, y)
 
 	return nil
 }
 
 func (g *gameInfo) Evolve() {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
 	cellsToDie := make([]coord, 0)
 	cellsToRevive := make([]coord, 0)
 
@@ -162,18 +179,23 @@ func (g *gameInfo) Evolve() {
 	}
 
 	for i := 0; i < len(cellsToDie); i++ {
-		g.KillCell(cellsToDie[i].x, cellsToDie[i].y)
+		g.setCellToDead(cellsToDie[i].x, cellsToDie[i].y)
 	}
 	for i := 0; i < len(cellsToRevive); i++ {
-		g.ReviveCell(cellsToRevive[i].x, cellsToRevive[i].y)
+		g.setCellToAlive(cellsToRevive[i].x, cellsToRevive[i].y)
 	}
 }
 
 func (g *gameInfo) GetGeneration() *generation {
+	g.locker.RLock()
+	defer g.locker.RUnlock()
+
 	return &g.generation
 }
 
 func (g *gameInfo) GetCell(x int, y int) (*bool, error) {
+	g.locker.RLock()
+	defer g.locker.RUnlock()
 	if g.isOutsideBorder(x, y) {
 		return nil, &ErrCoordinateIsOutsideBorder{x, y}
 	}
