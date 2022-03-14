@@ -29,19 +29,19 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 }
 
 func shouldInitializeGameWithGiveSeed(t *testing.T) {
-	width := 3
+	width := 6
 	height := 3
 	seed := [][]bool{
-		{true, true, true},
-		{true, true, true},
-		{true, false, true},
+		{true, true, true, true, true, true},
+		{true, true, true, true, true, true},
+		{true, false, true, true, true, true},
 	}
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := [][]bool{
-		{true, true, true},
-		{true, true, true},
-		{true, false, true},
+		{true, true, true, true, true, true},
+		{true, true, true, true, true, true},
+		{true, false, true, true, true, true},
 	}
 
 	if isBinaryMatrixEqual(generation, expectedBinaryBoard) {

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js" integrity="sha512-bPh3uwgU5qEMipS/VOmRqynnMXGGSRv+72H/N260MQeXZIK4PG48401Bsby9Nq5P5fz7hy5UGNmC/W1Z51h2GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <div class="flex items-center justify-center h-screen">
+            <div id="goways-game-of-life"></div>
+        </div>
+        <script lang="javascript">
+            var container = document.getElementById('goways-game-of-life');
+            var canvasDom = document.createElement('canvas');
+            var context = canvasDom.getContext('2d');
+            var unit = 8;
+            var size = {
+                width: 0,
+                height: 0,
+            };
+            var generation;
+            var period;
+
+            function initCanvas() {
+                canvasDom.width = size.width * unit;
+                canvasDom.height = size.height * unit;
+                context.fillStyle = 'black';
+                context.fillRect(0, 0, canvasDom.width, canvasDom.height);
+                container.appendChild(canvasDom);
+            }
+
+            function drawCell(x, y) {
+                var cell = generation[x][y];
+                context.fillStyle = cell ? 'white' : 'black';
+                context.fillRect(
+                    y * unit,
+                    x * unit,
+                    1 * unit,
+                    1 * unit
+                );
+            }
+
+            var fetchData = function () {
+                axios
+                    .get('http://localhost:8000/api/generation')
+                    .then(function ({ data }) {
+                        generation = data.generation;
+                        size.width = data.width;
+                        size.height = data.height;
+                        period = data.period;
+                        initCanvas();
+                        for (var i = 0; i < size.height; i += 1) {
+                            for (var j = 0; j < size.width; j += 1) {
+                                drawCell(i, j);
+                            }
+                        }
+                        setTimeout(fetchData, period);
+                    }).catch(function () {
+                        // Do nothing
+                    });
+            }
+            fetchData();
+        </script>
+    </body>
+</html>
