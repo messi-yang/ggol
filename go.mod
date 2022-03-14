@@ -1,4 +1,4 @@
-module github.com/DumDumGeniuss/goways-game-of-life
+module github.com/DumDumGeniuss/ggol
 
 go 1.17
 

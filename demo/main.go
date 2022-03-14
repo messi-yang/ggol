@@ -4,17 +4,17 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DumDumGeniuss/goways-game-of-life/game"
+	"github.com/DumDumGeniuss/ggol"
 	"github.com/gin-gonic/gin"
 )
 
-var g game.Game
+var g ggol.Game
 var count int
 var width int = 120
 var height int = 75
 var period time.Duration = 20
 
-func initGame() game.Game {
+func initGame() ggol.Game {
 	seed := make([][]bool, height)
 	for i := 0; i < height; i++ {
 		seed[i] = make([]bool, width)
@@ -22,7 +22,7 @@ func initGame() game.Game {
 			seed[i][j] = rand.Intn(2) == 0
 		}
 	}
-	newG, _ := game.NewGame(width, height, &seed)
+	newG, _ := ggol.NewGame(width, height, &seed)
 	return newG
 }
 
@@ -50,6 +50,6 @@ func main() {
 			"generation": *g.GetGeneration(),
 		})
 	})
-	route.Static("/demo", "./demo")
+	route.Static("/demo", "./demo/public")
 	route.Run(":8000")
 }

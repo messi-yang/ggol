@@ -1,4 +1,4 @@
-package game
+package ggol
 
 import (
 	"sync"

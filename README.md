@@ -1,7 +1,7 @@
 # Goways Game of Life
 
-![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/goways-game-of-life.svg)
-![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/goways-game-of-life)
+![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/ggol.svg)
+![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)
 
 Goways Game of Life is a go package that provides fundamental functions of a Conway's Game of Life, and it's **cocurrently safe**.
 
@@ -10,7 +10,7 @@ The goal is to help you build a Conway's Game of Life in the way you like.
 ## Installed This Package
 
 ```bash
-go get github.com/DumDumGeniuss/goways-game-of-life/game
+go get github.com/DumDumGeniuss/ggol
 ```
 
 ## Initialize A New Game
@@ -21,7 +21,7 @@ package main
 import {
     "fmt"
     
-    "github.com/DumDumGeniuss/goways-game-of-life/game"
+    "github.com/DumDumGeniuss/ggol"
 )
 
 main() {
@@ -31,7 +31,7 @@ main() {
         {false, true, false},
     }
     // Start a new game with given seed.
-    game, _ := game.NewGame(3, 3, &seed)
+    game, _ := ggol.NewGame(3, 3, &seed)
     // Generate next generation.
     game.Evolve()
     // Get current generation.
@@ -49,13 +49,13 @@ main() {
 You can see a quick demo by cloning this repo to your local machine.
 
 ```bash
-git clone https://github.com/DumDumGeniuss/goways-game-of-life.git
-cd goways-game-of-life
+git clone https://github.com/DumDumGeniuss/ggol.git
+cd ggol
 go mod tidy
-go run main.go
+go run ./demo/main.go
 # [GIN-debug] Listening and serving HTTP on :8000
 ```
 
 And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
 
-![demo](./demo/demo.png)
+![demo](./imgs/demo.png)

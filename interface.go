@@ -1,4 +1,4 @@
-package game
+package ggol
 
 type Game interface {
 	ReviveCell(int, int) error
