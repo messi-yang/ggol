@@ -1,10 +1,10 @@
-# Goways Game of Life
+# Gonways Game of Life
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/ggol.svg)](https://pkg.go.dev/github.com/DumDumGeniuss/ggol)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)](https://goreportcard.com/report/github.com/DumDumGeniuss/ggol)
 [![Build Status](https://app.travis-ci.com/DumDumGeniuss/ggol.svg?branch=main)](https://app.travis-ci.com/DumDumGeniuss/ggol)
 
-Goways Game of Life is a go package that provides fundamental functions of a Conway's Game of Life, and it's **cocurrently safe**.
+Gonways Game of Life is a go package that provides fundamental functions for running [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life),
 
 The goal is to help you build a Conway's Game of Life in the way you like.
 
@@ -53,10 +53,10 @@ You can see a quick demo by cloning this repo to your local machine.
 git clone https://github.com/DumDumGeniuss/ggol.git
 cd ggol
 go mod tidy
-go run ./demo/main.go
+go run ./cmd/main.go
 # [GIN-debug] Listening and serving HTTP on :8000
 ```
 
 And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
 
-![demo](./assets/demo.png)
+![demo](./doc/demo.png)

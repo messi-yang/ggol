@@ -1,4 +1,3 @@
-env: EMAIL_ADDRESS=hello@example.com
 language: go
 go: 1.17
 install:
