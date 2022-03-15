@@ -12,10 +12,9 @@ func (e *ErrSizeIsNotValid) Error() string {
 }
 
 type ErrCoordinateIsOutsideBorder struct {
-	x int
-	y int
+	Coordinate Coordinate
 }
 
 func (e *ErrCoordinateIsOutsideBorder) Error() string {
-	return fmt.Sprintf("Coordinate (%v, %v) is outside game border.", e.x, e.y)
+	return fmt.Sprintf("Coordinate (%v, %v) is outside game border.", e.Coordinate.X, e.Coordinate.Y)
 }

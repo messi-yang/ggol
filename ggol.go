@@ -40,14 +40,13 @@ func NewGame(width int, height int, seed *Seed) (*gameInfo, error) {
 
 	if seed != nil {
 		for i := 0; i < len(*seed); i++ {
-			x := (*seed)[i].Coordinate.X
-			y := (*seed)[i].Coordinate.Y
+			c := (*seed)[i].Coordinate
 			cell := (*seed)[i].Cell
-			if newG.isOutsideBorder(x, y) {
-				return nil, &ErrCoordinateIsOutsideBorder{x, y}
+			if newG.isOutsideBorder(c) {
+				return nil, &ErrCoordinateIsOutsideBorder{c}
 			}
 			if cell {
-				newG.makeCellAlive(x, y)
+				newG.makeCellAlive(c)
 			}
 		}
 	}
@@ -55,17 +54,17 @@ func NewGame(width int, height int, seed *Seed) (*gameInfo, error) {
 	return &newG, nil
 }
 
-func (g *gameInfo) isOutsideBorder(x int, y int) bool {
-	return x < 0 || x >= g.width || y < 0 || y >= g.height
+func (g *gameInfo) isOutsideBorder(c Coordinate) bool {
+	return c.X < 0 || c.X >= g.width || c.Y < 0 || c.Y >= g.height
 }
 
-func (g *gameInfo) addLiveNbrsCountAround(x int, y int) {
-	for i := x - 1; i <= x+1; i++ {
-		for j := y - 1; j <= y+1; j++ {
-			if g.isOutsideBorder(i, j) {
+func (g *gameInfo) addLiveNbrsCountAround(c Coordinate) {
+	for i := c.X - 1; i <= c.X+1; i++ {
+		for j := c.Y - 1; j <= c.Y+1; j++ {
+			if g.isOutsideBorder(Coordinate{X: i, Y: j}) {
 				continue
 			}
-			if i == x && j == y {
+			if i == c.X && j == c.Y {
 				continue
 			}
 			g.liveNbrsCountMap[i][j]++
@@ -73,13 +72,13 @@ func (g *gameInfo) addLiveNbrsCountAround(x int, y int) {
 	}
 }
 
-func (g *gameInfo) subLiveNbrsCountAround(x int, y int) {
-	for i := x - 1; i <= x+1; i++ {
-		for j := y - 1; j <= y+1; j++ {
-			if g.isOutsideBorder(i, j) {
+func (g *gameInfo) subLiveNbrsCountAround(c Coordinate) {
+	for i := c.X - 1; i <= c.X+1; i++ {
+		for j := c.Y - 1; j <= c.Y+1; j++ {
+			if g.isOutsideBorder(Coordinate{X: i, Y: j}) {
 				continue
 			}
-			if i == x && j == y {
+			if i == c.X && j == c.Y {
 				continue
 			}
 			g.liveNbrsCountMap[i][j]--
@@ -88,28 +87,28 @@ func (g *gameInfo) subLiveNbrsCountAround(x int, y int) {
 }
 
 // Make the cell in the coordinate alive.
-func (g *gameInfo) makeCellAlive(x int, y int) {
-	g.generation[x][y] = true
-	g.addLiveNbrsCountAround(x, y)
+func (g *gameInfo) makeCellAlive(c Coordinate) {
+	g.generation[c.X][c.Y] = true
+	g.addLiveNbrsCountAround(c)
 }
 
 // Make the cell in the coordinate dead.
-func (g *gameInfo) makeCellDead(x int, y int) {
-	g.generation[x][y] = false
-	g.subLiveNbrsCountAround(x, y)
+func (g *gameInfo) makeCellDead(c Coordinate) {
+	g.generation[c.X][c.Y] = false
+	g.subLiveNbrsCountAround(c)
 }
 
 // Revive the cell at the coordinate.
 func (g *gameInfo) ReviveCell(c Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
-	if g.isOutsideBorder(c.X, c.Y) {
-		return &ErrCoordinateIsOutsideBorder{c.X, c.Y}
+	if g.isOutsideBorder(c) {
+		return &ErrCoordinateIsOutsideBorder{c}
 	}
 	if g.generation[c.X][c.Y] {
 		return nil
 	}
-	g.makeCellAlive(c.X, c.Y)
+	g.makeCellAlive(c)
 
 	return nil
 }
@@ -118,13 +117,13 @@ func (g *gameInfo) ReviveCell(c Coordinate) error {
 func (g *gameInfo) KillCell(c Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
-	if g.isOutsideBorder(c.X, c.Y) {
-		return &ErrCoordinateIsOutsideBorder{x: c.X, y: c.Y}
+	if g.isOutsideBorder(c) {
+		return &ErrCoordinateIsOutsideBorder{c}
 	}
 	if !g.generation[c.X][c.Y] {
 		return nil
 	}
-	g.makeCellDead(c.X, c.Y)
+	g.makeCellDead(c)
 
 	return nil
 }
@@ -151,10 +150,10 @@ func (g *gameInfo) Evolve() {
 	}
 
 	for i := 0; i < len(cellsToDie); i++ {
-		g.makeCellDead(cellsToDie[i].X, cellsToDie[i].Y)
+		g.makeCellDead(cellsToDie[i])
 	}
 	for i := 0; i < len(cellsToRevive); i++ {
-		g.makeCellAlive(cellsToRevive[i].X, cellsToRevive[i].Y)
+		g.makeCellAlive(cellsToRevive[i])
 	}
 }
 
@@ -170,8 +169,8 @@ func (g *gameInfo) GetGeneration() *Generation {
 func (g *gameInfo) GetCell(c Coordinate) (*Cell, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
-	if g.isOutsideBorder(c.X, c.Y) {
-		return nil, &ErrCoordinateIsOutsideBorder{c.X, c.Y}
+	if g.isOutsideBorder(c) {
+		return nil, &ErrCoordinateIsOutsideBorder{c}
 	}
 	return &g.generation[c.X][c.Y], nil
 }
