@@ -32,8 +32,8 @@
                 var cell = generation[x][y];
                 context.fillStyle = cell ? 'white' : 'black';
                 context.fillRect(
-                    y * unit,
                     x * unit,
+                    y * unit,
                     1 * unit,
                     1 * unit
                 );
@@ -48,8 +48,8 @@
                         size.height = data.height;
                         period = data.period;
                         initCanvas();
-                        for (var i = 0; i < size.height; i += 1) {
-                            for (var j = 0; j < size.width; j += 1) {
+                        for (var i = 0; i < size.width; i += 1) {
+                            for (var j = 0; j < size.height; j += 1) {
                                 drawCell(i, j);
                             }
                         }

@@ -2,19 +2,13 @@ package ggol
 
 import "fmt"
 
-type ErrSizeInNotValid struct {
+type ErrSizeIsNotValid struct {
 	width  int
 	height int
 }
 
-func (e *ErrSizeInNotValid) Error() string {
+func (e *ErrSizeIsNotValid) Error() string {
 	return fmt.Sprintf("The game size (%v x %v) is not valid.", e.height, e.width)
-}
-
-type ErrSeedDoesNotMatchSize struct{}
-
-func (e *ErrSeedDoesNotMatchSize) Error() string {
-	return "The seed does not match game size."
 }
 
 type ErrCoordinateIsOutsideBorder struct {

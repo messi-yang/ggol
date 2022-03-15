@@ -11,7 +11,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	g, _ := NewGame(width, height, nil)
 	generation := *g.GetGeneration()
 
-	if len(generation) == height && len(generation[0]) == width {
+	if len(generation) == width && len(generation[0]) == height {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Size should be %v x %v", width, height)
@@ -21,23 +21,26 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 func shouldInitializeGameWithGiveSeed(t *testing.T) {
 	width := 6
 	height := 3
-	seed := [][]bool{
-		{true, true, true, true, true, true},
-		{true, true, true, true, true, true},
-		{true, false, true, true, true, true},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{true, true, true, true, true, true},
+			{true, true, true, true, true, true},
+			{false, false, false, false, false, false},
+		},
+		),
+	)
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
-	expectedBinaryBoard := [][]bool{
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{true, true, true, true, true, true},
 		{true, true, true, true, true, true},
-		{true, false, true, true, true, true},
-	}
+		{false, false, false, false, false, false},
+	})
 
-	if isBinaryMatrixEqual(generation, expectedBinaryBoard) {
+	if AreGenerationsEqual(generation, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should initialize a new game with given seed %v.", seed)
+		t.Fatalf("Should initialize a new game with given seed %v, got %v", seed, generation)
 	}
 }
 
@@ -55,10 +58,11 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 func shouldThrowErrorWhenSeedNotMatchesSize(t *testing.T) {
 	width := 2
 	height := 2
-	_, err := NewGame(width, height, &[][]bool{{true, true, false}, {true, true}})
+	seed := Seed{{x: 3, y: 0, cell: true}}
+	_, err := NewGame(width, height, &seed)
 
 	if err == nil {
-		t.Fatalf("Should get error when seed not matches the size.")
+		t.Fatalf("Should get error when any seed units are outside border.")
 	}
 	t.Log("Passed")
 }
@@ -91,20 +95,22 @@ func TestReviveCell(t *testing.T) {
 func shouldReviveCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 	width := 3
 	height := 3
-	seed := [][]bool{
-		{false, true, false},
-		{true, true, false},
-		{false, false, false},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{false, true, false},
+			{true, true, false},
+			{false, false, false},
+		}),
+	)
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
-	expectedBinaryBoard := [][]bool{
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
 		{true, true, false},
 		{false, false, false},
-	}
+	})
 
-	if isBinaryMatrixEqual(generation, expectedBinaryBoard) {
+	if AreGenerationsEqual(generation, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Should revice cells in this desired pattern %v", expectedBinaryBoard)
@@ -137,21 +143,23 @@ func TestKillCell(t *testing.T) {
 func testBlockEvolvement(t *testing.T) {
 	width := 3
 	height := 3
-	seed := [][]bool{
-		{true, true, false},
-		{true, true, false},
-		{false, false, false},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{true, true, false},
+			{true, true, false},
+			{false, false, false},
+		}),
+	)
 	g, _ := NewGame(width, height, &seed)
 	g.Evolve()
 	nextGeneration := *g.GetGeneration()
-	expectedNextGeneration := [][]bool{
+	expectedNextGeneration := RotateGenerationInDigonalLine(Generation{
 		{true, true, false},
 		{true, true, false},
 		{false, false, false},
-	}
+	})
 
-	if isBinaryMatrixEqual(nextGeneration, expectedNextGeneration) {
+	if AreGenerationsEqual(nextGeneration, expectedNextGeneration) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Should generate next generation of a block, but got %v.", nextGeneration)
@@ -161,31 +169,33 @@ func testBlockEvolvement(t *testing.T) {
 func testBlinkerEvolvement(t *testing.T) {
 	width := 3
 	height := 3
-	seed := [][]bool{
-		{false, false, false},
-		{true, true, true},
-		{false, false, false},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{false, false, false},
+			{true, true, true},
+			{false, false, false},
+		}),
+	)
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
-	expectedNextGenerationOne := [][]bool{
+	expectedNextGenerationOne := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
 		{false, true, false},
 		{false, true, false},
-	}
-	expectedNextGenerationTwo := [][]bool{
+	})
+	expectedNextGenerationTwo := RotateGenerationInDigonalLine(Generation{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
-	}
+	})
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedNextGenerationOne) {
+	if !AreGenerationsEqual(generation, expectedNextGenerationOne) {
 		t.Fatalf("Should generate next generation of a blinker, but got %v.", generation)
 	}
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedNextGenerationTwo) {
+	if !AreGenerationsEqual(generation, expectedNextGenerationTwo) {
 		t.Fatalf("Should generate 2nd next generation of a blinker, but got %v.", generation)
 	}
 }
@@ -193,62 +203,65 @@ func testBlinkerEvolvement(t *testing.T) {
 func testGliderEvolvement(t *testing.T) {
 	width := 5
 	height := 5
-	seed := [][]bool{
-		{false, false, false, false, false},
-		{false, true, false, false, false},
-		{false, false, true, true, false},
-		{false, true, true, false, false},
-		{false, false, false, false, false},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{false, false, false, false, false},
+			{false, true, false, false, false},
+			{false, false, true, true, false},
+			{false, true, true, false, false},
+			{false, false, false, false, false},
+		},
+		),
+	)
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
 
-	expectedGenerationOne := [][]bool{
+	expectedGenerationOne := RotateGenerationInDigonalLine(Generation{
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, false},
 		{false, true, true, true, false},
 		{false, false, false, false, false},
-	}
-	expectedGenerationTwo := [][]bool{
+	})
+	expectedGenerationTwo := RotateGenerationInDigonalLine(Generation{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
 		{false, false, true, false, false},
-	}
-	expectedGenerationThree := [][]bool{
+	})
+	expectedGenerationThree := RotateGenerationInDigonalLine(Generation{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
-	}
-	expectedGenerationFour := [][]bool{
+	})
+	expectedGenerationFour := RotateGenerationInDigonalLine(Generation{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, true},
 		{false, false, true, true, false},
-	}
+	})
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedGenerationOne) {
+	if !AreGenerationsEqual(generation, expectedGenerationOne) {
 		t.Fatalf("Should generate next generation of a glider, but got %v.", generation)
 	}
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedGenerationTwo) {
+	if !AreGenerationsEqual(generation, expectedGenerationTwo) {
 		t.Fatalf("Should generate 2nd next generation of a glider, but got %v.", generation)
 	}
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedGenerationThree) {
+	if !AreGenerationsEqual(generation, expectedGenerationThree) {
 		t.Fatalf("Should generate 3rd next next generation of a glider, but got %v.", generation)
 	}
 
 	g.Evolve()
-	if !isBinaryMatrixEqual(generation, expectedGenerationFour) {
+	if !AreGenerationsEqual(generation, expectedGenerationFour) {
 		t.Fatalf("Should generate 4th next next generation of a glider, but got %v.", generation)
 	}
 
@@ -258,7 +271,14 @@ func testGliderEvolvement(t *testing.T) {
 func testEvolvementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
-	g, _ := NewGame(width, height, nil)
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{true, false, false},
+			{false, true, true},
+			{true, true, false},
+		}),
+	)
+	g, _ := NewGame(width, height, &seed)
 
 	// Build a glider pattern
 	g.ReviveCell(0, 0)
@@ -307,20 +327,22 @@ func TestEvolve(t *testing.T) {
 func TestGetGeneration(t *testing.T) {
 	width := 3
 	height := 3
-	seed := [][]bool{
-		{false, true, false},
-		{true, true, false},
-		{false, false, false},
-	}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{false, true, false},
+			{true, true, false},
+			{false, false, false},
+		}),
+	)
 	g, _ := NewGame(width, height, &seed)
 	generation := *g.GetGeneration()
-	expectedBinaryBoard := [][]bool{
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
 		{true, true, false},
 		{false, false, false},
-	}
+	})
 
-	if isBinaryMatrixEqual(generation, expectedBinaryBoard) {
+	if AreGenerationsEqual(generation, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not get correct generation, expected %v, but got %v.", expectedBinaryBoard, generation)

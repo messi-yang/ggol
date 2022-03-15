@@ -26,17 +26,17 @@ import {
 )
 
 main() {
-    seed := [][]bool{
-        {false, true, false},
-        {false, true, false},
-        {false, true, false},
+    seed := Seed{
+        {x: 0, y: 1, cell: true},
+        {x: 1, y: 1, cell: true},
+        {x: 2, y: 1, cell: true},
     }
     // Start a new game with given seed.
     game, _ := ggol.NewGame(3, 3, &seed)
     // Generate next generation.
     game.Evolve()
     // Get current generation.
-    fmt.Println(game.GetGeneration())
+    fmt.Println(RotateGenerationInDigonalLine(game.GetGeneration()))
     // {
     //   {false, false, false}
     //   {true, true, true}

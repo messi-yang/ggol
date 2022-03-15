@@ -15,13 +15,14 @@ var height int = 75
 var period time.Duration = 20
 
 func initGame() ggol.Game {
-	seed := make([][]bool, height)
-	for i := 0; i < height; i++ {
-		seed[i] = make([]bool, width)
-		for j := 0; j < width; j++ {
-			seed[i][j] = rand.Intn(2) == 0
+	generation := make(ggol.Generation, width)
+	for x := 0; x < width; x++ {
+		generation[x] = make([]ggol.Cell, height)
+		for y := 0; y < height; y++ {
+			generation[x][y] = rand.Intn(2) == 0
 		}
 	}
+	seed := ggol.ConvertGenerationToSeed(generation)
 	newG, _ := ggol.NewGame(width, height, &seed)
 	return newG
 }
@@ -50,6 +51,6 @@ func main() {
 			"generation": *g.GetGeneration(),
 		})
 	})
-	route.Static("/demo", "./demo/public")
+	route.Static("/demo", "./cmd/public")
 	route.Run(":8000")
 }
