@@ -60,9 +60,9 @@ func testConverGenerationToSeedCaseOne(t *testing.T) {
 	seedUnitOne := seed[0]
 	seedUnitTwo := seed[1]
 
-	if seedUnitOne.x != 0 || seedUnitOne.y != 0 || !seedUnitOne.cell {
+	if seedUnitOne.Coordinate.X != 0 || seedUnitOne.Coordinate.Y != 0 || !seedUnitOne.Cell {
 		t.Fatalf("Did not convert generation to seed correclty.")
-	} else if seedUnitTwo.x != 0 || seedUnitTwo.y != 1 || seedUnitTwo.cell {
+	} else if seedUnitTwo.Coordinate.X != 0 || seedUnitTwo.Coordinate.Y != 1 || seedUnitTwo.Cell {
 		t.Fatalf("Did not convert generation to seed correclty.")
 	} else {
 		t.Log("Passed")

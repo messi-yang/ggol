@@ -5,10 +5,10 @@ import (
 )
 
 type Game interface {
-	ReviveCell(int, int) error
-	KillCell(int, int) error
+	ReviveCell(Coordinate) error
+	KillCell(Coordinate) error
 	Evolve()
-	GetCell(int, int) (*Cell, error)
+	GetCell(Coordinate) (*Cell, error)
 	GetGeneration() *Generation
 }
 
@@ -40,9 +40,9 @@ func NewGame(width int, height int, seed *Seed) (*gameInfo, error) {
 
 	if seed != nil {
 		for i := 0; i < len(*seed); i++ {
-			x := (*seed)[i].x
-			y := (*seed)[i].y
-			cell := (*seed)[i].cell
+			x := (*seed)[i].Coordinate.X
+			y := (*seed)[i].Coordinate.Y
+			cell := (*seed)[i].Cell
 			if newG.isOutsideBorder(x, y) {
 				return nil, &ErrCoordinateIsOutsideBorder{x, y}
 			}
@@ -100,31 +100,31 @@ func (g *gameInfo) makeCellDead(x int, y int) {
 }
 
 // Revive the cell at the coordinate.
-func (g *gameInfo) ReviveCell(x int, y int) error {
+func (g *gameInfo) ReviveCell(c Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
-	if g.isOutsideBorder(x, y) {
-		return &ErrCoordinateIsOutsideBorder{x, y}
+	if g.isOutsideBorder(c.X, c.Y) {
+		return &ErrCoordinateIsOutsideBorder{c.X, c.Y}
 	}
-	if g.generation[y][x] {
+	if g.generation[c.X][c.Y] {
 		return nil
 	}
-	g.makeCellAlive(x, y)
+	g.makeCellAlive(c.X, c.Y)
 
 	return nil
 }
 
 // Kill the cell at the coordinate.
-func (g *gameInfo) KillCell(x int, y int) error {
+func (g *gameInfo) KillCell(c Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
-	if g.isOutsideBorder(x, y) {
-		return &ErrCoordinateIsOutsideBorder{x, y}
+	if g.isOutsideBorder(c.X, c.Y) {
+		return &ErrCoordinateIsOutsideBorder{x: c.X, y: c.Y}
 	}
-	if !g.generation[y][x] {
+	if !g.generation[c.X][c.Y] {
 		return nil
 	}
-	g.makeCellDead(x, y)
+	g.makeCellDead(c.X, c.Y)
 
 	return nil
 }
@@ -141,7 +141,7 @@ func (g *gameInfo) Evolve() {
 		for y := 0; y < g.height; y++ {
 			liveNbrsCountMap := g.liveNbrsCountMap[x][y]
 			alive := g.generation[x][y]
-			coord := Coordinate{x: x, y: y}
+			coord := Coordinate{X: x, Y: y}
 			if liveNbrsCountMap == 3 && !alive {
 				cellsToRevive = append(cellsToRevive, coord)
 			} else if liveNbrsCountMap != 2 && liveNbrsCountMap != 3 && alive {
@@ -151,10 +151,10 @@ func (g *gameInfo) Evolve() {
 	}
 
 	for i := 0; i < len(cellsToDie); i++ {
-		g.makeCellDead(cellsToDie[i].x, cellsToDie[i].y)
+		g.makeCellDead(cellsToDie[i].X, cellsToDie[i].Y)
 	}
 	for i := 0; i < len(cellsToRevive); i++ {
-		g.makeCellAlive(cellsToRevive[i].x, cellsToRevive[i].y)
+		g.makeCellAlive(cellsToRevive[i].X, cellsToRevive[i].Y)
 	}
 }
 
@@ -167,11 +167,11 @@ func (g *gameInfo) GetGeneration() *Generation {
 }
 
 // Get the cell at the coordinate.
-func (g *gameInfo) GetCell(x int, y int) (*Cell, error) {
+func (g *gameInfo) GetCell(c Coordinate) (*Cell, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
-	if g.isOutsideBorder(x, y) {
-		return nil, &ErrCoordinateIsOutsideBorder{x, y}
+	if g.isOutsideBorder(c.X, c.Y) {
+		return nil, &ErrCoordinateIsOutsideBorder{c.X, c.Y}
 	}
-	return &g.generation[y][x], nil
+	return &g.generation[c.X][c.Y], nil
 }

@@ -1,6 +1,7 @@
 package ggol
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 )
@@ -58,7 +59,9 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 func shouldThrowErrorWhenSeedNotMatchesSize(t *testing.T) {
 	width := 2
 	height := 2
-	seed := Seed{{x: 3, y: 0, cell: true}}
+	seed := Seed{
+		{Coordinate: Coordinate{X: 3, Y: 0}, Cell: true},
+	}
 	_, err := NewGame(width, height, &seed)
 
 	if err == nil {
@@ -78,8 +81,9 @@ func shouldReviveCell(t *testing.T) {
 	width := 2
 	height := 2
 	g, _ := NewGame(width, height, nil)
-	g.ReviveCell(1, 1)
-	cell, _ := g.GetCell(1, 1)
+	c := Coordinate{1, 1}
+	g.ReviveCell(c)
+	cell, _ := g.GetCell(c)
 
 	if *cell {
 		t.Log("Passed")
@@ -125,9 +129,10 @@ func shouldKillCell(t *testing.T) {
 	width := 2
 	height := 2
 	g, _ := NewGame(width, height, nil)
-	g.ReviveCell(1, 1)
-	g.KillCell(1, 1)
-	cell, _ := g.GetCell(1, 1)
+	c := Coordinate{X: 1, Y: 1}
+	g.ReviveCell(c)
+	g.KillCell(c)
+	cell, _ := g.GetCell(c)
 
 	if !(*cell) {
 		t.Log("Passed")
@@ -272,6 +277,7 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
 	seed := ConvertGenerationToSeed(
+		// Build a glider pattern
 		RotateGenerationInDigonalLine(Generation{
 			{true, false, false},
 			{false, true, true},
@@ -279,13 +285,6 @@ func testEvolvementWithConcurrency(t *testing.T) {
 		}),
 	)
 	g, _ := NewGame(width, height, &seed)
-
-	// Build a glider pattern
-	g.ReviveCell(0, 0)
-	g.ReviveCell(1, 1)
-	g.ReviveCell(1, 2)
-	g.ReviveCell(2, 0)
-	g.ReviveCell(2, 1)
 
 	wg := sync.WaitGroup{}
 
@@ -304,11 +303,13 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	cellOne, _ := g.GetCell(0+step, 0+step)
-	cellTwo, _ := g.GetCell(1+step, 1+step)
-	cellThree, _ := g.GetCell(1+step, 2+step)
-	cellFour, _ := g.GetCell(2+step, 0+step)
-	cellFive, _ := g.GetCell(2+step, 1+step)
+	cellOne, _ := g.GetCell(Coordinate{X: 0 + step, Y: 0 + step})
+	cellTwo, _ := g.GetCell(Coordinate{X: 0 + step, Y: 2 + step})
+	cellThree, _ := g.GetCell(Coordinate{X: 1 + step, Y: 1 + step})
+	cellFour, _ := g.GetCell(Coordinate{X: 1 + step, Y: 2 + step})
+	cellFive, _ := g.GetCell(Coordinate{X: 2 + step, Y: 1 + step})
+
+	fmt.Println(*cellOne, *cellTwo, *cellThree, *cellFour, *cellFive)
 
 	if !*cellOne || !*cellTwo || !*cellThree || !*cellFour || !*cellFive {
 		t.Fatalf("Should still be a glider pattern.")

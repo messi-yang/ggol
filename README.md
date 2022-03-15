@@ -26,22 +26,26 @@ import {
 )
 
 main() {
-    seed := Seed{
-        {x: 0, y: 1, cell: true},
-        {x: 1, y: 1, cell: true},
-        {x: 2, y: 1, cell: true},
+    // This seed will bring cells in 2nd row back to life.
+    seed := ggol.Seed{
+        {Coordinate: ggol.Coordinate{X: 0, Y: 1}, Cell: true},
+        {Coordinate: ggol.Coordinate{X: 1, Y: 1}, Cell: true},
+        {Coordinate: ggol.Coordinate{X: 2, Y: 1}, Cell: true},
     }
     // Start a new game with given seed.
     game, _ := ggol.NewGame(3, 3, &seed)
     // Generate next generation.
     game.Evolve()
     // Get current generation.
-    fmt.Println(RotateGenerationInDigonalLine(game.GetGeneration()))
-    // {
-    //   {false, false, false}
-    //   {true, true, true}
-    //   {false, false, false}
-    // }
+    newGeneration := *game.GetGeneration()
+    // We digonally rotate the generation so it's easier to read.
+    rotatedNewGeneration := ggol.RotateGenerationInDigonalLine(newGeneration)
+    fmt.Println(rotatedNewGeneration)
+    // [
+    //     [false true false]
+    //     [false true false]
+    //     [false true false]
+    // ]
 }
 ```
 

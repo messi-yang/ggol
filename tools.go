@@ -39,9 +39,11 @@ func ConvertGenerationToSeed(g Generation) Seed {
 	for x := 0; x < len(g); x++ {
 		for y := 0; y < len(g[x]); y++ {
 			seed = append(seed, SeedUnit{
-				x:    x,
-				y:    y,
-				cell: g[x][y],
+				Coordinate: Coordinate{
+					X: x,
+					Y: y,
+				},
+				Cell: g[x][y],
 			})
 		}
 	}
