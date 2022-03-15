@@ -1,0 +1,13 @@
+env: EMAIL_ADDRESS=hello@example.com
+language: go
+go: 1.17
+install:
+  - go get
+script:
+  - go test -v
+notifications:
+  email:
+    recipients:
+      - $EMAIL_ADDRESS
+    on_success: always
+    on_failure: always
