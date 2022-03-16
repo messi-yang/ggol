@@ -25,7 +25,7 @@ func initGame() ggol.Game {
 		}
 	}
 	seed := ggol.ConvertGenerationToSeed(generation)
-	newG, _ := ggol.NewGame(size, &seed)
+	newG, _ := ggol.NewGame(&size, &seed)
 	return newG
 }
 
@@ -47,8 +47,7 @@ func main() {
 	route := gin.Default()
 	route.GET("/api/generation", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"width":      width,
-			"height":     height,
+			"size":       g.GetSize(),
 			"period":     period,
 			"generation": *g.GetGeneration(),
 		})

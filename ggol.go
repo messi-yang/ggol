@@ -7,11 +7,12 @@ import (
 // The Game contains all the basics operations that you need
 // for a Conway's Game of Life.
 type Game interface {
-	ReviveCell(Coordinate) error
-	KillCell(Coordinate) error
+	ReviveCell(*Coordinate) error
+	KillCell(*Coordinate) error
 	Evolve()
-	GetCell(Coordinate) (*Cell, error)
+	GetCell(*Coordinate) (*Cell, error)
 	GetGeneration() *Generation
+	GetSize() *Size
 }
 
 type gameInfo struct {
@@ -23,7 +24,7 @@ type gameInfo struct {
 
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
-func NewGame(size Size, seed *Seed) (*gameInfo, error) {
+func NewGame(size *Size, seed *Seed) (*gameInfo, error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
 	}
@@ -37,17 +38,17 @@ func NewGame(size Size, seed *Seed) (*gameInfo, error) {
 			liveNbrsCountMap[x][y] = 0
 		}
 	}
-	newG := gameInfo{generation, liveNbrsCountMap, size, sync.RWMutex{}}
+	newG := gameInfo{generation, liveNbrsCountMap, *size, sync.RWMutex{}}
 
 	if seed != nil {
 		for i := 0; i < len(*seed); i++ {
 			c := (*seed)[i].Coordinate
 			cell := (*seed)[i].Cell
-			if newG.isOutsideBorder(c) {
-				return nil, &ErrCoordinateIsOutsideBorder{c}
+			if newG.isOutsideBorder(&c) {
+				return nil, &ErrCoordinateIsOutsideBorder{&c}
 			}
 			if cell {
-				newG.makeCellAlive(c)
+				newG.makeCellAlive(&c)
 			}
 		}
 	}
@@ -55,14 +56,14 @@ func NewGame(size Size, seed *Seed) (*gameInfo, error) {
 	return &newG, nil
 }
 
-func (g *gameInfo) isOutsideBorder(c Coordinate) bool {
+func (g *gameInfo) isOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo) addLiveNbrsCountAround(c Coordinate) {
+func (g *gameInfo) addLiveNbrsCountAround(c *Coordinate) {
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
-			if g.isOutsideBorder(Coordinate{X: i, Y: j}) {
+			if g.isOutsideBorder(&Coordinate{X: i, Y: j}) {
 				continue
 			}
 			if i == c.X && j == c.Y {
@@ -73,10 +74,10 @@ func (g *gameInfo) addLiveNbrsCountAround(c Coordinate) {
 	}
 }
 
-func (g *gameInfo) subLiveNbrsCountAround(c Coordinate) {
+func (g *gameInfo) subLiveNbrsCountAround(c *Coordinate) {
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
-			if g.isOutsideBorder(Coordinate{X: i, Y: j}) {
+			if g.isOutsideBorder(&Coordinate{X: i, Y: j}) {
 				continue
 			}
 			if i == c.X && j == c.Y {
@@ -88,19 +89,19 @@ func (g *gameInfo) subLiveNbrsCountAround(c Coordinate) {
 }
 
 // Make the cell in the coordinate alive.
-func (g *gameInfo) makeCellAlive(c Coordinate) {
+func (g *gameInfo) makeCellAlive(c *Coordinate) {
 	g.generation[c.X][c.Y] = true
 	g.addLiveNbrsCountAround(c)
 }
 
 // Make the cell in the coordinate dead.
-func (g *gameInfo) makeCellDead(c Coordinate) {
+func (g *gameInfo) makeCellDead(c *Coordinate) {
 	g.generation[c.X][c.Y] = false
 	g.subLiveNbrsCountAround(c)
 }
 
 // Revive the cell at the coordinate.
-func (g *gameInfo) ReviveCell(c Coordinate) error {
+func (g *gameInfo) ReviveCell(c *Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 	if g.isOutsideBorder(c) {
@@ -115,7 +116,7 @@ func (g *gameInfo) ReviveCell(c Coordinate) error {
 }
 
 // Kill the cell at the coordinate.
-func (g *gameInfo) KillCell(c Coordinate) error {
+func (g *gameInfo) KillCell(c *Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 	if g.isOutsideBorder(c) {
@@ -151,10 +152,10 @@ func (g *gameInfo) Evolve() {
 	}
 
 	for i := 0; i < len(cellsToDie); i++ {
-		g.makeCellDead(cellsToDie[i])
+		g.makeCellDead(&cellsToDie[i])
 	}
 	for i := 0; i < len(cellsToRevive); i++ {
-		g.makeCellAlive(cellsToRevive[i])
+		g.makeCellAlive(&cellsToRevive[i])
 	}
 }
 
@@ -167,11 +168,16 @@ func (g *gameInfo) GetGeneration() *Generation {
 }
 
 // Get the cell at the coordinate.
-func (g *gameInfo) GetCell(c Coordinate) (*Cell, error) {
+func (g *gameInfo) GetCell(c *Coordinate) (*Cell, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 	if g.isOutsideBorder(c) {
 		return nil, &ErrCoordinateIsOutsideBorder{c}
 	}
 	return &g.generation[c.X][c.Y], nil
+}
+
+// Get the size of the game.
+func (g *gameInfo) GetSize() *Size {
+	return &g.size
 }

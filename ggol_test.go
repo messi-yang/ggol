@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(size, nil)
+	g, _ := NewGame(&size, nil)
 	generation := *g.GetGeneration()
 
 	if len(generation) == width && len(generation[0]) == height {
@@ -32,7 +32,7 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 		},
 		),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{true, true, true, true, true, true},
@@ -51,7 +51,7 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
 	size := Size{Width: width, Height: height}
-	_, err := NewGame(size, nil)
+	_, err := NewGame(&size, nil)
 
 	if err == nil {
 		t.Fatalf("Should get error when giving invalid size.")
@@ -66,7 +66,7 @@ func shouldThrowErrorWhenSeedNotMatchesSize(t *testing.T) {
 	seed := Seed{
 		{Coordinate: Coordinate{X: 3, Y: 0}, Cell: true},
 	}
-	_, err := NewGame(size, &seed)
+	_, err := NewGame(&size, &seed)
 
 	if err == nil {
 		t.Fatalf("Should get error when any seed units are outside border.")
@@ -85,10 +85,10 @@ func shouldReviveCell(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(size, nil)
+	g, _ := NewGame(&size, nil)
 	c := Coordinate{1, 1}
-	g.ReviveCell(c)
-	cell, _ := g.GetCell(c)
+	g.ReviveCell(&c)
+	cell, _ := g.GetCell(&c)
 
 	if *cell {
 		t.Log("Passed")
@@ -112,7 +112,7 @@ func shouldReviveCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -135,11 +135,11 @@ func shouldKillCell(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(size, nil)
+	g, _ := NewGame(&size, nil)
 	c := Coordinate{X: 1, Y: 1}
-	g.ReviveCell(c)
-	g.KillCell(c)
-	cell, _ := g.GetCell(c)
+	g.ReviveCell(&c)
+	g.KillCell(&c)
+	cell, _ := g.GetCell(&c)
 
 	if !(*cell) {
 		t.Log("Passed")
@@ -163,7 +163,7 @@ func testBlockEvolvement(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	g.Evolve()
 	nextGeneration := *g.GetGeneration()
 	expectedNextGeneration := RotateGenerationInDigonalLine(Generation{
@@ -190,7 +190,7 @@ func testBlinkerEvolvement(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	generation := *g.GetGeneration()
 	expectedNextGenerationOne := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -228,7 +228,7 @@ func testGliderEvolvement(t *testing.T) {
 		},
 		),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	generation := *g.GetGeneration()
 
 	expectedGenerationOne := RotateGenerationInDigonalLine(Generation{
@@ -295,7 +295,7 @@ func testEvolvementWithConcurrency(t *testing.T) {
 			{true, true, false},
 		}),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 
 	wg := sync.WaitGroup{}
 
@@ -314,11 +314,11 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	cellOne, _ := g.GetCell(Coordinate{X: 0 + step, Y: 0 + step})
-	cellTwo, _ := g.GetCell(Coordinate{X: 0 + step, Y: 2 + step})
-	cellThree, _ := g.GetCell(Coordinate{X: 1 + step, Y: 1 + step})
-	cellFour, _ := g.GetCell(Coordinate{X: 1 + step, Y: 2 + step})
-	cellFive, _ := g.GetCell(Coordinate{X: 2 + step, Y: 1 + step})
+	cellOne, _ := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step})
+	cellTwo, _ := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step})
+	cellThree, _ := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step})
+	cellFour, _ := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step})
+	cellFive, _ := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step})
 
 	fmt.Println(*cellOne, *cellTwo, *cellThree, *cellFour, *cellFive)
 
@@ -347,7 +347,7 @@ func TestGetGeneration(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(size, &seed)
+	g, _ := NewGame(&size, &seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -359,5 +359,18 @@ func TestGetGeneration(t *testing.T) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not get correct generation, expected %v, but got %v.", expectedBinaryBoard, generation)
+	}
+}
+
+func TestGetSize(t *testing.T) {
+	width := 3
+	height := 6
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, nil)
+
+	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
+		t.Log("Passed")
+	} else {
+		t.Fatalf("Size is not correct.")
 	}
 }
