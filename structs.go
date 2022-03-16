@@ -9,6 +9,12 @@ type Coordinate struct {
 // Cell, alive or dead.
 type Cell bool
 
+// The size of the Conway's Game of Life.
+type Size struct {
+	Width  int
+	Height int
+}
+
 // A matrix that contains all cells.
 type Generation [][]Cell
 

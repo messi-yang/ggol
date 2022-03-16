@@ -4,6 +4,8 @@ import (
 	"sync"
 )
 
+// The Game contains all the basics operations that you need
+// for a Conway's Game of Life.
 type Game interface {
 	ReviveCell(Coordinate) error
 	KillCell(Coordinate) error
@@ -15,28 +17,27 @@ type Game interface {
 type gameInfo struct {
 	generation       Generation
 	liveNbrsCountMap LiveNbrsCountMap
-	width            int
-	height           int
+	size             Size
 	locker           sync.RWMutex
 }
 
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
-func NewGame(width int, height int, seed *Seed) (*gameInfo, error) {
-	if width < 0 || height < 0 {
-		return nil, &ErrSizeIsNotValid{width, height}
+func NewGame(size Size, seed *Seed) (*gameInfo, error) {
+	if size.Width < 0 || size.Height < 0 {
+		return nil, &ErrSizeIsNotValid{size}
 	}
-	generation := make([][]Cell, width)
-	liveNbrsCountMap := make(LiveNbrsCountMap, width)
-	for x := 0; x < width; x++ {
-		generation[x] = make([]Cell, height)
-		liveNbrsCountMap[x] = make([]int, height)
-		for y := 0; y < height; y++ {
+	generation := make([][]Cell, size.Width)
+	liveNbrsCountMap := make(LiveNbrsCountMap, size.Width)
+	for x := 0; x < size.Width; x++ {
+		generation[x] = make([]Cell, size.Height)
+		liveNbrsCountMap[x] = make([]int, size.Height)
+		for y := 0; y < size.Height; y++ {
 			generation[x][y] = false
 			liveNbrsCountMap[x][y] = 0
 		}
 	}
-	newG := gameInfo{generation, liveNbrsCountMap, width, height, sync.RWMutex{}}
+	newG := gameInfo{generation, liveNbrsCountMap, size, sync.RWMutex{}}
 
 	if seed != nil {
 		for i := 0; i < len(*seed); i++ {
@@ -55,7 +56,7 @@ func NewGame(width int, height int, seed *Seed) (*gameInfo, error) {
 }
 
 func (g *gameInfo) isOutsideBorder(c Coordinate) bool {
-	return c.X < 0 || c.X >= g.width || c.Y < 0 || c.Y >= g.height
+	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
 func (g *gameInfo) addLiveNbrsCountAround(c Coordinate) {
@@ -136,8 +137,8 @@ func (g *gameInfo) Evolve() {
 	cellsToDie := make([]Coordinate, 0)
 	cellsToRevive := make([]Coordinate, 0)
 
-	for x := 0; x < g.width; x++ {
-		for y := 0; y < g.height; y++ {
+	for x := 0; x < g.size.Width; x++ {
+		for y := 0; y < g.size.Height; y++ {
 			liveNbrsCountMap := g.liveNbrsCountMap[x][y]
 			alive := g.generation[x][y]
 			coord := Coordinate{X: x, Y: y}

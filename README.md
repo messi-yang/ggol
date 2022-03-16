@@ -32,8 +32,10 @@ main() {
         {Coordinate: ggol.Coordinate{X: 1, Y: 1}, Cell: true},
         {Coordinate: ggol.Coordinate{X: 2, Y: 1}, Cell: true},
     }
+    // Create a size
+    size := ggol.Size{Height: 3, Width: 3}
     // Start a new game with given seed.
-    game, _ := ggol.NewGame(3, 3, &seed)
+    game, _ := ggol.NewGame(size, &seed)
     // Generate next generation.
     game.Evolve()
     // Get current generation.

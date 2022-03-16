@@ -12,9 +12,11 @@ var g ggol.Game
 var count int
 var width int = 120
 var height int = 75
+var size ggol.Size
 var period time.Duration = 20
 
 func initGame() ggol.Game {
+	size = ggol.Size{Width: width, Height: height}
 	generation := make(ggol.Generation, width)
 	for x := 0; x < width; x++ {
 		generation[x] = make([]ggol.Cell, height)
@@ -23,7 +25,7 @@ func initGame() ggol.Game {
 		}
 	}
 	seed := ggol.ConvertGenerationToSeed(generation)
-	newG, _ := ggol.NewGame(width, height, &seed)
+	newG, _ := ggol.NewGame(size, &seed)
 	return newG
 }
 
