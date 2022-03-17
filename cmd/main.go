@@ -13,7 +13,7 @@ var count int
 var width int = 120
 var height int = 75
 var size ggol.Size
-var period time.Duration = 20
+var period time.Duration = 100
 
 func initGame() ggol.Game {
 	size = ggol.Size{Width: width, Height: height}
@@ -25,7 +25,13 @@ func initGame() ggol.Game {
 		}
 	}
 	seed := ggol.ConvertGenerationToSeed(generation)
-	newG, _ := ggol.NewGame(&size, &seed)
+	newG, _ := ggol.NewGame(
+		&size,
+		&seed,
+	)
+	// newG.SetShouldCellDie(func(liveNbrsCount int, c *ggol.Coordinate) bool {
+	// 	return true
+	// })
 	return newG
 }
 

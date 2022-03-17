@@ -29,3 +29,11 @@ type SeedUnit struct {
 
 // Seed is an array of SeedUnit.
 type Seed []SeedUnit
+
+// A function that accepts liveNbrsCount and Coordinate, so you cant
+// custom the logic of determing a cell should revive or not.
+type ShouldCellRevive func(liveNbrsCount int, c *Coordinate) bool
+
+// A function that accepts liveNbrsCount and Coordinate, so you cant
+// custom the logic of determing a cell should die or not.
+type ShouldCellDie func(liveNbrsCount int, c *Coordinate) bool

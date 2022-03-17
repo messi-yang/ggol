@@ -66,3 +66,14 @@ go run ./cmd/main.go
 And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
 
 ![demo](./doc/demo.png)
+
+## Document
+
+### NewGame
+
+```go
+import "github.com/DumDumGeniuss/ggol"
+
+game, _ := ggol.NewGame(&size, &seed)
+
+```

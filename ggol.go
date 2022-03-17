@@ -9,9 +9,9 @@ import (
 type Game interface {
 	RescueCell(*Coordinate) error
 	KillCell(*Coordinate) error
+	SetShouldCellRevive(ShouldCellRevive)
+	SetShouldCellDie(ShouldCellDie)
 	Evolve()
-	ShouldCellDie(*Coordinate) bool
-	ShouldCellRevive(*Coordinate) bool
 	GetCell(*Coordinate) (*Cell, error)
 	GetGeneration() *Generation
 	GetSize() *Size
@@ -21,15 +21,30 @@ type gameInfo struct {
 	generation       Generation
 	liveNbrsCountMap LiveNbrsCountMap
 	size             Size
+	shouldCellRevive ShouldCellRevive
+	shouldCellDie    ShouldCellDie
 	locker           sync.RWMutex
+}
+
+func defaultShouldCellRevive(liveNbrsCount int, c *Coordinate) bool {
+	return liveNbrsCount == 3
+}
+
+func defaultShouldCellDie(liveNbrsCount int, c *Coordinate) bool {
+	return liveNbrsCount != 2 && liveNbrsCount != 3
 }
 
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
-func NewGame(size *Size, seed *Seed) (*gameInfo, error) {
+func NewGame(
+	size *Size,
+	seed *Seed,
+) (*gameInfo, error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
 	}
+
+	// Initialize generation & liveNbrsCountMap
 	generation := make([][]Cell, size.Width)
 	liveNbrsCountMap := make(LiveNbrsCountMap, size.Width)
 	for x := 0; x < size.Width; x++ {
@@ -40,7 +55,18 @@ func NewGame(size *Size, seed *Seed) (*gameInfo, error) {
 			liveNbrsCountMap[x][y] = 0
 		}
 	}
-	newG := gameInfo{generation, liveNbrsCountMap, *size, sync.RWMutex{}}
+	newG := gameInfo{
+		generation,
+		liveNbrsCountMap,
+		*size,
+		nil,
+		nil,
+		sync.RWMutex{},
+	}
+
+	// Initialize functions below:
+	newG.SetShouldCellRevive(defaultShouldCellRevive)
+	newG.SetShouldCellDie(defaultShouldCellDie)
 
 	if seed != nil {
 		for i := 0; i < len(*seed); i++ {
@@ -132,16 +158,14 @@ func (g *gameInfo) KillCell(c *Coordinate) error {
 	return nil
 }
 
-func (g *gameInfo) ShouldCellDie(c *Coordinate) bool {
-	liveNbrsCount := g.liveNbrsCountMap[c.X][c.Y]
-
-	return liveNbrsCount != 2 && liveNbrsCount != 3
+// Change the rule of wheter a dead cell should revive or not.
+func (g *gameInfo) SetShouldCellRevive(f ShouldCellRevive) {
+	g.shouldCellRevive = f
 }
 
-func (g *gameInfo) ShouldCellRevive(c *Coordinate) bool {
-	liveNbrsCount := g.liveNbrsCountMap[c.X][c.Y]
-
-	return liveNbrsCount == 3
+// Change the rule of wheter a dead cell should revive or not.
+func (g *gameInfo) SetShouldCellDie(f ShouldCellDie) {
+	g.shouldCellDie = f
 }
 
 // Generate next generation of current generation.
@@ -155,10 +179,11 @@ func (g *gameInfo) Evolve() {
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
 			alive := g.generation[x][y]
+			liveNbrsCount := g.liveNbrsCountMap[x][y]
 			coord := Coordinate{X: x, Y: y}
-			if alive == false && g.ShouldCellRevive(&coord) {
+			if alive == false && g.shouldCellRevive(liveNbrsCount, &coord) {
 				cellsToRevive = append(cellsToRevive, coord)
-			} else if alive == true && g.ShouldCellDie(&coord) {
+			} else if alive == true && g.shouldCellDie(liveNbrsCount, &coord) {
 				cellsToDie = append(cellsToDie, coord)
 			}
 		}
