@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	g, _ := NewGame(&size)
 	generation := *g.GetGeneration()
 
 	if len(generation) == width && len(generation[0]) == height {
@@ -32,7 +32,8 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 		},
 		),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{true, true, true, true, true, true},
@@ -51,25 +52,10 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
 	size := Size{Width: width, Height: height}
-	_, err := NewGame(&size, nil)
+	_, err := NewGame(&size)
 
 	if err == nil {
 		t.Fatalf("Should get error when giving invalid size.")
-	}
-	t.Log("Passed")
-}
-
-func shouldThrowErrorWhenSeedNotMatchesSize(t *testing.T) {
-	width := 2
-	height := 2
-	size := Size{Width: width, Height: height}
-	seed := Seed{
-		{Coordinate: Coordinate{X: 3, Y: 0}, Cell: true},
-	}
-	_, err := NewGame(&size, &seed)
-
-	if err == nil {
-		t.Fatalf("Should get error when any seed units are outside border.")
 	}
 	t.Log("Passed")
 }
@@ -78,14 +64,33 @@ func TestNewGame(t *testing.T) {
 	shouldInitializeGameWithCorrectSize(t)
 	shouldInitializeGameWithGiveSeed(t)
 	shouldThrowErrorWhenSizeIsInvalid(t)
-	shouldThrowErrorWhenSeedNotMatchesSize(t)
+}
+
+func shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t *testing.T) {
+	width := 2
+	height := 2
+	size := Size{Width: width, Height: height}
+	seed := Seed{
+		{Coordinate: Coordinate{X: 3, Y: 0}, Cell: true},
+	}
+	g, _ := NewGame(&size)
+	err := g.PlantSeed(&seed)
+
+	if err == nil {
+		t.Fatalf("Should get error when any seed units are outside border.")
+	}
+	t.Log("Passed")
+}
+
+func TestPlatnSeed(t *testing.T) {
+	shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t)
 }
 
 func shouldRescueCell(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	g, _ := NewGame(&size)
 	c := Coordinate{1, 1}
 	g.RescueCell(&c)
 	cell, _ := g.GetCell(&c)
@@ -112,7 +117,8 @@ func shouldRescueCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -135,7 +141,7 @@ func shouldKillCell(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	g, _ := NewGame(&size)
 	c := Coordinate{X: 1, Y: 1}
 	g.RescueCell(&c)
 	g.KillCell(&c)
@@ -163,7 +169,8 @@ func testBlockEvolvement(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	g.Evolve()
 	nextGeneration := *g.GetGeneration()
 	expectedNextGeneration := RotateGenerationInDigonalLine(Generation{
@@ -190,7 +197,8 @@ func testBlinkerEvolvement(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	generation := *g.GetGeneration()
 	expectedNextGenerationOne := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -228,7 +236,8 @@ func testGliderEvolvement(t *testing.T) {
 		},
 		),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	generation := *g.GetGeneration()
 
 	expectedGenerationOne := RotateGenerationInDigonalLine(Generation{
@@ -295,7 +304,8 @@ func testEvolvementWithConcurrency(t *testing.T) {
 			{true, true, false},
 		}),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 
 	wg := sync.WaitGroup{}
 
@@ -347,7 +357,8 @@ func TestGetGeneration(t *testing.T) {
 			{false, false, false},
 		}),
 	)
-	g, _ := NewGame(&size, &seed)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
 	generation := *g.GetGeneration()
 	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
 		{false, true, false},
@@ -366,11 +377,106 @@ func TestGetSize(t *testing.T) {
 	width := 3
 	height := 6
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	g, _ := NewGame(&size)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Size is not correct.")
+	}
+}
+
+func TestReset(t *testing.T) {
+	width := 3
+	height := 3
+	size := Size{Width: width, Height: height}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{true, true, true},
+			{true, true, true},
+			{true, true, true},
+		}),
+	)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
+	g.Reset()
+	generation := g.GetGeneration()
+
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+		{false, false, false},
+		{false, false, false},
+		{false, false, false},
+	})
+
+	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+		t.Log("Passed")
+	} else {
+		t.Fatalf("Did not reset generation correctly.")
+	}
+}
+
+func TestSetShouldCellRevive(t *testing.T) {
+	width := 3
+	height := 3
+	size := Size{Width: width, Height: height}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{false, false, false},
+			{false, false, false},
+			{false, false, false},
+		}),
+	)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
+	g.SetShouldCellRevive(func(liveNbrsCount int, c *Coordinate) bool {
+		// All live cells should die in any cases
+		return true
+	})
+	g.Evolve()
+	generation := g.GetGeneration()
+
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+		{true, true, true},
+		{true, true, true},
+		{true, true, true},
+	})
+
+	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+		t.Log("Passed")
+	} else {
+		t.Fatalf("Did not set custom 'shouldCellRevive' logic correcly.")
+	}
+}
+
+func TestSetShouldCellDie(t *testing.T) {
+	width := 3
+	height := 3
+	size := Size{Width: width, Height: height}
+	seed := ConvertGenerationToSeed(
+		RotateGenerationInDigonalLine(Generation{
+			{true, true, true},
+			{true, true, true},
+			{true, true, true},
+		}),
+	)
+	g, _ := NewGame(&size)
+	g.PlantSeed(&seed)
+	g.SetShouldCellDie(func(liveNbrsCount int, c *Coordinate) bool {
+		// All live cells should die in any cases
+		return true
+	})
+	g.Evolve()
+	generation := g.GetGeneration()
+
+	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+		{false, false, false},
+		{false, false, false},
+		{false, false, false},
+	})
+
+	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+		t.Log("Passed")
+	} else {
+		t.Fatalf("Did not set custom 'shouldCellDie' logic correcly.")
 	}
 }

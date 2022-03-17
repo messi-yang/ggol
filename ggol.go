@@ -11,6 +11,8 @@ type Game interface {
 	KillCell(*Coordinate) error
 	SetShouldCellRevive(ShouldCellRevive)
 	SetShouldCellDie(ShouldCellDie)
+	PlantSeed(*Seed) error
+	Reset()
 	Evolve()
 	GetCell(*Coordinate) (*Cell, error)
 	GetGeneration() *Generation
@@ -38,50 +40,40 @@ func defaultShouldCellDie(liveNbrsCount int, c *Coordinate) bool {
 // if it's given.
 func NewGame(
 	size *Size,
-	seed *Seed,
 ) (*gameInfo, error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
 	}
 
-	// Initialize generation & liveNbrsCountMap
-	generation := make([][]Cell, size.Width)
-	liveNbrsCountMap := make(LiveNbrsCountMap, size.Width)
-	for x := 0; x < size.Width; x++ {
-		generation[x] = make([]Cell, size.Height)
-		liveNbrsCountMap[x] = make([]int, size.Height)
-		for y := 0; y < size.Height; y++ {
-			generation[x][y] = false
-			liveNbrsCountMap[x][y] = 0
-		}
-	}
 	newG := gameInfo{
-		generation,
-		liveNbrsCountMap,
+		nil,
+		nil,
 		*size,
 		nil,
 		nil,
 		sync.RWMutex{},
 	}
+	// Initialize generation
+	newG.initializeGeneration()
 
 	// Initialize functions below:
 	newG.SetShouldCellRevive(defaultShouldCellRevive)
 	newG.SetShouldCellDie(defaultShouldCellDie)
 
-	if seed != nil {
-		for i := 0; i < len(*seed); i++ {
-			c := (*seed)[i].Coordinate
-			cell := (*seed)[i].Cell
-			if newG.isOutsideBorder(&c) {
-				return nil, &ErrCoordinateIsOutsideBorder{&c}
-			}
-			if cell {
-				newG.makeCellAlive(&c)
-			}
+	return &newG, nil
+}
+
+func (g *gameInfo) initializeGeneration() {
+	g.generation = make(Generation, g.size.Width)
+	g.liveNbrsCountMap = make(LiveNbrsCountMap, g.size.Width)
+	for x := 0; x < g.size.Width; x++ {
+		g.generation[x] = make([]Cell, g.size.Height)
+		g.liveNbrsCountMap[x] = make([]int, g.size.Height)
+		for y := 0; y < g.size.Height; y++ {
+			g.generation[x][y] = false
+			g.liveNbrsCountMap[x][y] = 0
 		}
 	}
-
-	return &newG, nil
 }
 
 func (g *gameInfo) isOutsideBorder(c *Coordinate) bool {
@@ -128,6 +120,21 @@ func (g *gameInfo) makeCellDead(c *Coordinate) {
 	g.subLiveNbrsCountAround(c)
 }
 
+// Use seed to initialize generation the way you like.
+func (g *gameInfo) PlantSeed(seed *Seed) error {
+	for i := 0; i < len(*seed); i++ {
+		c := (*seed)[i].Coordinate
+		cell := (*seed)[i].Cell
+		if g.isOutsideBorder(&c) {
+			return &ErrCoordinateIsOutsideBorder{&c}
+		}
+		if cell {
+			g.makeCellAlive(&c)
+		}
+	}
+	return nil
+}
+
 // Revive the cell at the coordinate.
 func (g *gameInfo) RescueCell(c *Coordinate) error {
 	g.locker.Lock()
@@ -166,6 +173,11 @@ func (g *gameInfo) SetShouldCellRevive(f ShouldCellRevive) {
 // Change the rule of wheter a dead cell should revive or not.
 func (g *gameInfo) SetShouldCellDie(f ShouldCellDie) {
 	g.shouldCellDie = f
+}
+
+// Reset game with empty generation
+func (g *gameInfo) Reset() {
+	g.initializeGeneration()
 }
 
 // Generate next generation of current generation.

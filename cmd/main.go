@@ -12,11 +12,10 @@ var g ggol.Game
 var count int
 var width int = 120
 var height int = 75
-var size ggol.Size
-var period time.Duration = 100
+var size *ggol.Size = &ggol.Size{Width: width, Height: height}
+var period time.Duration = 20
 
-func initGame() ggol.Game {
-	size = ggol.Size{Width: width, Height: height}
+func generateSeed() *ggol.Seed {
 	generation := make(ggol.Generation, width)
 	for x := 0; x < width; x++ {
 		generation[x] = make([]ggol.Cell, height)
@@ -25,29 +24,24 @@ func initGame() ggol.Game {
 		}
 	}
 	seed := ggol.ConvertGenerationToSeed(generation)
-	newG, _ := ggol.NewGame(
-		&size,
-		&seed,
-	)
-	// newG.SetShouldCellDie(func(liveNbrsCount int, c *ggol.Coordinate) bool {
-	// 	return true
-	// })
-	return newG
+	return &seed
 }
 
 func heartBeat() {
 	for range time.Tick(time.Millisecond * period) {
 		count++
-		if count == 1000 {
+		if count == 200 {
 			count = 0
-			g = initGame()
+			g.Reset()
+			g.PlantSeed(generateSeed())
 		}
 		g.Evolve()
 	}
 }
 
 func main() {
-	g = initGame()
+	g, _ = ggol.NewGame(size)
+	g.PlantSeed(generateSeed())
 	go heartBeat()
 
 	route := gin.Default()
