@@ -11,8 +11,8 @@ type Cell bool
 
 // The size of the Conway's Game of Life.
 type Size struct {
-	Width  int
-	Height int
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 // A matrix that contains all cells.

@@ -81,13 +81,13 @@ func TestNewGame(t *testing.T) {
 	shouldThrowErrorWhenSeedNotMatchesSize(t)
 }
 
-func shouldReviveCell(t *testing.T) {
+func shouldRescueCell(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 	c := Coordinate{1, 1}
-	g.ReviveCell(&c)
+	g.RescueCell(&c)
 	cell, _ := g.GetCell(&c)
 
 	if *cell {
@@ -97,11 +97,11 @@ func shouldReviveCell(t *testing.T) {
 	}
 }
 
-func TestReviveCell(t *testing.T) {
-	shouldReviveCell(t)
+func TestRescueCell(t *testing.T) {
+	shouldRescueCell(t)
 }
 
-func shouldReviveCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
+func shouldRescueCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
@@ -127,8 +127,8 @@ func shouldReviveCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 	}
 }
 
-func TestReviveCells(t *testing.T) {
-	shouldReviveCellsInDesiredPatternAndDesiredCoord(t)
+func TestRescueCells(t *testing.T) {
+	shouldRescueCellsInDesiredPatternAndDesiredCoord(t)
 }
 
 func shouldKillCell(t *testing.T) {
@@ -137,7 +137,7 @@ func shouldKillCell(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 	c := Coordinate{X: 1, Y: 1}
-	g.ReviveCell(&c)
+	g.RescueCell(&c)
 	g.KillCell(&c)
 	cell, _ := g.GetCell(&c)
 

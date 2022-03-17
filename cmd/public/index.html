@@ -44,8 +44,8 @@
                     .get('http://localhost:8000/api/generation')
                     .then(function ({ data }) {
                         generation = data.generation;
-                        size.width = data.size.Width;
-                        size.height = data.size.Height;
+                        size.width = data.size.width;
+                        size.height = data.size.height;
                         period = data.period;
                         initCanvas();
                         for (var i = 0; i < size.width; i += 1) {

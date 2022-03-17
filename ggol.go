@@ -7,9 +7,11 @@ import (
 // The Game contains all the basics operations that you need
 // for a Conway's Game of Life.
 type Game interface {
-	ReviveCell(*Coordinate) error
+	RescueCell(*Coordinate) error
 	KillCell(*Coordinate) error
 	Evolve()
+	ShouldCellDie(*Coordinate) bool
+	ShouldCellRevive(*Coordinate) bool
 	GetCell(*Coordinate) (*Cell, error)
 	GetGeneration() *Generation
 	GetSize() *Size
@@ -101,7 +103,7 @@ func (g *gameInfo) makeCellDead(c *Coordinate) {
 }
 
 // Revive the cell at the coordinate.
-func (g *gameInfo) ReviveCell(c *Coordinate) error {
+func (g *gameInfo) RescueCell(c *Coordinate) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 	if g.isOutsideBorder(c) {
@@ -130,6 +132,18 @@ func (g *gameInfo) KillCell(c *Coordinate) error {
 	return nil
 }
 
+func (g *gameInfo) ShouldCellDie(c *Coordinate) bool {
+	liveNbrsCount := g.liveNbrsCountMap[c.X][c.Y]
+
+	return liveNbrsCount != 2 && liveNbrsCount != 3
+}
+
+func (g *gameInfo) ShouldCellRevive(c *Coordinate) bool {
+	liveNbrsCount := g.liveNbrsCountMap[c.X][c.Y]
+
+	return liveNbrsCount == 3
+}
+
 // Generate next generation of current generation.
 func (g *gameInfo) Evolve() {
 	g.locker.Lock()
@@ -140,12 +154,11 @@ func (g *gameInfo) Evolve() {
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			liveNbrsCountMap := g.liveNbrsCountMap[x][y]
 			alive := g.generation[x][y]
 			coord := Coordinate{X: x, Y: y}
-			if liveNbrsCountMap == 3 && !alive {
+			if alive == false && g.ShouldCellRevive(&coord) {
 				cellsToRevive = append(cellsToRevive, coord)
-			} else if liveNbrsCountMap != 2 && liveNbrsCountMap != 3 && alive {
+			} else if alive == true && g.ShouldCellDie(&coord) {
 				cellsToDie = append(cellsToDie, coord)
 			}
 		}
