@@ -35,7 +35,8 @@ main() {
     // Create a size
     size := ggol.Size{Height: 3, Width: 3}
     // Start a new game with given seed.
-    game, _ := ggol.NewGame(&size, &seed)
+    game, _ := ggol.NewGame(&size)
+    game.PlantSeed(&seed)
     // Generate next generation.
     game.Evolve()
     // Get current generation.
