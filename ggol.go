@@ -18,14 +18,15 @@ type Game interface {
 	GetCellLiveNbrsCountMap() *CellLiveNbrsCountMap
 	GetCellLiveStatus(*Coordinate) (*CellLiveStatus, error)
 	GetCellLiveStatusMap() *CellLiveStatusMap
+	GetGeneration() *CellMap
 }
 
 type gameInfo struct {
+	gameSize             Size
 	emptyCellMeta        interface{}
 	cellLiveStatusMap    CellLiveStatusMap
 	cellLiveNbrsCountMap CellLiveNbrsCountMap
 	cellMetaMap          CellMetaMap
-	gameSize             Size
 	cellIterator         CellIterator
 	locker               sync.RWMutex
 }
@@ -62,11 +63,11 @@ func NewGame(
 	}
 
 	newG := gameInfo{
+		*gameSize,
 		emptyCellMeta,
 		nil,
 		nil,
 		nil,
-		*gameSize,
 		nil,
 		sync.RWMutex{},
 	}
@@ -258,4 +259,21 @@ func (g *gameInfo) GetCellLiveStatus(c *Coordinate) (*CellLiveStatus, error) {
 // Get the size of the game.
 func (g *gameInfo) GetSize() *Size {
 	return &g.gameSize
+}
+
+func (g *gameInfo) GetGeneration() *CellMap {
+	var generation CellMap = make(CellMap, g.gameSize.Width)
+
+	for x := 0; x < g.gameSize.Width; x++ {
+		generation[x] = make([]Cell, g.gameSize.Height)
+		for y := 0; y < g.gameSize.Height; y++ {
+			generation[x][y] = Cell{
+				g.cellLiveStatusMap[x][y],
+				g.cellLiveNbrsCountMap[x][y],
+				g.cellMetaMap[x][y],
+			}
+		}
+	}
+
+	return &generation
 }

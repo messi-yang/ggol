@@ -292,7 +292,8 @@ func TestGetSize(t *testing.T) {
 	width := 3
 	height := 6
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	g, _ := NewGame(&size, 111)
+	fmt.Print(g.GetGeneration())
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")

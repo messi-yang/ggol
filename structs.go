@@ -27,5 +27,15 @@ type CellLiveNbrsCount int
 // A map that contains all live neighbours counts of all cells.
 type CellLiveNbrsCountMap [][]CellLiveNbrsCount
 
+// Cell
+type Cell struct {
+	Live          CellLiveStatus
+	LiveNbrsCount CellLiveNbrsCount
+	Meta          interface{}
+}
+
+// Cell Map
+type CellMap [][]Cell
+
 // Decide next condition of the cell.
 type CellIterator func(live *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{})

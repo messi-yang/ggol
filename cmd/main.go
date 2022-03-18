@@ -48,6 +48,7 @@ func main() {
 			"size":        g.GetSize(),
 			"period":      period,
 			"cellLiveMap": *g.GetCellLiveStatusMap(),
+			"generation":  *g.GetGeneration(),
 		})
 	})
 	route.Static("/demo", "./cmd/public")
