@@ -12,9 +12,6 @@ type Size struct {
 	Height int `json:"height"`
 }
 
-// A map that contains all information of cells.
-type CellMetaMap [][]interface{}
-
 // Alive or dead.
 type CellLiveStatus bool
 
@@ -23,9 +20,6 @@ type CellLiveStatusMap [][]CellLiveStatus
 
 // Adjacent live cells.
 type CellLiveNbrsCount int
-
-// A map that contains all live neighbours counts of all cells.
-type CellLiveNbrsCountMap [][]CellLiveNbrsCount
 
 // Cell
 type Cell struct {
