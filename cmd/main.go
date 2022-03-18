@@ -16,14 +16,14 @@ var size *ggol.Size = &ggol.Size{Width: width, Height: height}
 var period time.Duration = 20
 
 func generateSeed() *ggol.Seed {
-	generation := make(ggol.Generation, width)
+	liveMap := make(ggol.LiveMap, width)
 	for x := 0; x < width; x++ {
-		generation[x] = make([]ggol.Cell, height)
+		liveMap[x] = make([]ggol.Live, height)
 		for y := 0; y < height; y++ {
-			generation[x][y] = rand.Intn(2) == 0
+			liveMap[x][y] = rand.Intn(2) == 0
 		}
 	}
-	seed := ggol.ConvertGenerationToSeed(generation)
+	seed := ggol.ConvertLiveMapToSeed(liveMap)
 	return &seed
 }
 
@@ -45,11 +45,11 @@ func main() {
 	go heartBeat()
 
 	route := gin.Default()
-	route.GET("/api/generation", func(c *gin.Context) {
+	route.GET("/api/liveMap", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"size":       g.GetSize(),
-			"period":     period,
-			"generation": *g.GetGeneration(),
+			"size":    g.GetSize(),
+			"period":  period,
+			"liveMap": *g.GetLiveCellMap(),
 		})
 	})
 	route.Static("/demo", "./cmd/public")

@@ -17,7 +17,7 @@
                 width: 0,
                 height: 0,
             };
-            var generation;
+            var liveMap;
             var period;
 
             function initCanvas() {
@@ -29,7 +29,7 @@
             }
 
             function drawCell(x, y) {
-                var cell = generation[x][y];
+                var cell = liveMap[x][y];
                 context.fillStyle = cell ? 'white' : 'black';
                 context.fillRect(
                     x * unit,
@@ -41,9 +41,9 @@
 
             var fetchData = function () {
                 axios
-                    .get('http://localhost:8000/api/generation')
+                    .get('http://localhost:8000/api/liveMap')
                     .then(function ({ data }) {
-                        generation = data.generation;
+                        liveMap = data.liveMap;
                         size.width = data.size.width;
                         size.height = data.size.height;
                         period = data.period;

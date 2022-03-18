@@ -1,13 +1,13 @@
 package ggol
 
-// This contains X and Y, which represents a coordinate in generation.
+// This contains X and Y, which represents a coordinate in liveMap.
 type Coordinate struct {
 	X int
 	Y int
 }
 
-// Cell, alive or dead.
-type Cell bool
+// Alive or dead.
+type Live bool
 
 // The size of the Conway's Game of Life.
 type Size struct {
@@ -15,16 +15,16 @@ type Size struct {
 	Height int `json:"height"`
 }
 
-// A matrix that contains all cells.
-type Generation [][]Cell
+// A matrix that contains all living statuses of all cells.
+type LiveMap [][]Live
 
 // A map that contains all live neighbours counts of all cells.
 type LiveNbrsCountMap [][]int
 
-// Every SeedUnit contains a coordinate and a cell.
+// Every SeedUnit contains a coordinate and a live status.
 type SeedUnit struct {
 	Coordinate Coordinate
-	Cell       Cell
+	Live       Live
 }
 
 // Seed is an array of SeedUnit.

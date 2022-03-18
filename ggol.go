@@ -14,13 +14,13 @@ type Game interface {
 	PlantSeed(*Seed) error
 	Reset()
 	Evolve()
-	GetCell(*Coordinate) (*Cell, error)
-	GetGeneration() *Generation
+	GetCell(*Coordinate) (*Live, error)
+	GetLiveCellMap() *LiveMap
 	GetSize() *Size
 }
 
 type gameInfo struct {
-	generation       Generation
+	liveMap          LiveMap
 	liveNbrsCountMap LiveNbrsCountMap
 	size             Size
 	shouldCellRevive ShouldCellRevive
@@ -53,8 +53,8 @@ func NewGame(
 		nil,
 		sync.RWMutex{},
 	}
-	// Initialize generation
-	newG.initializeGeneration()
+	// Initialize liveMap
+	newG.initializeLiveMap()
 
 	// Initialize functions below:
 	newG.SetShouldCellRevive(defaultShouldCellRevive)
@@ -63,14 +63,14 @@ func NewGame(
 	return &newG, nil
 }
 
-func (g *gameInfo) initializeGeneration() {
-	g.generation = make(Generation, g.size.Width)
+func (g *gameInfo) initializeLiveMap() {
+	g.liveMap = make(LiveMap, g.size.Width)
 	g.liveNbrsCountMap = make(LiveNbrsCountMap, g.size.Width)
 	for x := 0; x < g.size.Width; x++ {
-		g.generation[x] = make([]Cell, g.size.Height)
+		g.liveMap[x] = make([]Live, g.size.Height)
 		g.liveNbrsCountMap[x] = make([]int, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
-			g.generation[x][y] = false
+			g.liveMap[x][y] = false
 			g.liveNbrsCountMap[x][y] = 0
 		}
 	}
@@ -110,25 +110,25 @@ func (g *gameInfo) subLiveNbrsCountAround(c *Coordinate) {
 
 // Make the cell in the coordinate alive.
 func (g *gameInfo) makeCellAlive(c *Coordinate) {
-	g.generation[c.X][c.Y] = true
+	g.liveMap[c.X][c.Y] = true
 	g.addLiveNbrsCountAround(c)
 }
 
 // Make the cell in the coordinate dead.
 func (g *gameInfo) makeCellDead(c *Coordinate) {
-	g.generation[c.X][c.Y] = false
+	g.liveMap[c.X][c.Y] = false
 	g.subLiveNbrsCountAround(c)
 }
 
-// Use seed to initialize generation the way you like.
+// Use seed to initialize liveMap the way you like.
 func (g *gameInfo) PlantSeed(seed *Seed) error {
 	for i := 0; i < len(*seed); i++ {
 		c := (*seed)[i].Coordinate
-		cell := (*seed)[i].Cell
+		live := (*seed)[i].Live
 		if g.isOutsideBorder(&c) {
 			return &ErrCoordinateIsOutsideBorder{&c}
 		}
-		if cell {
+		if live {
 			g.makeCellAlive(&c)
 		}
 	}
@@ -142,7 +142,7 @@ func (g *gameInfo) RescueCell(c *Coordinate) error {
 	if g.isOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	if g.generation[c.X][c.Y] {
+	if g.liveMap[c.X][c.Y] {
 		return nil
 	}
 	g.makeCellAlive(c)
@@ -157,7 +157,7 @@ func (g *gameInfo) KillCell(c *Coordinate) error {
 	if g.isOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	if !g.generation[c.X][c.Y] {
+	if !g.liveMap[c.X][c.Y] {
 		return nil
 	}
 	g.makeCellDead(c)
@@ -175,12 +175,12 @@ func (g *gameInfo) SetShouldCellDie(f ShouldCellDie) {
 	g.shouldCellDie = f
 }
 
-// Reset game with empty generation
+// Reset game with empty liveMap
 func (g *gameInfo) Reset() {
-	g.initializeGeneration()
+	g.initializeLiveMap()
 }
 
-// Generate next generation of current generation.
+// Generate next liveMap of current liveMap.
 func (g *gameInfo) Evolve() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
@@ -190,7 +190,7 @@ func (g *gameInfo) Evolve() {
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			alive := g.generation[x][y]
+			alive := g.liveMap[x][y]
 			liveNbrsCount := g.liveNbrsCountMap[x][y]
 			coord := Coordinate{X: x, Y: y}
 			if alive == false && g.shouldCellRevive(liveNbrsCount, &coord) {
@@ -209,22 +209,22 @@ func (g *gameInfo) Evolve() {
 	}
 }
 
-// Get current generation.
-func (g *gameInfo) GetGeneration() *Generation {
+// Get current liveMap.
+func (g *gameInfo) GetLiveCellMap() *LiveMap {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return &g.generation
+	return &g.liveMap
 }
 
 // Get the cell at the coordinate.
-func (g *gameInfo) GetCell(c *Coordinate) (*Cell, error) {
+func (g *gameInfo) GetCell(c *Coordinate) (*Live, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 	if g.isOutsideBorder(c) {
 		return nil, &ErrCoordinateIsOutsideBorder{c}
 	}
-	return &g.generation[c.X][c.Y], nil
+	return &g.liveMap[c.X][c.Y], nil
 }
 
 // Get the size of the game.

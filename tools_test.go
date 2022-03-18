@@ -4,70 +4,70 @@ import (
 	"testing"
 )
 
-func testAreGenerationsEqualCaseOne(t *testing.T) {
-	g1 := Generation{{true, false}, {true, false}}
-	g2 := Generation{{true, false}, {true, false}}
+func testAreLiveMapsEqualCaseOne(t *testing.T) {
+	g1 := LiveMap{{true, false}, {true, false}}
+	g2 := LiveMap{{true, false}, {true, false}}
 
-	if AreGenerationsEqual(g1, g2) {
+	if AreLiveMapsEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should be equal.")
 	}
 }
 
-func testAreGenerationsEqualCaseTwo(t *testing.T) {
-	g1 := Generation{{true, false}, {true, false}}
-	g2 := Generation{{true, false}, {true, true}}
+func testAreLiveMapsEqualCaseTwo(t *testing.T) {
+	g1 := LiveMap{{true, false}, {true, false}}
+	g2 := LiveMap{{true, false}, {true, true}}
 
-	if !AreGenerationsEqual(g1, g2) {
+	if !AreLiveMapsEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should not be equal.")
 	}
 }
 
-func TestAreGenerationsEqual(t *testing.T) {
-	testAreGenerationsEqualCaseOne(t)
-	testAreGenerationsEqualCaseTwo(t)
+func TestAreLiveMapsEqual(t *testing.T) {
+	testAreLiveMapsEqualCaseOne(t)
+	testAreLiveMapsEqualCaseTwo(t)
 }
 
-func testRotateGenerationInDigonalLineCaseOne(t *testing.T) {
-	g := Generation{
+func testRotateLiveMapInDigonalLineCaseOne(t *testing.T) {
+	g := LiveMap{
 		{true, true, true},
 		{false, false, false},
 	}
-	mirrorG := RotateGenerationInDigonalLine(g)
-	expectedG := Generation{
+	mirrorG := RotateLiveMapInDigonalLine(g)
+	expectedG := LiveMap{
 		{true, false},
 		{true, false},
 		{true, false},
 	}
-	if AreGenerationsEqual(mirrorG, expectedG) {
+	if AreLiveMapsEqual(mirrorG, expectedG) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("mirrorG should be mirror version of g")
 	}
 }
 
-func TestRotateGenerationInDigonalLine(t *testing.T) {
-	testRotateGenerationInDigonalLineCaseOne(t)
+func TestRotateLiveMapInDigonalLine(t *testing.T) {
+	testRotateLiveMapInDigonalLineCaseOne(t)
 }
 
-func testConverGenerationToSeedCaseOne(t *testing.T) {
-	g := Generation{{true, false}}
-	seed := ConvertGenerationToSeed(g)
+func testConverLiveMapToSeedCaseOne(t *testing.T) {
+	g := LiveMap{{true, false}}
+	seed := ConvertLiveMapToSeed(g)
 
 	seedUnitOne := seed[0]
 	seedUnitTwo := seed[1]
 
-	if seedUnitOne.Coordinate.X != 0 || seedUnitOne.Coordinate.Y != 0 || !seedUnitOne.Cell {
-		t.Fatalf("Did not convert generation to seed correclty.")
-	} else if seedUnitTwo.Coordinate.X != 0 || seedUnitTwo.Coordinate.Y != 1 || seedUnitTwo.Cell {
-		t.Fatalf("Did not convert generation to seed correclty.")
+	if seedUnitOne.Coordinate.X != 0 || seedUnitOne.Coordinate.Y != 0 || !seedUnitOne.Live {
+		t.Fatalf("Did not convert liveMap to seed correclty.")
+	} else if seedUnitTwo.Coordinate.X != 0 || seedUnitTwo.Coordinate.Y != 1 || seedUnitTwo.Live {
+		t.Fatalf("Did not convert liveMap to seed correclty.")
 	} else {
 		t.Log("Passed")
 	}
 }
-func TestConvertGenerationToSeed(t *testing.T) {
-	testConverGenerationToSeedCaseOne(t)
+func TestConvertLiveMapToSeed(t *testing.T) {
+	testConverLiveMapToSeedCaseOne(t)
 }

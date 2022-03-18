@@ -11,9 +11,9 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	height := 10
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size)
-	generation := *g.GetGeneration()
+	liveMap := *g.GetLiveCellMap()
 
-	if len(generation) == width && len(generation[0]) == height {
+	if len(liveMap) == width && len(liveMap[0]) == height {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Size should be %v x %v", width, height)
@@ -24,8 +24,8 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 	width := 6
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{true, true, true, true, true, true},
 			{true, true, true, true, true, true},
 			{false, false, false, false, false, false},
@@ -34,17 +34,17 @@ func shouldInitializeGameWithGiveSeed(t *testing.T) {
 	)
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
-	generation := *g.GetGeneration()
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	liveMap := *g.GetLiveCellMap()
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{true, true, true, true, true, true},
 		{true, true, true, true, true, true},
 		{false, false, false, false, false, false},
 	})
 
-	if AreGenerationsEqual(generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should initialize a new game with given seed %v, got %v", seed, generation)
+		t.Fatalf("Should initialize a new game with given seed %v, got %v", seed, liveMap)
 	}
 }
 
@@ -71,7 +71,7 @@ func shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t *testing.T) {
 	height := 2
 	size := Size{Width: width, Height: height}
 	seed := Seed{
-		{Coordinate: Coordinate{X: 3, Y: 0}, Cell: true},
+		{Coordinate: Coordinate{X: 3, Y: 0}, Live: true},
 	}
 	g, _ := NewGame(&size)
 	err := g.PlantSeed(&seed)
@@ -110,8 +110,8 @@ func shouldRescueCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{false, true, false},
 			{true, true, false},
 			{false, false, false},
@@ -119,14 +119,14 @@ func shouldRescueCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
 	)
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
-	generation := *g.GetGeneration()
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	liveMap := *g.GetLiveCellMap()
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{false, true, false},
 		{true, true, false},
 		{false, false, false},
 	})
 
-	if AreGenerationsEqual(generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Should revice cells in this desired pattern %v", expectedBinaryBoard)
@@ -162,8 +162,8 @@ func testBlockEvolvement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{true, true, false},
 			{true, true, false},
 			{false, false, false},
@@ -172,17 +172,17 @@ func testBlockEvolvement(t *testing.T) {
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
 	g.Evolve()
-	nextGeneration := *g.GetGeneration()
-	expectedNextGeneration := RotateGenerationInDigonalLine(Generation{
+	nextLiveMap := *g.GetLiveCellMap()
+	expectedNextLiveMap := RotateLiveMapInDigonalLine(LiveMap{
 		{true, true, false},
 		{true, true, false},
 		{false, false, false},
 	})
 
-	if AreGenerationsEqual(nextGeneration, expectedNextGeneration) {
+	if AreLiveMapsEqual(nextLiveMap, expectedNextLiveMap) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should generate next generation of a block, but got %v.", nextGeneration)
+		t.Fatalf("Should generate next liveMap of a block, but got %v.", nextLiveMap)
 	}
 }
 
@@ -190,8 +190,8 @@ func testBlinkerEvolvement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{false, false, false},
 			{true, true, true},
 			{false, false, false},
@@ -199,26 +199,26 @@ func testBlinkerEvolvement(t *testing.T) {
 	)
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
-	generation := *g.GetGeneration()
-	expectedNextGenerationOne := RotateGenerationInDigonalLine(Generation{
+	liveMap := *g.GetLiveCellMap()
+	expectedNextLiveMapOne := RotateLiveMapInDigonalLine(LiveMap{
 		{false, true, false},
 		{false, true, false},
 		{false, true, false},
 	})
-	expectedNextGenerationTwo := RotateGenerationInDigonalLine(Generation{
+	expectedNextLiveMapTwo := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
 	})
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedNextGenerationOne) {
-		t.Fatalf("Should generate next generation of a blinker, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedNextLiveMapOne) {
+		t.Fatalf("Should generate next liveMap of a blinker, but got %v.", liveMap)
 	}
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedNextGenerationTwo) {
-		t.Fatalf("Should generate 2nd next generation of a blinker, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedNextLiveMapTwo) {
+		t.Fatalf("Should generate 2nd next liveMap of a blinker, but got %v.", liveMap)
 	}
 }
 
@@ -226,8 +226,8 @@ func testGliderEvolvement(t *testing.T) {
 	width := 5
 	height := 5
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{false, false, false, false, false},
 			{false, true, false, false, false},
 			{false, false, true, true, false},
@@ -238,30 +238,30 @@ func testGliderEvolvement(t *testing.T) {
 	)
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
-	generation := *g.GetGeneration()
+	liveMap := *g.GetLiveCellMap()
 
-	expectedGenerationOne := RotateGenerationInDigonalLine(Generation{
+	expectedLiveMapOne := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, false},
 		{false, true, true, true, false},
 		{false, false, false, false, false},
 	})
-	expectedGenerationTwo := RotateGenerationInDigonalLine(Generation{
+	expectedLiveMapTwo := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
 		{false, false, true, false, false},
 	})
-	expectedGenerationThree := RotateGenerationInDigonalLine(Generation{
+	expectedLiveMapThree := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
 	})
-	expectedGenerationFour := RotateGenerationInDigonalLine(Generation{
+	expectedLiveMapFour := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, true, false, false},
@@ -270,23 +270,23 @@ func testGliderEvolvement(t *testing.T) {
 	})
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedGenerationOne) {
-		t.Fatalf("Should generate next generation of a glider, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedLiveMapOne) {
+		t.Fatalf("Should generate next liveMap of a glider, but got %v.", liveMap)
 	}
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedGenerationTwo) {
-		t.Fatalf("Should generate 2nd next generation of a glider, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedLiveMapTwo) {
+		t.Fatalf("Should generate 2nd next liveMap of a glider, but got %v.", liveMap)
 	}
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedGenerationThree) {
-		t.Fatalf("Should generate 3rd next next generation of a glider, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedLiveMapThree) {
+		t.Fatalf("Should generate 3rd next next liveMap of a glider, but got %v.", liveMap)
 	}
 
 	g.Evolve()
-	if !AreGenerationsEqual(generation, expectedGenerationFour) {
-		t.Fatalf("Should generate 4th next next generation of a glider, but got %v.", generation)
+	if !AreLiveMapsEqual(liveMap, expectedLiveMapFour) {
+		t.Fatalf("Should generate 4th next next liveMap of a glider, but got %v.", liveMap)
 	}
 
 	t.Log("Passed")
@@ -296,9 +296,9 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
+	seed := ConvertLiveMapToSeed(
 		// Build a glider pattern
-		RotateGenerationInDigonalLine(Generation{
+		RotateLiveMapInDigonalLine(LiveMap{
 			{true, false, false},
 			{false, true, true},
 			{true, true, false},
@@ -346,12 +346,12 @@ func TestEvolve(t *testing.T) {
 	testEvolvementWithConcurrency(t)
 }
 
-func TestGetGeneration(t *testing.T) {
+func TestGetLiveCellMap(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{false, true, false},
 			{true, true, false},
 			{false, false, false},
@@ -359,17 +359,17 @@ func TestGetGeneration(t *testing.T) {
 	)
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
-	generation := *g.GetGeneration()
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	liveMap := *g.GetLiveCellMap()
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{false, true, false},
 		{true, true, false},
 		{false, false, false},
 	})
 
-	if AreGenerationsEqual(generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not get correct generation, expected %v, but got %v.", expectedBinaryBoard, generation)
+		t.Fatalf("Did not get correct liveMap, expected %v, but got %v.", expectedBinaryBoard, liveMap)
 	}
 }
 
@@ -390,8 +390,8 @@ func TestReset(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{true, true, true},
 			{true, true, true},
 			{true, true, true},
@@ -400,18 +400,18 @@ func TestReset(t *testing.T) {
 	g, _ := NewGame(&size)
 	g.PlantSeed(&seed)
 	g.Reset()
-	generation := g.GetGeneration()
+	liveMap := g.GetLiveCellMap()
 
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false},
 		{false, false, false},
 		{false, false, false},
 	})
 
-	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(*liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not reset generation correctly.")
+		t.Fatalf("Did not reset liveMap correctly.")
 	}
 }
 
@@ -419,8 +419,8 @@ func TestSetShouldCellRevive(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{false, false, false},
 			{false, false, false},
 			{false, false, false},
@@ -433,15 +433,15 @@ func TestSetShouldCellRevive(t *testing.T) {
 		return true
 	})
 	g.Evolve()
-	generation := g.GetGeneration()
+	liveMap := g.GetLiveCellMap()
 
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{true, true, true},
 		{true, true, true},
 		{true, true, true},
 	})
 
-	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(*liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not set custom 'shouldCellRevive' logic correcly.")
@@ -452,8 +452,8 @@ func TestSetShouldCellDie(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	seed := ConvertGenerationToSeed(
-		RotateGenerationInDigonalLine(Generation{
+	seed := ConvertLiveMapToSeed(
+		RotateLiveMapInDigonalLine(LiveMap{
 			{true, true, true},
 			{true, true, true},
 			{true, true, true},
@@ -466,15 +466,15 @@ func TestSetShouldCellDie(t *testing.T) {
 		return true
 	})
 	g.Evolve()
-	generation := g.GetGeneration()
+	liveMap := g.GetLiveCellMap()
 
-	expectedBinaryBoard := RotateGenerationInDigonalLine(Generation{
+	expectedBinaryBoard := RotateLiveMapInDigonalLine(LiveMap{
 		{false, false, false},
 		{false, false, false},
 		{false, false, false},
 	})
 
-	if AreGenerationsEqual(*generation, expectedBinaryBoard) {
+	if AreLiveMapsEqual(*liveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not set custom 'shouldCellDie' logic correcly.")
