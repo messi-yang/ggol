@@ -44,8 +44,8 @@
                     .get('http://localhost:8000/api/cellLiveMap')
                     .then(function ({ data }) {
                         cellLiveMap = data.cellLiveMap;
-                        size.width = data.gameSize.width;
-                        size.height = data.gameSize.height;
+                        size.width = data.size.width;
+                        size.height = data.size.height;
                         period = data.period;
                         initCanvas();
                         for (var i = 0; i < size.width; i += 1) {

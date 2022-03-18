@@ -9,7 +9,7 @@ import (
 func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
-	size := GameSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 	cellLiveMap := *g.GetCellLiveStatusMap()
 
@@ -20,38 +20,10 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	}
 }
 
-func shouldInitializeGameWithGiveSeed(t *testing.T) {
-	width := 6
-	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{true, true, true, true, true, true},
-			{true, true, true, true, true, true},
-			{false, false, false, false, false, false},
-		},
-		),
-	)
-	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
-	cellLiveMap := *g.GetCellLiveStatusMap()
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{true, true, true, true, true, true},
-		{true, true, true, true, true, true},
-		{false, false, false, false, false, false},
-	})
-
-	if AreCellLiveStatusMapsEqual(cellLiveMap, expectedBinaryBoard) {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Should initialize a new game with given seed %v, got %v", seed, cellLiveMap)
-	}
-}
-
 func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
-	size := GameSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	_, err := NewGame(&size, nil)
 
 	if err == nil {
@@ -62,19 +34,17 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 
 func TestNewGame(t *testing.T) {
 	shouldInitializeGameWithCorrectSize(t)
-	shouldInitializeGameWithGiveSeed(t)
 	shouldThrowErrorWhenSizeIsInvalid(t)
 }
 
-func shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t *testing.T) {
+func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
 	width := 2
 	height := 2
-	size := GameSize{Width: width, Height: height}
-	seed := Seed{
-		{Coordinate: Coordinate{X: 3, Y: 0}, CellLiveStatus: true},
-	}
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	err := g.PlantSeed(&seed)
+	var live CellLiveStatus = true
+	c := Coordinate{X: 0, Y: 10}
+	err := g.SetCell(&c, &live, nil)
 
 	if err == nil {
 		t.Fatalf("Should get error when any seed units are outside border.")
@@ -82,103 +52,48 @@ func shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t *testing.T) {
 	t.Log("Passed")
 }
 
-func TestPlatnSeed(t *testing.T) {
-	shouldThrowErrorWhenAnySeedUnitsExceedBoarder(t)
-}
-
-func shouldRescueCell(t *testing.T) {
-	width := 2
-	height := 2
-	size := GameSize{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
-	c := Coordinate{1, 1}
-	g.RescueCell(&c)
-	cell, _ := g.GetCellLiveStatus(&c)
-
-	if *cell {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Cell on %v, %v should be alive.", 1, 1)
-	}
-}
-
-func TestRescueCell(t *testing.T) {
-	shouldRescueCell(t)
-}
-
-func shouldRescueCellsInDesiredPatternAndDesiredCoord(t *testing.T) {
+func shouldSetCellCorrectly(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{false, true, false},
-			{true, true, false},
-			{false, false, false},
-		}),
-	)
-	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
-	cellLiveMap := *g.GetCellLiveStatusMap()
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, true, false},
-		{true, true, false},
-		{false, false, false},
-	})
-
-	if AreCellLiveStatusMapsEqual(cellLiveMap, expectedBinaryBoard) {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Should revice cells in this desired pattern %v", expectedBinaryBoard)
-	}
-}
-
-func TestRescueCells(t *testing.T) {
-	shouldRescueCellsInDesiredPatternAndDesiredCoord(t)
-}
-
-func shouldKillCell(t *testing.T) {
-	width := 2
-	height := 2
-	size := GameSize{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
+	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
-	g.RescueCell(&c)
-	g.KillCell(&c)
-	cell, _ := g.GetCellLiveStatus(&c)
+	g, _ := NewGame(&size, nil)
+	var live CellLiveStatus = true
+	g.SetCell(&c, &live, nil)
+	newLiveStatus, _ := g.GetCellLiveStatus(&c)
 
-	if !(*cell) {
+	if *newLiveStatus {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Cell on %v, %v should be dead.", 1, 1)
+		t.Fatalf("Should correctly set cell with CellSeed.")
 	}
 }
 
-func TestKillCell(t *testing.T) {
-	shouldKillCell(t)
+func TestSetCell(t *testing.T) {
+	shouldThrowErrorWhenCellSeedExceedBoarder(t)
+	shouldSetCellCorrectly(t)
 }
 
-func testBlockEvolvement(t *testing.T) {
+func testBlockIteratement(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{true, true, false},
-			{true, true, false},
-			{false, false, false},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
-	g.Evolve()
+
+	// Make a block pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 0, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 0, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+	g.Iterate()
 
 	nextCellLiveStatusMap := *g.GetCellLiveStatusMap()
-	expectedNextCellLiveStatusMap := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
+	expectedNextCellLiveStatusMap := CellLiveStatusMap{
 		{true, true, false},
 		{true, true, false},
 		{false, false, false},
-	})
+	}
 
 	if AreCellLiveStatusMapsEqual(nextCellLiveStatusMap, expectedNextCellLiveStatusMap) {
 		t.Log("Passed")
@@ -187,105 +102,105 @@ func testBlockEvolvement(t *testing.T) {
 	}
 }
 
-func testBlinkerEvolvement(t *testing.T) {
+func testBlinkerIteratement(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{false, false, false},
-			{true, true, true},
-			{false, false, false},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
+
+	// Make a blinker pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
+
+	g.Iterate()
+
 	cellLiveMap := *g.GetCellLiveStatusMap()
-	expectedNextCellLiveStatusMapOne := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, true, false},
-		{false, true, false},
-		{false, true, false},
-	})
-	expectedNextCellLiveStatusMapTwo := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
+
+	expectedNextCellLiveStatusMapOne := CellLiveStatusMap{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
-	})
+	}
+	expectedNextCellLiveStatusMapTwo := CellLiveStatusMap{
+		{false, true, false},
+		{false, true, false},
+		{false, true, false},
+	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 }
 
-func testGliderEvolvement(t *testing.T) {
+func testGliderIteratement(t *testing.T) {
 	width := 5
 	height := 5
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{false, false, false, false, false},
-			{false, true, false, false, false},
-			{false, false, true, true, false},
-			{false, true, true, false, false},
-			{false, false, false, false, false},
-		},
-		),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
+
+	// Make a glider pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 2, Y: 2}, &live, nil)
+	g.SetCell(&Coordinate{X: 3, Y: 2}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 3}, &live, nil)
+	g.SetCell(&Coordinate{X: 2, Y: 3}, &live, nil)
+
 	cellLiveMap := *g.GetCellLiveStatusMap()
 
-	expectedCellLiveStatusMapOne := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, false, false, false, false},
-		{false, false, true, false, false},
-		{false, false, false, true, false},
-		{false, true, true, true, false},
-		{false, false, false, false, false},
-	})
-	expectedCellLiveStatusMapTwo := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, false, false, false, false},
-		{false, false, false, false, false},
-		{false, true, false, true, false},
-		{false, false, true, true, false},
-		{false, false, true, false, false},
-	})
-	expectedCellLiveStatusMapThree := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, false, false, false, false},
+	expectedCellLiveStatusMapOne := CellLiveStatusMap{
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
-	})
-	expectedCellLiveStatusMapFour := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
 		{false, false, false, false, false},
+	}
+	expectedCellLiveStatusMapTwo := CellLiveStatusMap{
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, true},
 		{false, false, true, true, false},
-	})
+		{false, false, false, false, false},
+	}
+	expectedCellLiveStatusMapThree := CellLiveStatusMap{
+		{false, false, false, false, false},
+		{false, false, false, true, false},
+		{false, false, false, false, true},
+		{false, false, true, true, true},
+		{false, false, false, false, false},
+	}
+	expectedCellLiveStatusMapFour := CellLiveStatusMap{
+		{false, false, false, false, false},
+		{false, false, false, false, false},
+		{false, false, true, false, true},
+		{false, false, false, true, true},
+		{false, false, false, true, false},
+	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapThree) {
 		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
-	g.Evolve()
+	g.Iterate()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapFour) {
 		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
@@ -293,20 +208,20 @@ func testGliderEvolvement(t *testing.T) {
 	t.Log("Passed")
 }
 
-func testEvolvementWithConcurrency(t *testing.T) {
+func testIteratementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		// Build a glider pattern
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{true, false, false},
-			{false, true, true},
-			{true, true, false},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
+
+	// Make a glider pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 0, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 2, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 2, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 0, Y: 2}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
 
 	wg := sync.WaitGroup{}
 
@@ -316,10 +231,10 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	for i := 0; i < step; i++ {
 		// Let the glider fly to digonal cell in four steps.
 		go func() {
-			g.Evolve()
-			g.Evolve()
-			g.Evolve()
-			g.Evolve()
+			g.Iterate()
+			g.Iterate()
+			g.Iterate()
+			g.Iterate()
 			wg.Done()
 		}()
 	}
@@ -340,32 +255,31 @@ func testEvolvementWithConcurrency(t *testing.T) {
 	t.Log("Passed")
 }
 
-func TestEvolve(t *testing.T) {
-	testBlockEvolvement(t)
-	testBlinkerEvolvement(t)
-	testGliderEvolvement(t)
-	testEvolvementWithConcurrency(t)
+func TestIterate(t *testing.T) {
+	testBlockIteratement(t)
+	testBlinkerIteratement(t)
+	testGliderIteratement(t)
+	testIteratementWithConcurrency(t)
 }
 
 func TestGetCellLiveStatusMap(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{false, true, false},
-			{true, true, false},
-			{false, false, false},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
+
+	// Make a glider pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 0, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+
 	cellLiveMap := *g.GetCellLiveStatusMap()
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
+	expectedBinaryBoard := CellLiveStatusMap{
 		{false, true, false},
 		{true, true, false},
 		{false, false, false},
-	})
+	}
 
 	if AreCellLiveStatusMapsEqual(cellLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
@@ -377,7 +291,7 @@ func TestGetCellLiveStatusMap(t *testing.T) {
 func TestGetSize(t *testing.T) {
 	width := 3
 	height := 6
-	size := GameSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
@@ -390,24 +304,23 @@ func TestGetSize(t *testing.T) {
 func TestReset(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{true, true, true},
-			{true, true, true},
-			{true, true, true},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
+
+	// Make a glider pattern
+	var live CellLiveStatus = true
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
+
 	g.Reset()
 	cellLiveMap := g.GetCellLiveStatusMap()
 
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
+	expectedBinaryBoard := CellLiveStatusMap{
 		{false, false, false},
 		{false, false, false},
 		{false, false, false},
-	})
+	}
 
 	if AreCellLiveStatusMapsEqual(*cellLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
@@ -416,64 +329,31 @@ func TestReset(t *testing.T) {
 	}
 }
 
-func TestSetShouldCellRevive(t *testing.T) {
+func TestSetCellIterator(t *testing.T) {
 	width := 3
 	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{false, false, false},
-			{false, false, false},
-			{false, false, false},
-		}),
-	)
+	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
-	g.SetShouldCellRevive(func(liveNbrsCount int, meta interface{}) bool {
-		// All live cells should die in any cases
-		return true
+
+	g.SetCellIterator(func(liveStatus *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{}) {
+		var cellLiveStatus CellLiveStatus
+		// Bring back all dead cells to live in next iteration.
+		if !*liveStatus {
+			cellLiveStatus = true
+			return &cellLiveStatus, meta
+		} else {
+			cellLiveStatus = false
+			return &cellLiveStatus, meta
+		}
 	})
-	g.Evolve()
+	g.Iterate()
 	cellLiveMap := g.GetCellLiveStatusMap()
 
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
+	expectedBinaryBoard := CellLiveStatusMap{
 		{true, true, true},
 		{true, true, true},
 		{true, true, true},
-	})
-
-	if AreCellLiveStatusMapsEqual(*cellLiveMap, expectedBinaryBoard) {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Did not set custom 'shouldCellRevive' logic correcly.")
 	}
-}
-
-func TestSetShouldCellDie(t *testing.T) {
-	width := 3
-	height := 3
-	size := GameSize{Width: width, Height: height}
-	seed := ConvertCellLiveStatusMapToSeed(
-		RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-			{true, true, true},
-			{true, true, true},
-			{true, true, true},
-		}),
-	)
-	g, _ := NewGame(&size, nil)
-	g.PlantSeed(&seed)
-	g.SetShouldCellDie(func(liveNbrsCount int, meta interface{}) bool {
-		// All live cells should die in any cases
-		return true
-	})
-	g.Evolve()
-	cellLiveMap := g.GetCellLiveStatusMap()
-
-	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
-		{false, false, false},
-		{false, false, false},
-		{false, false, false},
-	})
 
 	if AreCellLiveStatusMapsEqual(*cellLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")

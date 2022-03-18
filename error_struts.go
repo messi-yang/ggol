@@ -4,7 +4,7 @@ import "fmt"
 
 // When Size is not valid, e.g: A minus width.
 type ErrSizeIsNotValid struct {
-	Size *GameSize
+	Size *Size
 }
 
 func (e *ErrSizeIsNotValid) Error() string {

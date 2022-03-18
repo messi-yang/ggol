@@ -6,11 +6,8 @@ type Coordinate struct {
 	Y int
 }
 
-// Alive or dead.
-type CellLiveStatus bool
-
 // The size of the Conway's Game of Life.
-type GameSize struct {
+type Size struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
@@ -18,26 +15,24 @@ type GameSize struct {
 // A map that contains all information of cells.
 type CellMetaMap [][]interface{}
 
+// Alive or dead.
+type CellLiveStatus bool
+
 // A matrix that contains all living statuses of all cells.
 type CellLiveStatusMap [][]CellLiveStatus
 
-// A map that contains all live neighbours counts of all cells.
-type CellLiveNbrsCountMap [][]int
+// Adjacent live cells.
+type CellLiveNbrsCount int
 
-// Every SeedUnit contains a coordinate and a live status.
-type SeedUnit struct {
+// A map that contains all live neighbours counts of all cells.
+type CellLiveNbrsCountMap [][]CellLiveNbrsCount
+
+// Every CellSeed contains a coordinate and a live status.
+type CellSeed struct {
 	Coordinate     Coordinate
 	CellLiveStatus CellLiveStatus
 	CellMeta       interface{}
 }
 
-// Seed is an array of SeedUnit.
-type Seed []SeedUnit
-
-// // A function that accepts liveNbrsCount and Coordinate, so you cant
-// // custom the logic of determing a cell should revive or not.
-type ShouldCellRevive func(liveNbrsCount int, meta interface{}) bool
-
-// // A function that accepts liveNbrsCount and Coordinate, so you cant
-// // custom the logic of determing a cell should die or not.
-type ShouldCellDie func(liveNbrsCount int, meta interface{}) bool
+// Decide next condition of the cell.
+type CellIterator func(live *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{})
