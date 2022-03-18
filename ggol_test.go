@@ -59,9 +59,9 @@ func shouldSetCellCorrectly(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 	var live CellLiveStatus = true
 	g.SetCell(&c, &live, nil)
-	newLiveStatus, _ := g.GetCellLiveStatus(&c)
+	newLiveStatus := g.GetCell(&c).Live
 
-	if *newLiveStatus {
+	if newLiveStatus {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Should correctly set cell.")
@@ -113,27 +113,27 @@ func testBlinkerIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
 
-	g.Iterate()
-
-	cellLiveMap := *g.GetCellLiveStatusMap()
+	var cellLiveMap CellLiveStatusMap
 
 	expectedNextCellLiveStatusMapOne := CellLiveStatusMap{
+		{false, true, false},
+		{false, true, false},
+		{false, true, false},
+	}
+	expectedNextCellLiveStatusMapTwo := CellLiveStatusMap{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
 	}
-	expectedNextCellLiveStatusMapTwo := CellLiveStatusMap{
-		{false, true, false},
-		{false, true, false},
-		{false, true, false},
-	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
@@ -153,7 +153,7 @@ func testGliderIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 3}, &live, nil)
 	g.SetCell(&Coordinate{X: 2, Y: 3}, &live, nil)
 
-	cellLiveMap := *g.GetCellLiveStatusMap()
+	var cellLiveMap CellLiveStatusMap
 
 	expectedCellLiveStatusMapOne := CellLiveStatusMap{
 		{false, false, false, false, false},
@@ -185,21 +185,25 @@ func testGliderIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapThree) {
 		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
+	cellLiveMap = *g.GetCellLiveStatusMap()
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapFour) {
 		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
@@ -239,13 +243,13 @@ func testIteratementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	liveStatusCellOne, _ := g.GetCellLiveStatus(&Coordinate{X: 0 + step, Y: 0 + step})
-	liveStatusCellTwo, _ := g.GetCellLiveStatus(&Coordinate{X: 0 + step, Y: 2 + step})
-	liveStatusCellThree, _ := g.GetCellLiveStatus(&Coordinate{X: 1 + step, Y: 1 + step})
-	liveStatusCellFour, _ := g.GetCellLiveStatus(&Coordinate{X: 1 + step, Y: 2 + step})
-	liveStatusCellFive, _ := g.GetCellLiveStatus(&Coordinate{X: 2 + step, Y: 1 + step})
+	liveStatusCellOne := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step}).Live
+	liveStatusCellTwo := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step}).Live
+	liveStatusCellThree := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step}).Live
+	liveStatusCellFour := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step}).Live
+	liveStatusCellFive := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step}).Live
 
-	if !*liveStatusCellOne || !*liveStatusCellTwo || !*liveStatusCellThree || !*liveStatusCellFour || !*liveStatusCellFive {
+	if !liveStatusCellOne || !liveStatusCellTwo || !liveStatusCellThree || !liveStatusCellFour || !liveStatusCellFive {
 		t.Fatalf("Should still be a glider pattern.")
 	}
 
@@ -326,6 +330,10 @@ func TestReset(t *testing.T) {
 	}
 }
 
+type Hello struct {
+	Hi string
+}
+
 func TestSetCellIterator(t *testing.T) {
 	width := 3
 	height := 3
@@ -334,6 +342,7 @@ func TestSetCellIterator(t *testing.T) {
 
 	g.SetCellIterator(func(liveStatus *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{}) {
 		var cellLiveStatus CellLiveStatus
+
 		// Bring back all dead cells to live in next iteration.
 		if !*liveStatus {
 			cellLiveStatus = true
