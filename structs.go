@@ -34,8 +34,8 @@ type Cell struct {
 	Meta          interface{}
 }
 
-// Cell Map
-type CellMap [][]Cell
+// Generation
+type Generation [][]Cell
 
 // Decide next condition of the cell.
 type CellIterator func(live *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{})

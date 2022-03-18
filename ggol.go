@@ -14,21 +14,19 @@ type Game interface {
 	GetSize() *Size
 	GetCellMeta(*Coordinate) (interface{}, error)
 	GetCellMetaMap() *CellMetaMap
-	GetCellLiveNbrsCount(*Coordinate) (*CellLiveNbrsCount, error)
-	GetCellLiveNbrsCountMap() *CellLiveNbrsCountMap
 	GetCellLiveStatus(*Coordinate) (*CellLiveStatus, error)
 	GetCellLiveStatusMap() *CellLiveStatusMap
-	GetGeneration() *CellMap
+	GetGeneration() *Generation
 }
 
 type gameInfo struct {
-	gameSize             Size
-	emptyCellMeta        interface{}
-	cellLiveStatusMap    CellLiveStatusMap
-	cellLiveNbrsCountMap CellLiveNbrsCountMap
-	cellMetaMap          CellMetaMap
-	cellIterator         CellIterator
-	locker               sync.RWMutex
+	gameSize          Size
+	emptyCellMeta     interface{}
+	cellLiveStatusMap CellLiveStatusMap
+	cellMetaMap       CellMetaMap
+	generation        Generation
+	cellIterator      CellIterator
+	locker            sync.RWMutex
 }
 
 func defaultCellIterator(live *CellLiveStatus, cellLiveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{}) {
@@ -82,16 +80,19 @@ func NewGame(
 
 func (g *gameInfo) initGame() {
 	g.cellLiveStatusMap = make(CellLiveStatusMap, g.gameSize.Width)
-	g.cellLiveNbrsCountMap = make(CellLiveNbrsCountMap, g.gameSize.Width)
 	g.cellMetaMap = make(CellMetaMap, g.gameSize.Width)
+	g.generation = make(Generation, g.gameSize.Width)
 	for x := 0; x < g.gameSize.Width; x++ {
 		g.cellLiveStatusMap[x] = make([]CellLiveStatus, g.gameSize.Height)
-		g.cellLiveNbrsCountMap[x] = make([]CellLiveNbrsCount, g.gameSize.Height)
 		g.cellMetaMap[x] = make([]interface{}, g.gameSize.Height)
+		g.generation[x] = make([]Cell, g.gameSize.Height)
 		for y := 0; y < g.gameSize.Height; y++ {
 			g.cellLiveStatusMap[x][y] = false
-			g.cellLiveNbrsCountMap[x][y] = 0
 			g.cellMetaMap[x][y] = g.emptyCellMeta
+
+			g.generation[x][y].Live = false
+			g.generation[x][y].LiveNbrsCount = 0
+			g.generation[x][y].Meta = g.emptyCellMeta
 		}
 	}
 }
@@ -109,7 +110,7 @@ func (g *gameInfo) addLiveNbrsCountAround(c *Coordinate) {
 			if i == c.X && j == c.Y {
 				continue
 			}
-			g.cellLiveNbrsCountMap[i][j]++
+			g.generation[i][j].LiveNbrsCount++
 		}
 	}
 }
@@ -123,7 +124,7 @@ func (g *gameInfo) subLiveNbrsCountAround(c *Coordinate) {
 			if i == c.X && j == c.Y {
 				continue
 			}
-			g.cellLiveNbrsCountMap[i][j]--
+			g.generation[i][j].LiveNbrsCount--
 		}
 	}
 }
@@ -185,7 +186,7 @@ func (g *gameInfo) Iterate() {
 		nextCellMetaMap[x] = make([]interface{}, g.gameSize.Height)
 		for y := 0; y < g.gameSize.Height; y++ {
 			liveStatus := g.cellLiveStatusMap[x][y]
-			liveNbrsCount := g.cellLiveNbrsCountMap[x][y]
+			liveNbrsCount := g.generation[x][y].LiveNbrsCount
 			meta := g.cellMetaMap[x][y]
 			coord := Coordinate{X: x, Y: y}
 			nextLiveStatus, newMeta := g.cellIterator(&liveStatus, &liveNbrsCount, meta)
@@ -225,19 +226,6 @@ func (g *gameInfo) GetCellMetaMap() *CellMetaMap {
 	return &g.cellMetaMap
 }
 
-func (g *gameInfo) GetCellLiveNbrsCount(c *Coordinate) (*CellLiveNbrsCount, error) {
-	g.locker.RLock()
-	defer g.locker.RUnlock()
-	if g.isOutsideBorder(c) {
-		return nil, &ErrCoordinateIsOutsideBorder{c}
-	}
-	return &g.cellLiveNbrsCountMap[c.X][c.Y], nil
-}
-
-func (g *gameInfo) GetCellLiveNbrsCountMap() *CellLiveNbrsCountMap {
-	return &g.cellLiveNbrsCountMap
-}
-
 // Get current cellLiveStatusMap.
 func (g *gameInfo) GetCellLiveStatusMap() *CellLiveStatusMap {
 	g.locker.RLock()
@@ -261,15 +249,15 @@ func (g *gameInfo) GetSize() *Size {
 	return &g.gameSize
 }
 
-func (g *gameInfo) GetGeneration() *CellMap {
-	var generation CellMap = make(CellMap, g.gameSize.Width)
+func (g *gameInfo) GetGeneration() *Generation {
+	var generation Generation = make(Generation, g.gameSize.Width)
 
 	for x := 0; x < g.gameSize.Width; x++ {
 		generation[x] = make([]Cell, g.gameSize.Height)
 		for y := 0; y < g.gameSize.Height; y++ {
 			generation[x][y] = Cell{
 				g.cellLiveStatusMap[x][y],
-				g.cellLiveNbrsCountMap[x][y],
+				g.generation[x][y].LiveNbrsCount,
 				g.cellMetaMap[x][y],
 			}
 		}

@@ -1,7 +1,6 @@
 package ggol
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 )
@@ -246,8 +245,6 @@ func testIteratementWithConcurrency(t *testing.T) {
 	liveStatusCellFour, _ := g.GetCellLiveStatus(&Coordinate{X: 1 + step, Y: 2 + step})
 	liveStatusCellFive, _ := g.GetCellLiveStatus(&Coordinate{X: 2 + step, Y: 1 + step})
 
-	fmt.Println(*liveStatusCellOne, *liveStatusCellTwo, *liveStatusCellThree, *liveStatusCellFour, *liveStatusCellFive)
-
 	if !*liveStatusCellOne || !*liveStatusCellTwo || !*liveStatusCellThree || !*liveStatusCellFour || !*liveStatusCellFive {
 		t.Fatalf("Should still be a glider pattern.")
 	}
@@ -293,7 +290,6 @@ func TestGetSize(t *testing.T) {
 	height := 6
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, 111)
-	fmt.Print(g.GetGeneration())
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
