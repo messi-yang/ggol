@@ -17,7 +17,7 @@
                 width: 0,
                 height: 0,
             };
-            var liveMap;
+            var cellLiveMap;
             var period;
 
             function initCanvas() {
@@ -29,7 +29,7 @@
             }
 
             function drawCell(x, y) {
-                var cell = liveMap[x][y];
+                var cell = cellLiveMap[x][y];
                 context.fillStyle = cell ? 'white' : 'black';
                 context.fillRect(
                     x * unit,
@@ -41,11 +41,11 @@
 
             var fetchData = function () {
                 axios
-                    .get('http://localhost:8000/api/liveMap')
+                    .get('http://localhost:8000/api/cellLiveMap')
                     .then(function ({ data }) {
-                        liveMap = data.liveMap;
-                        size.width = data.size.width;
-                        size.height = data.size.height;
+                        cellLiveMap = data.cellLiveMap;
+                        size.width = data.gameSize.width;
+                        size.height = data.gameSize.height;
                         period = data.period;
                         initCanvas();
                         for (var i = 0; i < size.width; i += 1) {

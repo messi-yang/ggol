@@ -37,13 +37,13 @@ main() {
     // Start a new game with given seed.
     game, _ := ggol.NewGame(&size)
     game.PlantSeed(&seed)
-    // Generate next liveMap.
+    // Generate next cellLiveMap.
     game.Evolve()
-    // Get current liveMap.
-    newLiveMap := *game.GetLiveCellMap()
-    // We digonally rotate the liveMap so it's easier to read.
-    rotatedNewLiveMap := ggol.RotateLiveMapInDigonalLine(newLiveMap)
-    fmt.Println(rotatedNewLiveMap)
+    // Get current cellLiveMap.
+    newCellLiveStatusMap := *game.GetCellLiveStatusMap()
+    // We digonally rotate the cellLiveMap so it's easier to read.
+    rotatedNewCellLiveStatusMap := ggol.RotateCellLiveStatusMapInDigonalLine(newCellLiveStatusMap)
+    fmt.Println(rotatedNewCellLiveStatusMap)
     // [
     //     [false true false]
     //     [false true false]

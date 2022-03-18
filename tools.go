@@ -1,7 +1,7 @@
 package ggol
 
-// Check if two LiveMaps are equal.
-func AreLiveMapsEqual(a LiveMap, b LiveMap) bool {
+// Check if two CellLiveStatusMaps are equal.
+func AreCellLiveStatusMapsEqual(a CellLiveStatusMap, b CellLiveStatusMap) bool {
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[i]); j++ {
 			if a[i][j] != b[i][j] {
@@ -12,20 +12,20 @@ func AreLiveMapsEqual(a LiveMap, b LiveMap) bool {
 	return true
 }
 
-// Diagonally rotate the LiveMap in a line starting from left-top corner
+// Diagonally rotate the CellLiveStatusMap in a line starting from left-top corner
 // to right-bottom corner, it's useful when testing because you can
 // write your test data in a human-friendly way.
 // e.g: For a 3 x 2 matrix.
-// testData := RotateLiveMapInDigonalLine(LiveMap{
+// testData := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
 //     {true,true,true},
 //     {true,true,true},
 // })
-func RotateLiveMapInDigonalLine(g LiveMap) LiveMap {
+func RotateCellLiveStatusMapInDigonalLine(g CellLiveStatusMap) CellLiveStatusMap {
 	width := len(g[0])
 	height := len(g)
-	mirrorG := make(LiveMap, len(g[0]))
+	mirrorG := make(CellLiveStatusMap, len(g[0]))
 	for x := 0; x < width; x++ {
-		mirrorG[x] = make([]Live, height)
+		mirrorG[x] = make([]CellLiveStatus, height)
 		for y := 0; y < height; y++ {
 			mirrorG[x][y] = g[y][x]
 		}
@@ -33,8 +33,8 @@ func RotateLiveMapInDigonalLine(g LiveMap) LiveMap {
 	return mirrorG
 }
 
-// Given a LiveMap, converting it to Seed.
-func ConvertLiveMapToSeed(g LiveMap) Seed {
+// Given a CellLiveStatusMap, converting it to Seed.
+func ConvertCellLiveStatusMapToSeed(g CellLiveStatusMap) Seed {
 	seed := make([]SeedUnit, 0)
 	for x := 0; x < len(g); x++ {
 		for y := 0; y < len(g[x]); y++ {
@@ -43,7 +43,7 @@ func ConvertLiveMapToSeed(g LiveMap) Seed {
 					X: x,
 					Y: y,
 				},
-				Live: g[x][y],
+				CellLiveStatus: g[x][y],
 			})
 		}
 	}
