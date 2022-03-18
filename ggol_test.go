@@ -65,7 +65,7 @@ func shouldSetCellCorrectly(t *testing.T) {
 	if *newLiveStatus {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should correctly set cell with CellSeed.")
+		t.Fatalf("Should correctly set cell.")
 	}
 }
 

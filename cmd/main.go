@@ -28,7 +28,7 @@ func randomlySetCells(g ggol.Game) {
 func heartBeat() {
 	for range time.Tick(time.Millisecond * period) {
 		count++
-		if count == 200 {
+		if count == 1000 {
 			count = 0
 			g.Reset()
 			randomlySetCells(g)

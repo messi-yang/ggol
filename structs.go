@@ -27,12 +27,5 @@ type CellLiveNbrsCount int
 // A map that contains all live neighbours counts of all cells.
 type CellLiveNbrsCountMap [][]CellLiveNbrsCount
 
-// Every CellSeed contains a coordinate and a live status.
-type CellSeed struct {
-	Coordinate     Coordinate
-	CellLiveStatus CellLiveStatus
-	CellMeta       interface{}
-}
-
 // Decide next condition of the cell.
 type CellIterator func(live *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{})
