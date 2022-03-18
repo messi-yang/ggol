@@ -12,9 +12,9 @@ type Game interface {
 	SetShouldCellRevive(ShouldCellRevive)
 	SetShouldCellDie(ShouldCellDie)
 	PlantSeed(*Seed) error
-	ResetGame()
+	Reset()
 	Evolve()
-	GetGameSize() *GameSize
+	GetSize() *GameSize
 	GetCellMeta(*Coordinate) (interface{}, error)
 	GetCellMetaMap() *CellMetaMap
 	GetCellLiveNbrsCount(*Coordinate) (*int, error)
@@ -24,7 +24,7 @@ type Game interface {
 }
 
 type gameInfo struct {
-	initialCell          interface{}
+	initCell             interface{}
 	cellLiveMap          CellLiveStatusMap
 	cellLiveNbrsCountMap CellLiveNbrsCountMap
 	cellMetaMap          CellMetaMap
@@ -34,11 +34,11 @@ type gameInfo struct {
 	locker               sync.RWMutex
 }
 
-func defaultShouldCellRevive(liveNbrsCount int, c *Coordinate, meta interface{}) bool {
+func defaultShouldCellRevive(liveNbrsCount int, meta interface{}) bool {
 	return liveNbrsCount == 3
 }
 
-func defaultShouldCellDie(liveNbrsCount int, c *Coordinate, meta interface{}) bool {
+func defaultShouldCellDie(liveNbrsCount int, meta interface{}) bool {
 	return liveNbrsCount != 2 && liveNbrsCount != 3
 }
 
@@ -46,14 +46,14 @@ func defaultShouldCellDie(liveNbrsCount int, c *Coordinate, meta interface{}) bo
 // if it's given.
 func NewGame(
 	gameSize *GameSize,
-	initialCell interface{},
+	initCell interface{},
 ) (*gameInfo, error) {
 	if gameSize.Width < 0 || gameSize.Height < 0 {
 		return nil, &ErrSizeIsNotValid{gameSize}
 	}
 
 	newG := gameInfo{
-		initialCell,
+		initCell,
 		nil,
 		nil,
 		nil,
@@ -63,7 +63,7 @@ func NewGame(
 		sync.RWMutex{},
 	}
 	// Initialize cellLiveMap
-	newG.initializeCellLiveStatusMap()
+	newG.initGame()
 
 	// Initialize functions below:
 	newG.SetShouldCellRevive(defaultShouldCellRevive)
@@ -72,7 +72,7 @@ func NewGame(
 	return &newG, nil
 }
 
-func (g *gameInfo) initializeCellLiveStatusMap() {
+func (g *gameInfo) initGame() {
 	g.cellLiveMap = make(CellLiveStatusMap, g.gameSize.Width)
 	g.cellLiveNbrsCountMap = make(CellLiveNbrsCountMap, g.gameSize.Width)
 	g.cellMetaMap = make(CellMetaMap, g.gameSize.Width)
@@ -83,7 +83,7 @@ func (g *gameInfo) initializeCellLiveStatusMap() {
 		for y := 0; y < g.gameSize.Height; y++ {
 			g.cellLiveMap[x][y] = false
 			g.cellLiveNbrsCountMap[x][y] = 0
-			g.cellMetaMap[x][y] = nil
+			g.cellMetaMap[x][y] = g.initCell
 		}
 	}
 }
@@ -122,12 +122,18 @@ func (g *gameInfo) subLiveNbrsCountAround(c *Coordinate) {
 
 // Make the cell in the coordinate alive.
 func (g *gameInfo) makeCellAlive(c *Coordinate) {
+	if g.cellLiveMap[c.X][c.Y] {
+		return
+	}
 	g.cellLiveMap[c.X][c.Y] = true
 	g.addLiveNbrsCountAround(c)
 }
 
 // Make the cell in the coordinate dead.
 func (g *gameInfo) makeCellDead(c *Coordinate) {
+	if !g.cellLiveMap[c.X][c.Y] {
+		return
+	}
 	g.cellLiveMap[c.X][c.Y] = false
 	g.subLiveNbrsCountAround(c)
 }
@@ -137,12 +143,16 @@ func (g *gameInfo) PlantSeed(seed *Seed) error {
 	for i := 0; i < len(*seed); i++ {
 		c := (*seed)[i].Coordinate
 		live := (*seed)[i].CellLiveStatus
+		meta := (*seed)[i].CellMeta
 		if g.isOutsideBorder(&c) {
 			return &ErrCoordinateIsOutsideBorder{&c}
 		}
 		if live {
 			g.makeCellAlive(&c)
+		} else {
+			g.makeCellDead(&c)
 		}
+		g.cellMetaMap[c.X][c.Y] = meta
 	}
 	return nil
 }
@@ -187,9 +197,9 @@ func (g *gameInfo) SetShouldCellDie(f ShouldCellDie) {
 	g.shouldCellDie = f
 }
 
-// ResetGame game with empty cellLiveMap
-func (g *gameInfo) ResetGame() {
-	g.initializeCellLiveStatusMap()
+// Reset game with empty cellLiveMap
+func (g *gameInfo) Reset() {
+	g.initGame()
 }
 
 // Generate next cellLiveMap of current cellLiveMap.
@@ -205,9 +215,9 @@ func (g *gameInfo) Evolve() {
 			alive := g.cellLiveMap[x][y]
 			liveNbrsCount := g.cellLiveNbrsCountMap[x][y]
 			coord := Coordinate{X: x, Y: y}
-			if alive == false && g.shouldCellRevive(liveNbrsCount, &coord, nil) {
+			if alive == false && g.shouldCellRevive(liveNbrsCount, nil) {
 				cellsToRevive = append(cellsToRevive, coord)
-			} else if alive == true && g.shouldCellDie(liveNbrsCount, &coord, nil) {
+			} else if alive == true && g.shouldCellDie(liveNbrsCount, nil) {
 				cellsToDie = append(cellsToDie, coord)
 			}
 		}
@@ -266,6 +276,6 @@ func (g *gameInfo) GetCellLiveStatus(c *Coordinate) (*CellLiveStatus, error) {
 }
 
 // Get the size of the game.
-func (g *gameInfo) GetGameSize() *GameSize {
+func (g *gameInfo) GetSize() *GameSize {
 	return &g.gameSize
 }

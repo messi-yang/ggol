@@ -172,6 +172,7 @@ func testBlockEvolvement(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 	g.PlantSeed(&seed)
 	g.Evolve()
+
 	nextCellLiveStatusMap := *g.GetCellLiveStatusMap()
 	expectedNextCellLiveStatusMap := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
 		{true, true, false},
@@ -373,20 +374,20 @@ func TestGetCellLiveStatusMap(t *testing.T) {
 	}
 }
 
-func TestGetGameSize(t *testing.T) {
+func TestGetSize(t *testing.T) {
 	width := 3
 	height := 6
 	size := GameSize{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 
-	if g.GetGameSize().Width == 3 && g.GetGameSize().Height == 6 {
+	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Size is not correct.")
 	}
 }
 
-func TestResetGame(t *testing.T) {
+func TestReset(t *testing.T) {
 	width := 3
 	height := 3
 	size := GameSize{Width: width, Height: height}
@@ -399,7 +400,7 @@ func TestResetGame(t *testing.T) {
 	)
 	g, _ := NewGame(&size, nil)
 	g.PlantSeed(&seed)
-	g.ResetGame()
+	g.Reset()
 	cellLiveMap := g.GetCellLiveStatusMap()
 
 	expectedBinaryBoard := RotateCellLiveStatusMapInDigonalLine(CellLiveStatusMap{
@@ -428,7 +429,7 @@ func TestSetShouldCellRevive(t *testing.T) {
 	)
 	g, _ := NewGame(&size, nil)
 	g.PlantSeed(&seed)
-	g.SetShouldCellRevive(func(liveNbrsCount int, c *Coordinate, meta interface{}) bool {
+	g.SetShouldCellRevive(func(liveNbrsCount int, meta interface{}) bool {
 		// All live cells should die in any cases
 		return true
 	})
@@ -461,7 +462,7 @@ func TestSetShouldCellDie(t *testing.T) {
 	)
 	g, _ := NewGame(&size, nil)
 	g.PlantSeed(&seed)
-	g.SetShouldCellDie(func(liveNbrsCount int, c *Coordinate, meta interface{}) bool {
+	g.SetShouldCellDie(func(liveNbrsCount int, meta interface{}) bool {
 		// All live cells should die in any cases
 		return true
 	})

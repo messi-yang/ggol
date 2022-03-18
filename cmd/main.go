@@ -32,7 +32,7 @@ func heartBeat() {
 		count++
 		if count == 200 {
 			count = 0
-			g.ResetGame()
+			g.Reset()
 			g.PlantSeed(generateSeed())
 		}
 		g.Evolve()
@@ -47,7 +47,7 @@ func main() {
 	route := gin.Default()
 	route.GET("/api/cellLiveMap", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"size":        g.GetGameSize(),
+			"size":        g.GetSize(),
 			"period":      period,
 			"cellLiveMap": *g.GetCellLiveStatusMap(),
 		})

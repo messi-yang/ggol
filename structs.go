@@ -15,6 +15,7 @@ type GameSize struct {
 	Height int `json:"height"`
 }
 
+// A map that contains all information of cells.
 type CellMetaMap [][]interface{}
 
 // A matrix that contains all living statuses of all cells.
@@ -27,6 +28,7 @@ type CellLiveNbrsCountMap [][]int
 type SeedUnit struct {
 	Coordinate     Coordinate
 	CellLiveStatus CellLiveStatus
+	CellMeta       interface{}
 }
 
 // Seed is an array of SeedUnit.
@@ -34,8 +36,8 @@ type Seed []SeedUnit
 
 // // A function that accepts liveNbrsCount and Coordinate, so you cant
 // // custom the logic of determing a cell should revive or not.
-type ShouldCellRevive func(liveNbrsCount int, c *Coordinate, meta interface{}) bool
+type ShouldCellRevive func(liveNbrsCount int, meta interface{}) bool
 
 // // A function that accepts liveNbrsCount and Coordinate, so you cant
 // // custom the logic of determing a cell should die or not.
-type ShouldCellDie func(liveNbrsCount int, c *Coordinate, meta interface{}) bool
+type ShouldCellDie func(liveNbrsCount int, meta interface{}) bool
