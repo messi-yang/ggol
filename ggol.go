@@ -54,37 +54,36 @@ var defaultCellIterator CellIterator = func(alive bool, meta interface{}, adjace
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
 func NewGame(
-	gameSize *Size,
+	size *Size,
 	emptyCellMeta interface{},
 ) (*gameInfo, error) {
-	if gameSize.Width < 0 || gameSize.Height < 0 {
-		return nil, &ErrSizeIsNotValid{gameSize}
+	if size.Width < 0 || size.Height < 0 {
+		return nil, &ErrSizeIsNotValid{size}
 	}
 
 	newG := gameInfo{
-		*gameSize,
+		*size,
 		emptyCellMeta,
-		nil,
+		*createGeneration(size, emptyCellMeta),
 		defaultCellIterator,
 		sync.RWMutex{},
 	}
 
-	newG.resetGeneration()
-
 	return &newG, nil
 }
 
-func (g *gameInfo) resetGeneration() {
-	g.generation = make(Generation, g.size.Width)
-	for x := 0; x < g.size.Width; x++ {
-		g.generation[x] = make([]*Cell, g.size.Height)
-		for y := 0; y < g.size.Height; y++ {
-			g.generation[x][y] = &Cell{
+func createGeneration(size *Size, emptyCellMeta interface{}) *Generation {
+	generation := make(Generation, size.Width)
+	for x := 0; x < size.Width; x++ {
+		generation[x] = make([]*Cell, size.Height)
+		for y := 0; y < size.Height; y++ {
+			generation[x][y] = &Cell{
 				Alive: false,
-				Meta:  g.emptyCellMeta,
+				Meta:  emptyCellMeta,
 			}
 		}
 	}
+	return &generation
 }
 
 func (g *gameInfo) isCoordinateOutsideBorder(c *Coordinate) bool {
@@ -120,7 +119,7 @@ func (g *gameInfo) Reset() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.resetGeneration()
+	g.generation = *createGeneration(&g.size, g.emptyCellMeta)
 }
 
 // Generate next generation.
