@@ -8,6 +8,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type TestCell struct {
+	Alive bool
+}
+
+var initTestCell TestCell = TestCell{
+	Alive: false,
+}
+
+var defaultCellIterator ggol.CellIterator = func(cell TestCell, adjacentCells *[]*ggol.Cell) TestCell {
+	newCell := cell.(TestCell)
+
+	var aliveNbrsCount int = 0
+	for i := 0; i < len(*adjacentCells); i += 1 {
+		adjacentCells := (*(*adjacentCells)[i]).(TestCell)
+		if adjacentCells.Alive {
+			aliveNbrsCount += 1
+		}
+	}
+	if newCell.Alive {
+		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
+			newCell.Alive = false
+			return newCell
+		} else {
+			newCell.Alive = true
+			return newCell
+		}
+	} else {
+		if aliveNbrsCount == 3 {
+			newCell.Alive = true
+			return newCell
+		} else {
+			newCell.Alive = false
+			return newCell
+		}
+	}
+}
+
 var g ggol.Game
 var count int
 var width int = 120
@@ -19,7 +56,7 @@ func randomlySetCells(g ggol.Game) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, rand.Intn(2) == 0, nil)
+			g.SetCell(&c, TestCell{Alive: rand.Intn(2) == 0})
 		}
 	}
 }
@@ -37,7 +74,7 @@ func heartBeat() {
 }
 
 func main() {
-	g, _ = ggol.NewGame(size, nil)
+	g, _ = ggol.NewGame(size, initTestCell, defaultCellIterator)
 	randomlySetCells(g)
 	go heartBeat()
 

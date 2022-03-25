@@ -33,13 +33,10 @@ type Size struct {
 }
 
 // Cell
-type Cell struct {
-	Alive bool
-	Meta  interface{}
-}
+type Cell interface{}
 
 // Generation
-type Generation [][]*Cell
+type Generation [][]Cell
 
 // Decide next condition of the cell.
-type CellIterator func(alive bool, meta interface{}, adjacentCells *[]*Cell) (nextAlive bool, nextMeta interface{})
+type CellIterator func(cell interface{}, adjacentCells *[]*Cell) (nextCell interface{})

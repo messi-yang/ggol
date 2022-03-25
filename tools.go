@@ -17,7 +17,7 @@ func convertGenerationToAliveCellsMap(g *Generation) *aliveCellsMap {
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
 		for y := 0; y < len((*g)[x]); y++ {
-			gMap[x] = append(gMap[x], (*g)[x][y].Alive)
+			gMap[x] = append(gMap[x], ((*g)[x][y]).(TestCell).Alive)
 		}
 	}
 

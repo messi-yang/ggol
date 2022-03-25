@@ -9,10 +9,10 @@ import (
 type Game interface {
 	Reset()
 	Iterate()
-	SetCell(*Coordinate, bool, interface{}) error
+	SetCell(*Coordinate, interface{}) error
 	SetCellIterator(CellIterator)
 	GetSize() *Size
-	GetCell(*Coordinate) *Cell
+	GetCell(*Coordinate) Cell
 	GetGeneration() *Generation
 }
 
@@ -24,38 +24,12 @@ type gameInfo struct {
 	locker        sync.RWMutex
 }
 
-var defaultCellIterator CellIterator = func(alive bool, meta interface{}, adjacentCells *[]*Cell) (bool, interface{}) {
-	var nextAlive bool
-	var aliveNbrsCount int = 0
-	for i := 0; i < len(*adjacentCells); i += 1 {
-		if (*adjacentCells)[i].Alive {
-			aliveNbrsCount += 1
-		}
-	}
-	if alive {
-		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
-			nextAlive = false
-			return nextAlive, meta
-		} else {
-			nextAlive = true
-			return nextAlive, meta
-		}
-	} else {
-		if aliveNbrsCount == 3 {
-			nextAlive = true
-			return nextAlive, meta
-		} else {
-			nextAlive = false
-			return nextAlive, meta
-		}
-	}
-}
-
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
 func NewGame(
 	size *Size,
 	emptyCellMeta interface{},
+	defaultCellIterator CellIterator,
 ) (*gameInfo, error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
@@ -75,12 +49,9 @@ func NewGame(
 func createGeneration(size *Size, emptyCellMeta interface{}) *Generation {
 	generation := make(Generation, size.Width)
 	for x := 0; x < size.Width; x++ {
-		generation[x] = make([]*Cell, size.Height)
+		generation[x] = make([]Cell, size.Height)
 		for y := 0; y < size.Height; y++ {
-			generation[x][y] = &Cell{
-				Alive: false,
-				Meta:  emptyCellMeta,
-			}
+			generation[x][y] = emptyCellMeta
 		}
 	}
 	return &generation
@@ -100,7 +71,7 @@ func (g *gameInfo) getAdjacentCells(c *Coordinate) *[]*Cell {
 			if i == c.X && j == c.Y {
 				continue
 			}
-			adjCells = append(adjCells, g.generation[i][j])
+			adjCells = append(adjCells, &g.generation[i][j])
 		}
 	}
 	return &adjCells
@@ -133,39 +104,33 @@ func (g *gameInfo) Iterate() {
 	for x := 0; x < g.size.Width; x++ {
 		nextGeneration[x] = make([]Cell, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
-			alive := g.generation[x][y].Alive
-			meta := g.generation[x][y].Meta
 			coord := Coordinate{X: x, Y: y}
-			nextAlive, newMeta := g.cellIterator(alive, meta, g.getAdjacentCells(&coord))
-			nextGeneration[x][y] = Cell{
-				Alive: nextAlive,
-				Meta:  newMeta,
-			}
+			nextCell := g.cellIterator(g.generation[x][y], g.getAdjacentCells(&coord))
+			nextGeneration[x][y] = nextCell
 		}
 	}
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			g.setCell(&Coordinate{X: x, Y: y}, nextGeneration[x][y].Alive, nextGeneration[x][y].Meta)
+			g.setCell(&Coordinate{X: x, Y: y}, nextGeneration[x][y])
 		}
 	}
 }
 
 // Set properties of a Cell
-func (g *gameInfo) setCell(c *Coordinate, alive bool, meta interface{}) {
-	g.generation[c.X][c.Y].Alive = alive
-	g.generation[c.X][c.Y].Meta = meta
+func (g *gameInfo) setCell(c *Coordinate, cell interface{}) {
+	g.generation[c.X][c.Y] = cell
 }
 
 // Set properties of a Cell, public method, have checks.
-func (g *gameInfo) SetCell(c *Coordinate, alive bool, meta interface{}) error {
+func (g *gameInfo) SetCell(c *Coordinate, cell interface{}) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
 	if g.isCoordinateOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	g.setCell(c, alive, meta)
+	g.setCell(c, cell)
 
 	return nil
 }
@@ -178,7 +143,7 @@ func (g *gameInfo) GetSize() *Size {
 	return &g.size
 }
 
-func (g *gameInfo) GetCell(c *Coordinate) *Cell {
+func (g *gameInfo) GetCell(c *Coordinate) Cell {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
