@@ -9,12 +9,12 @@ var initTestCell TestCell = TestCell{
 	Alive: false,
 }
 
-var defaultCellIterator CellIterator = func(cell interface{}, adjacentCells *[]*Cell) interface{} {
+var defaultCellIterator CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
 	newCell := cell.(TestCell)
 
 	var aliveNbrsCount int = 0
-	for i := 0; i < len(*adjacentCells); i += 1 {
-		adjacentCells := (*(*adjacentCells)[i]).(TestCell)
+	for i := 0; i < len(adjacentCells); i += 1 {
+		adjacentCells := adjacentCells[i].(TestCell)
 		if adjacentCells.Alive {
 			aliveNbrsCount += 1
 		}
@@ -334,9 +334,7 @@ func TestSetCellIterator(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
-
-	g.SetCellIterator(func(cell interface{}, adjacentCells *[]*Cell) interface{} {
+	customCellIterator := func(cell interface{}, adjacentCells []interface{}) interface{} {
 		nextCell := cell.(TestCell)
 
 		// Bring back all dead cells to alive in next iteration.
@@ -347,7 +345,8 @@ func TestSetCellIterator(t *testing.T) {
 			nextCell.Alive = false
 			return nextCell
 		}
-	})
+	}
+	g, _ := NewGame(&size, initTestCell, customCellIterator)
 	g.Iterate()
 	cellLiveMap := convertGenerationToAliveCellsMap(&g.generation)
 

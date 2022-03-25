@@ -16,12 +16,12 @@ var initTestCell TestCell = TestCell{
 	Alive: false,
 }
 
-var defaultCellIterator ggol.CellIterator = func(cell TestCell, adjacentCells *[]*ggol.Cell) TestCell {
+var defaultCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
 	newCell := cell.(TestCell)
 
 	var aliveNbrsCount int = 0
-	for i := 0; i < len(*adjacentCells); i += 1 {
-		adjacentCells := (*(*adjacentCells)[i]).(TestCell)
+	for i := 0; i < len(adjacentCells); i += 1 {
+		adjacentCells := adjacentCells[i].(TestCell)
 		if adjacentCells.Alive {
 			aliveNbrsCount += 1
 		}

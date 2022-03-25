@@ -10,9 +10,8 @@ type Game interface {
 	Reset()
 	Iterate()
 	SetCell(*Coordinate, interface{}) error
-	SetCellIterator(CellIterator)
 	GetSize() *Size
-	GetCell(*Coordinate) Cell
+	GetCell(*Coordinate) interface{}
 	GetGeneration() *Generation
 }
 
@@ -49,7 +48,7 @@ func NewGame(
 func createGeneration(size *Size, emptyCellMeta interface{}) *Generation {
 	generation := make(Generation, size.Width)
 	for x := 0; x < size.Width; x++ {
-		generation[x] = make([]Cell, size.Height)
+		generation[x] = make([]interface{}, size.Height)
 		for y := 0; y < size.Height; y++ {
 			generation[x][y] = emptyCellMeta
 		}
@@ -61,8 +60,8 @@ func (g *gameInfo) isCoordinateOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo) getAdjacentCells(c *Coordinate) *[]*Cell {
-	var adjCells []*Cell = make([]*Cell, 0)
+func (g *gameInfo) getAdjacentCells(c *Coordinate) []interface{} {
+	var adjCells []interface{} = make([]interface{}, 0)
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
 			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
@@ -71,18 +70,10 @@ func (g *gameInfo) getAdjacentCells(c *Coordinate) *[]*Cell {
 			if i == c.X && j == c.Y {
 				continue
 			}
-			adjCells = append(adjCells, &g.generation[i][j])
+			adjCells = append(adjCells, g.generation[i][j])
 		}
 	}
-	return &adjCells
-}
-
-// Set function that defines cell in next generation.
-func (g *gameInfo) SetCellIterator(f CellIterator) {
-	g.locker.Lock()
-	defer g.locker.Unlock()
-
-	g.cellIterator = f
+	return adjCells
 }
 
 // Reset game.
@@ -99,10 +90,10 @@ func (g *gameInfo) Iterate() {
 	defer g.locker.Unlock()
 
 	// A map that saves next cell metas.
-	nextGeneration := make([][]Cell, g.size.Width)
+	nextGeneration := make([][]interface{}, g.size.Width)
 
 	for x := 0; x < g.size.Width; x++ {
-		nextGeneration[x] = make([]Cell, g.size.Height)
+		nextGeneration[x] = make([]interface{}, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
 			nextCell := g.cellIterator(g.generation[x][y], g.getAdjacentCells(&coord))
@@ -143,7 +134,7 @@ func (g *gameInfo) GetSize() *Size {
 	return &g.size
 }
 
-func (g *gameInfo) GetCell(c *Coordinate) Cell {
+func (g *gameInfo) GetCell(c *Coordinate) interface{} {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 

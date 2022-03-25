@@ -32,11 +32,8 @@ type Size struct {
 	Height int
 }
 
-// Cell
-type Cell interface{}
-
 // Generation
-type Generation [][]Cell
+type Generation [][]interface{}
 
 // Decide next condition of the cell.
-type CellIterator func(cell interface{}, adjacentCells *[]*Cell) (nextCell interface{})
+type CellIterator func(cell interface{}, adjacentCells []interface{}) (nextCell interface{})
