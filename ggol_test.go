@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	height := 10
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	cellLiveMap := *ConvertGenerationToAliveCellsMap(&g.generation)
+	cellLiveMap := *convertGenerationToAliveCellsMap(&g.generation)
 
 	if len(cellLiveMap) == width && len(cellLiveMap[0]) == height {
 		t.Log("Passed")
@@ -84,14 +84,14 @@ func testBlockIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 1}, true, nil)
 	g.Iterate()
 
-	nextAliveCellsMap := *ConvertGenerationToAliveCellsMap(&g.generation)
-	expectedNextAliveCellsMap := AliveCellsMap{
+	nextAliveCellsMap := *convertGenerationToAliveCellsMap(&g.generation)
+	expectedNextAliveCellsMap := aliveCellsMap{
 		{true, true, false},
 		{true, true, false},
 		{false, false, false},
 	}
 
-	if AreAliveCellsMapsEqual(nextAliveCellsMap, expectedNextAliveCellsMap) {
+	if areAliveCellsMapsEqual(nextAliveCellsMap, expectedNextAliveCellsMap) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Should generate next cellLiveMap of a block, but got %v.", nextAliveCellsMap)
@@ -109,28 +109,28 @@ func testBlinkerIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 1}, true, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 2}, true, nil)
 
-	var cellLiveMap AliveCellsMap
+	var cellLiveMap aliveCellsMap
 
-	expectedNextAliveCellsMapOne := AliveCellsMap{
+	expectedNextAliveCellsMapOne := aliveCellsMap{
 		{false, true, false},
 		{false, true, false},
 		{false, true, false},
 	}
-	expectedNextAliveCellsMapTwo := AliveCellsMap{
+	expectedNextAliveCellsMapTwo := aliveCellsMap{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapOne) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapTwo) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 }
@@ -148,30 +148,30 @@ func testGliderIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 3}, true, nil)
 	g.SetCell(&Coordinate{X: 2, Y: 3}, true, nil)
 
-	var cellLiveMap AliveCellsMap
+	var cellLiveMap aliveCellsMap
 
-	expectedAliveCellsMapOne := AliveCellsMap{
+	expectedAliveCellsMapOne := aliveCellsMap{
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapTwo := AliveCellsMap{
+	expectedAliveCellsMapTwo := aliveCellsMap{
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, true},
 		{false, false, true, true, false},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapThree := AliveCellsMap{
+	expectedAliveCellsMapThree := aliveCellsMap{
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, false, false, false, true},
 		{false, false, true, true, true},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapFour := AliveCellsMap{
+	expectedAliveCellsMapFour := aliveCellsMap{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, true, false, true},
@@ -180,26 +180,26 @@ func testGliderIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapOne) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapTwo) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapThree) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapThree) {
 		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *ConvertGenerationToAliveCellsMap(&g.generation)
-	if !AreAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapFour) {
+	cellLiveMap = *convertGenerationToAliveCellsMap(&g.generation)
+	if !areAliveCellsMapsEqual(cellLiveMap, expectedAliveCellsMapFour) {
 		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
@@ -282,15 +282,15 @@ func TestReset(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 2}, true, nil)
 
 	g.Reset()
-	cellLiveMap := ConvertGenerationToAliveCellsMap(&g.generation)
+	cellLiveMap := convertGenerationToAliveCellsMap(&g.generation)
 
-	expectedBinaryBoard := AliveCellsMap{
+	expectedBinaryBoard := aliveCellsMap{
 		{false, false, false},
 		{false, false, false},
 		{false, false, false},
 	}
 
-	if AreAliveCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
+	if areAliveCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not reset cellLiveMap correctly.")
@@ -320,15 +320,15 @@ func TestSetCellIterator(t *testing.T) {
 		}
 	})
 	g.Iterate()
-	cellLiveMap := ConvertGenerationToAliveCellsMap(&g.generation)
+	cellLiveMap := convertGenerationToAliveCellsMap(&g.generation)
 
-	expectedBinaryBoard := AliveCellsMap{
+	expectedBinaryBoard := aliveCellsMap{
 		{true, true, true},
 		{true, true, true},
 		{true, true, true},
 	}
 
-	if AreAliveCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
+	if areAliveCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not set custom 'shouldCellDie' logic correcly.")

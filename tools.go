@@ -1,7 +1,7 @@
 package ggol
 
 // Check if two AliveCellsMaps are equal.
-func AreAliveCellsMapsEqual(a AliveCellsMap, b AliveCellsMap) bool {
+func areAliveCellsMapsEqual(a aliveCellsMap, b aliveCellsMap) bool {
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[i]); j++ {
 			if a[i][j] != b[i][j] {
@@ -12,8 +12,8 @@ func AreAliveCellsMapsEqual(a AliveCellsMap, b AliveCellsMap) bool {
 	return true
 }
 
-func ConvertGenerationToAliveCellsMap(g *Generation) *AliveCellsMap {
-	gMap := make(AliveCellsMap, 0)
+func convertGenerationToAliveCellsMap(g *Generation) *aliveCellsMap {
+	gMap := make(aliveCellsMap, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
 		for y := 0; y < len((*g)[x]); y++ {

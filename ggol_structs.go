@@ -19,3 +19,27 @@ type ErrCoordinateIsOutsideBorder struct {
 func (e *ErrCoordinateIsOutsideBorder) Error() string {
 	return fmt.Sprintf("Coordinate (%v, %v) is outside game border.", e.Coordinate.X, e.Coordinate.Y)
 }
+
+// This contains X and Y, which represents a coordinate in cellLiveMap.
+type Coordinate struct {
+	X int
+	Y int
+}
+
+// The size of the Conway's Game of Life.
+type Size struct {
+	Width  int
+	Height int
+}
+
+// Cell
+type Cell struct {
+	Alive bool
+	Meta  interface{}
+}
+
+// Generation
+type Generation [][]*Cell
+
+// Decide next condition of the cell.
+type CellIterator func(alive bool, meta interface{}, adjacentCells *[]*Cell) (nextAlive bool, nextMeta interface{})
