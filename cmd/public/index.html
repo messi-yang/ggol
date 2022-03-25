@@ -43,9 +43,9 @@
                 axios
                     .get('http://localhost:8000/api/cellLiveMap')
                     .then(function ({ data }) {
-                        cellLiveMap = data.cellLiveMap;
-                        size.width = data.size.width;
-                        size.height = data.size.height;
+                        cellLiveMap = data.generation.map((cells) => cells.map(cell => cell.Alive));
+                        size.width = data.size.Width;
+                        size.height = data.size.Height;
                         period = data.period;
                         initCanvas();
                         for (var i = 0; i < size.width; i += 1) {

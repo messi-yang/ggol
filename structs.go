@@ -8,8 +8,8 @@ type Coordinate struct {
 
 // The size of the Conway's Game of Life.
 type Size struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+	Width  int
+	Height int
 }
 
 // Alive or dead.
@@ -23,9 +23,9 @@ type CellLiveNbrsCount int
 
 // Cell
 type Cell struct {
-	Live          CellLiveStatus
-	LiveNbrsCount CellLiveNbrsCount
-	Meta          interface{}
+	Alive          CellLiveStatus
+	AliveNbrsCount CellLiveNbrsCount
+	Meta           interface{}
 }
 
 // Generation

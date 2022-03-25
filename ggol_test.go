@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	height := 10
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	cellLiveMap := *g.GetCellLiveStatusMap()
+	cellLiveMap := *ConvertGenerationToCellLiveStatusMap(g.generation)
 
 	if len(cellLiveMap) == width && len(cellLiveMap[0]) == height {
 		t.Log("Passed")
@@ -59,7 +59,7 @@ func shouldSetCellCorrectly(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 	var live CellLiveStatus = true
 	g.SetCell(&c, &live, nil)
-	newLiveStatus := g.GetCell(&c).Live
+	newLiveStatus := g.GetCell(&c).Alive
 
 	if newLiveStatus {
 		t.Log("Passed")
@@ -87,7 +87,7 @@ func testBlockIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.Iterate()
 
-	nextCellLiveStatusMap := *g.GetCellLiveStatusMap()
+	nextCellLiveStatusMap := *ConvertGenerationToCellLiveStatusMap(g.generation)
 	expectedNextCellLiveStatusMap := CellLiveStatusMap{
 		{true, true, false},
 		{true, true, false},
@@ -127,13 +127,13 @@ func testBlinkerIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedNextCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
@@ -185,25 +185,25 @@ func testGliderIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapThree) {
 		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *g.GetCellLiveStatusMap()
+	cellLiveMap = *ConvertGenerationToCellLiveStatusMap(g.generation)
 	if !AreCellLiveStatusMapsEqual(cellLiveMap, expectedCellLiveStatusMapFour) {
 		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
@@ -243,11 +243,11 @@ func testIteratementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	liveStatusCellOne := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step}).Live
-	liveStatusCellTwo := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step}).Live
-	liveStatusCellThree := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step}).Live
-	liveStatusCellFour := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step}).Live
-	liveStatusCellFive := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step}).Live
+	liveStatusCellOne := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step}).Alive
+	liveStatusCellTwo := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step}).Alive
+	liveStatusCellThree := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step}).Alive
+	liveStatusCellFour := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step}).Alive
+	liveStatusCellFive := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step}).Alive
 
 	if !liveStatusCellOne || !liveStatusCellTwo || !liveStatusCellThree || !liveStatusCellFour || !liveStatusCellFive {
 		t.Fatalf("Should still be a glider pattern.")
@@ -261,32 +261,6 @@ func TestIterate(t *testing.T) {
 	testBlinkerIteratement(t)
 	testGliderIteratement(t)
 	testIteratementWithConcurrency(t)
-}
-
-func TestGetCellLiveStatusMap(t *testing.T) {
-	width := 3
-	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, nil)
-
-	// Make a glider pattern
-	var live CellLiveStatus = true
-	g.SetCell(&Coordinate{X: 0, Y: 1}, &live, nil)
-	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
-
-	cellLiveMap := *g.GetCellLiveStatusMap()
-	expectedBinaryBoard := CellLiveStatusMap{
-		{false, true, false},
-		{true, true, false},
-		{false, false, false},
-	}
-
-	if AreCellLiveStatusMapsEqual(cellLiveMap, expectedBinaryBoard) {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Did not get correct cellLiveMap, expected %v, but got %v.", expectedBinaryBoard, cellLiveMap)
-	}
 }
 
 func TestGetSize(t *testing.T) {
@@ -315,7 +289,7 @@ func TestReset(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
 
 	g.Reset()
-	cellLiveMap := g.GetCellLiveStatusMap()
+	cellLiveMap := ConvertGenerationToCellLiveStatusMap(g.generation)
 
 	expectedBinaryBoard := CellLiveStatusMap{
 		{false, false, false},
@@ -353,7 +327,7 @@ func TestSetCellIterator(t *testing.T) {
 		}
 	})
 	g.Iterate()
-	cellLiveMap := g.GetCellLiveStatusMap()
+	cellLiveMap := ConvertGenerationToCellLiveStatusMap(g.generation)
 
 	expectedBinaryBoard := CellLiveStatusMap{
 		{true, true, true},

@@ -45,10 +45,9 @@ func main() {
 	route := gin.Default()
 	route.GET("/api/cellLiveMap", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"size":        g.GetSize(),
-			"period":      period,
-			"cellLiveMap": *g.GetCellLiveStatusMap(),
-			"generation":  *g.GetGeneration(),
+			"size":       g.GetSize(),
+			"period":     period,
+			"generation": g.GetGeneration(),
 		})
 	})
 	route.Static("/demo", "./cmd/public")

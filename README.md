@@ -25,30 +25,32 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
+type CellMeta struct {
+    Age int
+}
+
 main() {
-    // This seed will bring cells in 2nd row back to life.
-    seed := ggol.Seed{
-        {Coordinate: ggol.Coordinate{X: 0, Y: 1}, Cell: true},
-        {Coordinate: ggol.Coordinate{X: 1, Y: 1}, Cell: true},
-        {Coordinate: ggol.Coordinate{X: 2, Y: 1}, Cell: true},
+    // Default meta data of your cell, besides "Alive".
+    defaultCellMeta := CellMeta{
+        Age 0
     }
     // Create a size
     size := ggol.Size{Height: 3, Width: 3}
-    // Start a new game with given seed.
-    game, _ := ggol.NewGame(&size)
-    game.PlantSeed(&seed)
-    // Generate next cellLiveMap.
+
+    // Start a new game with default cell meta
+    game, _ := ggol.NewGame(&size, defaultCellMeta)
+
+    // Set cell at (0, 0) to alive.
+    coord := Coordinate{X: 0, Y: 0}
+    var alive ggol.CellLiveStatus = true
+    game.SetCell(&coord, &alive, defaultCellMeta)
+
+    // Generate next Generation.
     game.Iterate()
-    // Get current cellLiveMap.
-    newLiveStatusMap := *game.GetLiveStatusMap()
-    // We digonally rotate the cellLiveMap so it's easier to read.
-    rotatedNewLiveStatusMap := ggol.RotateLiveStatusMapInDigonalLine(newLiveStatusMap)
-    fmt.Println(rotatedNewLiveStatusMap)
-    // [
-    //     [false true false]
-    //     [false true false]
-    //     [false true false]
-    // ]
+
+    // Get current next Generation
+    fmt.Println(game.GetGeneration())
+    // [[{false 0 {0}} {false 0 {0}} {false 0 {0}}] [{false 0 {0}} {false 0 {0}} {false 0 {0}}] [{false 0 {0}} {false 0 {0}} {false 0 {0}}]]
 }
 ```
 
@@ -70,11 +72,4 @@ And you can open your browser and view the demo on [http://localhost:8000/demo](
 
 ## Document
 
-### NewGame
-
-```go
-import "github.com/DumDumGeniuss/ggol"
-
-game, _ := ggol.NewGame(&size, &seed)
-
-```
+Under construction.
