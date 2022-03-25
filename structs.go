@@ -23,13 +23,12 @@ type CellLiveNbrsCount int
 
 // Cell
 type Cell struct {
-	Alive          CellLiveStatus
-	AliveNbrsCount CellLiveNbrsCount
-	Meta           interface{}
+	Alive CellLiveStatus
+	Meta  interface{}
 }
 
 // Generation
 type Generation [][]Cell
 
 // Decide next condition of the cell.
-type CellIterator func(live *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{})
+type CellIterator func(live *CellLiveStatus, adjacentCells *[]*Cell, meta interface{}) (*CellLiveStatus, interface{})

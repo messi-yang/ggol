@@ -314,7 +314,7 @@ func TestSetCellIterator(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 
-	g.SetCellIterator(func(liveStatus *CellLiveStatus, liveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{}) {
+	g.SetCellIterator(func(liveStatus *CellLiveStatus, adjacentCells *[]*Cell, meta interface{}) (*CellLiveStatus, interface{}) {
 		var cellLiveStatus CellLiveStatus
 
 		// Bring back all dead cells to live in next iteration.

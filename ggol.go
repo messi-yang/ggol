@@ -24,10 +24,16 @@ type gameInfo struct {
 	locker        sync.RWMutex
 }
 
-func defaultCellIterator(live *CellLiveStatus, cellLiveNbrsCount *CellLiveNbrsCount, meta interface{}) (*CellLiveStatus, interface{}) {
+func defaultCellIterator(live *CellLiveStatus, adjacentCells *[]*Cell, meta interface{}) (*CellLiveStatus, interface{}) {
 	var liveStatus CellLiveStatus
+	var aliveNbrsCount int = 0
+	for i := 0; i < len(*adjacentCells); i += 1 {
+		if (*adjacentCells)[i].Alive {
+			aliveNbrsCount += 1
+		}
+	}
 	if *live {
-		if *cellLiveNbrsCount != 2 && *cellLiveNbrsCount != 3 {
+		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
 			liveStatus = false
 			return &liveStatus, meta
 		} else {
@@ -35,7 +41,7 @@ func defaultCellIterator(live *CellLiveStatus, cellLiveNbrsCount *CellLiveNbrsCo
 			return &liveStatus, meta
 		}
 	} else {
-		if *cellLiveNbrsCount == 3 {
+		if aliveNbrsCount == 3 {
 			liveStatus = true
 			return &liveStatus, meta
 		} else {
@@ -77,7 +83,6 @@ func (g *gameInfo) resetGeneration() {
 		g.generation[x] = make([]Cell, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			g.generation[x][y].Alive = false
-			g.generation[x][y].AliveNbrsCount = 0
 			g.generation[x][y].Meta = g.emptyCellMeta
 		}
 	}
@@ -87,7 +92,8 @@ func (g *gameInfo) isCoordinateOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo) addLiveNbrsCountAround(c *Coordinate) {
+func (g *gameInfo) getAdjacentCells(c *Coordinate) *[]*Cell {
+	var adjCells []*Cell = make([]*Cell, 0)
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
 			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
@@ -96,23 +102,10 @@ func (g *gameInfo) addLiveNbrsCountAround(c *Coordinate) {
 			if i == c.X && j == c.Y {
 				continue
 			}
-			g.generation[i][j].AliveNbrsCount++
+			adjCells = append(adjCells, &g.generation[i][j])
 		}
 	}
-}
-
-func (g *gameInfo) subLiveNbrsCountAround(c *Coordinate) {
-	for i := c.X - 1; i <= c.X+1; i++ {
-		for j := c.Y - 1; j <= c.Y+1; j++ {
-			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
-				continue
-			}
-			if i == c.X && j == c.Y {
-				continue
-			}
-			g.generation[i][j].AliveNbrsCount--
-		}
-	}
+	return &adjCells
 }
 
 // Make the cell in the coordinate alive.
@@ -121,7 +114,6 @@ func (g *gameInfo) setCellToAlive(c *Coordinate) {
 		return
 	}
 	g.generation[c.X][c.Y].Alive = true
-	g.addLiveNbrsCountAround(c)
 }
 
 // Make the cell in the coordinate dead.
@@ -130,7 +122,6 @@ func (g *gameInfo) setCellToDead(c *Coordinate) {
 		return
 	}
 	g.generation[c.X][c.Y].Alive = false
-	g.subLiveNbrsCountAround(c)
 }
 
 func (g *gameInfo) SetCell(c *Coordinate, live *CellLiveStatus, meta interface{}) error {
@@ -181,10 +172,9 @@ func (g *gameInfo) Iterate() {
 		nextCellMetaMap[x] = make([]interface{}, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			liveStatus := g.generation[x][y].Alive
-			liveNbrsCount := g.generation[x][y].AliveNbrsCount
 			meta := g.generation[x][y].Meta
 			coord := Coordinate{X: x, Y: y}
-			nextLiveStatus, newMeta := g.cellIterator(&liveStatus, &liveNbrsCount, meta)
+			nextLiveStatus, newMeta := g.cellIterator(&liveStatus, g.getAdjacentCells(&coord), meta)
 			if !liveStatus && *nextLiveStatus {
 				cellsToRevive = append(cellsToRevive, coord)
 			}
@@ -234,7 +224,6 @@ func (g *gameInfo) GetGeneration() *Generation {
 		for y := 0; y < g.size.Height; y++ {
 			generation[x][y] = Cell{
 				g.generation[x][y].Alive,
-				g.generation[x][y].AliveNbrsCount,
 				g.generation[x][y].Meta,
 			}
 		}
