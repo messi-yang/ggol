@@ -16,19 +16,19 @@ type Game interface {
 }
 
 type gameInfo struct {
-	size          Size
-	emptyCellMeta interface{}
-	generation    Generation
-	cellIterator  CellIterator
-	locker        sync.RWMutex
+	size         Size
+	initialCell  interface{}
+	generation   Generation
+	cellIterator CellIterator
+	locker       sync.RWMutex
 }
 
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
 func NewGame(
 	size *Size,
-	emptyCellMeta interface{},
-	defaultCellIterator CellIterator,
+	initialCell interface{},
+	cellIterator CellIterator,
 ) (*gameInfo, error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
@@ -36,21 +36,21 @@ func NewGame(
 
 	newG := gameInfo{
 		*size,
-		emptyCellMeta,
-		*createGeneration(size, emptyCellMeta),
-		defaultCellIterator,
+		initialCell,
+		*createGeneration(size, initialCell),
+		cellIterator,
 		sync.RWMutex{},
 	}
 
 	return &newG, nil
 }
 
-func createGeneration(size *Size, emptyCellMeta interface{}) *Generation {
+func createGeneration(size *Size, initialCell interface{}) *Generation {
 	generation := make(Generation, size.Width)
 	for x := 0; x < size.Width; x++ {
 		generation[x] = make([]interface{}, size.Height)
 		for y := 0; y < size.Height; y++ {
-			generation[x][y] = emptyCellMeta
+			generation[x][y] = initialCell
 		}
 	}
 	return &generation
@@ -81,7 +81,7 @@ func (g *gameInfo) Reset() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.generation = *createGeneration(&g.size, g.emptyCellMeta)
+	g.generation = *createGeneration(&g.size, g.initialCell)
 }
 
 // Generate next generation.
@@ -134,6 +134,7 @@ func (g *gameInfo) GetSize() *Size {
 	return &g.size
 }
 
+// Get the cell at the coordinate.
 func (g *gameInfo) GetCell(c *Coordinate) interface{} {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
@@ -141,6 +142,7 @@ func (g *gameInfo) GetCell(c *Coordinate) interface{} {
 	return g.generation[c.X][c.Y]
 }
 
+// Get the entire genetation, which is a matrix that contains all cells.
 func (g *gameInfo) GetGeneration() *Generation {
 	g.locker.RLock()
 	defer g.locker.RUnlock()

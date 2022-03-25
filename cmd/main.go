@@ -8,20 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TestCell struct {
+type MyCell struct {
 	Alive bool
 }
 
-var initTestCell TestCell = TestCell{
+var initialMyCell MyCell = MyCell{
 	Alive: false,
 }
 
-var defaultCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
-	newCell := cell.(TestCell)
+var myCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
+	newCell := cell.(MyCell)
 
 	var aliveNbrsCount int = 0
 	for i := 0; i < len(adjacentCells); i += 1 {
-		adjacentCells := adjacentCells[i].(TestCell)
+		adjacentCells := adjacentCells[i].(MyCell)
 		if adjacentCells.Alive {
 			aliveNbrsCount += 1
 		}
@@ -47,21 +47,21 @@ var defaultCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells
 
 var g ggol.Game
 var count int
-var width int = 120
-var height int = 75
+var width int = 480
+var height int = 300
 var size *ggol.Size = &ggol.Size{Width: width, Height: height}
-var period time.Duration = 20
+var period time.Duration = 1000
 
 func randomlySetCells(g ggol.Game) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, TestCell{Alive: rand.Intn(2) == 0})
+			g.SetCell(&c, MyCell{Alive: rand.Intn(2) == 0})
 		}
 	}
 }
 
-func heartBeat() {
+func iterationTicker() {
 	for range time.Tick(time.Millisecond * period) {
 		count++
 		if count == 1000 {
@@ -74,9 +74,9 @@ func heartBeat() {
 }
 
 func main() {
-	g, _ = ggol.NewGame(size, initTestCell, defaultCellIterator)
+	g, _ = ggol.NewGame(size, initialMyCell, myCellIterator)
 	randomlySetCells(g)
-	go heartBeat()
+	go iterationTicker()
 
 	route := gin.Default()
 	route.GET("/api/cellLiveMap", func(c *gin.Context) {

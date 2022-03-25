@@ -25,25 +25,51 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
-type CellMeta struct {
-    Age int
+type MyCell struct {
+    Alive bool
+}
+
+// Initial Cell Statuses
+var initialMyCell MyCell = MyCell{
+    Alive: false,
+}
+
+// Your custom cell iterator, the example below implements the standard rules of Conway's Game of Life.
+var myCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
+    newCell := cell.(MyCell)
+
+    var aliveNbrsCount int = 0
+    for i := 0; i < len(adjacentCells); i += 1 {
+        adjacentCells := adjacentCells[i].(MyCell)
+        if adjacentCells.Alive {
+            aliveNbrsCount += 1
+        }
+    }
+    if newCell.Alive {
+        if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
+            newCell.Alive = false
+            return newCell
+        } else {
+            newCell.Alive = true
+            return newCell
+        }
+    } else {
+        if aliveNbrsCount == 3 {
+            newCell.Alive = true
+            return newCell
+        } else {
+            newCell.Alive = false
+            return newCell
+        }
+    }
 }
 
 main() {
-    // Default meta data of your cell, besides "Alive".
-    defaultCellMeta := CellMeta{
-        Age 0
-    }
-    // Create a size
-    size := ggol.Size{Height: 3, Width: 3}
-
     // Start a new game with default cell meta
-    game, _ := ggol.NewGame(&size, defaultCellMeta)
+    game, _ := ggol.NewGame(&ggo.Size{Height: 3, Width: 3}, initialMyCell, myCellIterator)
 
     // Set cell at (0, 0) to alive.
-    coord := Coordinate{X: 0, Y: 0}
-    alive := true
-    game.SetCell(&coord, &alive, defaultCellMeta)
+    game.SetCell(&ggol.Coordinate{X: 0, Y: 0}, true, initialMyCell)
 
     // Generate next Generation.
     game.Iterate()

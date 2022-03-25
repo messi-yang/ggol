@@ -5,44 +5,11 @@ import (
 	"testing"
 )
 
-var initTestCell TestCell = TestCell{
-	Alive: false,
-}
-
-var defaultCellIterator CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
-	newCell := cell.(TestCell)
-
-	var aliveNbrsCount int = 0
-	for i := 0; i < len(adjacentCells); i += 1 {
-		adjacentCells := adjacentCells[i].(TestCell)
-		if adjacentCells.Alive {
-			aliveNbrsCount += 1
-		}
-	}
-	if newCell.Alive {
-		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
-			newCell.Alive = false
-			return newCell
-		} else {
-			newCell.Alive = true
-			return newCell
-		}
-	} else {
-		if aliveNbrsCount == 3 {
-			newCell.Alive = true
-			return newCell
-		} else {
-			newCell.Alive = false
-			return newCell
-		}
-	}
-}
-
 func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 	cellLiveMap := *convertGenerationToAliveCellsMap(&g.generation)
 
 	if len(cellLiveMap) == width && len(cellLiveMap[0]) == height {
@@ -56,7 +23,7 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
 	size := Size{Width: width, Height: height}
-	_, err := NewGame(&size, initTestCell, defaultCellIterator)
+	_, err := NewGame(&size, initTestCell, testCellIterator)
 
 	if err == nil {
 		t.Fatalf("Should get error when giving invalid size.")
@@ -73,7 +40,7 @@ func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetCell(&c, TestCell{Alive: true})
 
@@ -88,7 +55,7 @@ func shouldSetCellCorrectly(t *testing.T) {
 	height := 3
 	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 	g.SetCell(&c, TestCell{Alive: true})
 	newLiveStatus := (g.GetCell(&c)).(TestCell).Alive
 
@@ -108,7 +75,7 @@ func testBlockIteratement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a block pattern
 	g.SetCell(&Coordinate{X: 0, Y: 0}, TestCell{Alive: true})
@@ -135,7 +102,7 @@ func testBlinkerIteratement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a blinker pattern
 	g.SetCell(&Coordinate{X: 1, Y: 0}, TestCell{Alive: true})
@@ -172,7 +139,7 @@ func testGliderIteratement(t *testing.T) {
 	width := 5
 	height := 5
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
 	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
@@ -243,7 +210,7 @@ func testIteratementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
 	g.SetCell(&Coordinate{X: 0, Y: 0}, TestCell{Alive: true})
@@ -294,7 +261,7 @@ func TestGetSize(t *testing.T) {
 	width := 3
 	height := 6
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
@@ -307,7 +274,7 @@ func TestReset(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, initTestCell, defaultCellIterator)
+	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
 	g.SetCell(&Coordinate{X: 1, Y: 0}, TestCell{Alive: true})
