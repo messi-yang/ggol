@@ -65,14 +65,11 @@ func NewGame(
 		*gameSize,
 		emptyCellMeta,
 		nil,
-		nil,
+		defaultCellIterator,
 		sync.RWMutex{},
 	}
 
 	newG.resetGeneration()
-
-	// Initialize functions below:
-	newG.SetCellIterator(defaultCellIterator)
 
 	return &newG, nil
 }
@@ -110,38 +107,6 @@ func (g *gameInfo) getAdjacentCells(c *Coordinate) *[]*Cell {
 	return &adjCells
 }
 
-// Make the cell in the coordinate alive.
-func (g *gameInfo) setCellToAlive(c *Coordinate) {
-	if g.generation[c.X][c.Y].Alive {
-		return
-	}
-	g.generation[c.X][c.Y].Alive = true
-}
-
-// Make the cell in the coordinate dead.
-func (g *gameInfo) setCellToDead(c *Coordinate) {
-	if !g.generation[c.X][c.Y].Alive {
-		return
-	}
-	g.generation[c.X][c.Y].Alive = false
-}
-
-func (g *gameInfo) SetCell(c *Coordinate, alive bool, meta interface{}) error {
-	g.locker.Lock()
-	defer g.locker.Unlock()
-
-	if g.isCoordinateOutsideBorder(c) {
-		return &ErrCoordinateIsOutsideBorder{c}
-	}
-	if alive {
-		g.setCellToAlive(c)
-	} else {
-		g.setCellToDead(c)
-	}
-	g.generation[c.X][c.Y].Meta = meta
-	return nil
-}
-
 // Set function that defines cell in next generation.
 func (g *gameInfo) SetCellIterator(f CellIterator) {
 	g.locker.Lock()
@@ -163,41 +128,47 @@ func (g *gameInfo) Iterate() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	// List of coordinates of cells that we are gonna make them dead
-	cellsToDie := make([]Coordinate, 0)
-	// List of coordinates of cells that we are gonna make them alive
-	cellsToRevive := make([]Coordinate, 0)
 	// A map that saves next cell metas.
-	nextCellMetaMap := make([][]interface{}, g.size.Width)
+	nextGeneration := make([][]Cell, g.size.Width)
 
 	for x := 0; x < g.size.Width; x++ {
-		nextCellMetaMap[x] = make([]interface{}, g.size.Height)
+		nextGeneration[x] = make([]Cell, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
-			liveStatus := g.generation[x][y].Alive
+			alive := g.generation[x][y].Alive
 			meta := g.generation[x][y].Meta
 			coord := Coordinate{X: x, Y: y}
-			nextLiveStatus, newMeta := g.cellIterator(liveStatus, meta, g.getAdjacentCells(&coord))
-			if !liveStatus && nextLiveStatus {
-				cellsToRevive = append(cellsToRevive, coord)
+			nextAlive, newMeta := g.cellIterator(alive, meta, g.getAdjacentCells(&coord))
+			nextGeneration[x][y] = Cell{
+				Alive: nextAlive,
+				Meta:  newMeta,
 			}
-			if liveStatus && !nextLiveStatus {
-				cellsToDie = append(cellsToDie, coord)
-			}
-			nextCellMetaMap[x][y] = newMeta
 		}
 	}
 
-	for i := 0; i < len(cellsToDie); i++ {
-		g.setCellToDead(&cellsToDie[i])
-	}
-	for i := 0; i < len(cellsToRevive); i++ {
-		g.setCellToAlive(&cellsToRevive[i])
-	}
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			g.generation[x][y].Meta = nextCellMetaMap[x][y]
+			g.setCell(&Coordinate{X: x, Y: y}, nextGeneration[x][y].Alive, nextGeneration[x][y].Meta)
 		}
 	}
+}
+
+// Set properties of a Cell
+func (g *gameInfo) setCell(c *Coordinate, alive bool, meta interface{}) {
+	g.generation[c.X][c.Y].Alive = alive
+	g.generation[c.X][c.Y].Meta = meta
+}
+
+// Set properties of a Cell, public method, have checks.
+func (g *gameInfo) SetCell(c *Coordinate, alive bool, meta interface{}) error {
+	g.locker.Lock()
+	defer g.locker.Unlock()
+
+	if g.isCoordinateOutsideBorder(c) {
+		return &ErrCoordinateIsOutsideBorder{c}
+	}
+	g.setCell(c, alive, meta)
+
+	return nil
 }
 
 // Get the size of the game.
@@ -219,17 +190,5 @@ func (g *gameInfo) GetGeneration() *Generation {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	var generation Generation = make(Generation, g.size.Width)
-
-	for x := 0; x < g.size.Width; x++ {
-		generation[x] = make([]*Cell, g.size.Height)
-		for y := 0; y < g.size.Height; y++ {
-			generation[x][y] = &Cell{
-				g.generation[x][y].Alive,
-				g.generation[x][y].Meta,
-			}
-		}
-	}
-
-	return &generation
+	return &g.generation
 }
