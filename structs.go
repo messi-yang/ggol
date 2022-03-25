@@ -13,10 +13,7 @@ type Size struct {
 }
 
 // A matrix that contains all living statuses of all cells.
-type CellLiveStatusMap [][]bool
-
-// Adjacent live cells.
-type CellLiveNbrsCount int
+type AliveCellsMap [][]bool
 
 // Cell
 type Cell struct {
@@ -25,7 +22,7 @@ type Cell struct {
 }
 
 // Generation
-type Generation [][]Cell
+type Generation [][]*Cell
 
 // Decide next condition of the cell.
-type CellIterator func(live *bool, adjacentCells *[]*Cell, meta interface{}) (*bool, interface{})
+type CellIterator func(alive bool, meta interface{}, adjacentCells *[]*Cell) (nextAlive bool, nextMeta interface{})

@@ -42,7 +42,7 @@ main() {
 
     // Set cell at (0, 0) to alive.
     coord := Coordinate{X: 0, Y: 0}
-    var alive ggol.CellLiveStatus = true
+    alive := true
     game.SetCell(&coord, &alive, defaultCellMeta)
 
     // Generate next Generation.

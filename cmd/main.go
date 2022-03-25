@@ -19,8 +19,7 @@ func randomlySetCells(g ggol.Game) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			live := rand.Intn(2) == 0
-			g.SetCell(&c, &live, nil)
+			g.SetCell(&c, rand.Intn(2) == 0, nil)
 		}
 	}
 }
