@@ -41,7 +41,7 @@ func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
 	height := 2
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
-	var live CellLiveStatus = true
+	live := true
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetCell(&c, &live, nil)
 
@@ -57,7 +57,7 @@ func shouldSetCellCorrectly(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
 	g, _ := NewGame(&size, nil)
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&c, &live, nil)
 	newLiveStatus := g.GetCell(&c).Alive
 
@@ -80,7 +80,7 @@ func testBlockIteratement(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 
 	// Make a block pattern
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&Coordinate{X: 0, Y: 0}, &live, nil)
 	g.SetCell(&Coordinate{X: 0, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
@@ -108,7 +108,7 @@ func testBlinkerIteratement(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 
 	// Make a blinker pattern
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
@@ -146,7 +146,7 @@ func testGliderIteratement(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 
 	// Make a glider pattern
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 2, Y: 2}, &live, nil)
 	g.SetCell(&Coordinate{X: 3, Y: 2}, &live, nil)
@@ -218,7 +218,7 @@ func testIteratementWithConcurrency(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 
 	// Make a glider pattern
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&Coordinate{X: 0, Y: 0}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 2, Y: 1}, &live, nil)
@@ -283,7 +283,7 @@ func TestReset(t *testing.T) {
 	g, _ := NewGame(&size, nil)
 
 	// Make a glider pattern
-	var live CellLiveStatus = true
+	live := true
 	g.SetCell(&Coordinate{X: 1, Y: 0}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 1}, &live, nil)
 	g.SetCell(&Coordinate{X: 1, Y: 2}, &live, nil)
@@ -314,8 +314,8 @@ func TestSetCellIterator(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, nil)
 
-	g.SetCellIterator(func(liveStatus *CellLiveStatus, adjacentCells *[]*Cell, meta interface{}) (*CellLiveStatus, interface{}) {
-		var cellLiveStatus CellLiveStatus
+	g.SetCellIterator(func(liveStatus *bool, adjacentCells *[]*Cell, meta interface{}) (*bool, interface{}) {
+		var cellLiveStatus bool
 
 		// Bring back all dead cells to live in next iteration.
 		if !*liveStatus {

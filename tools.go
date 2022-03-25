@@ -15,7 +15,7 @@ func AreCellLiveStatusMapsEqual(a CellLiveStatusMap, b CellLiveStatusMap) bool {
 func ConvertGenerationToCellLiveStatusMap(g Generation) *CellLiveStatusMap {
 	gMap := make(CellLiveStatusMap, 0)
 	for x := 0; x < len(g); x++ {
-		gMap = append(gMap, []CellLiveStatus{})
+		gMap = append(gMap, []bool{})
 		for y := 0; y < len(g[x]); y++ {
 			gMap[x] = append(gMap[x], g[x][y].Alive)
 		}

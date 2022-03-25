@@ -9,7 +9,7 @@ import (
 type Game interface {
 	Reset()
 	Iterate()
-	SetCell(*Coordinate, *CellLiveStatus, interface{}) error
+	SetCell(*Coordinate, *bool, interface{}) error
 	SetCellIterator(CellIterator)
 	GetSize() *Size
 	GetCell(*Coordinate) *Cell
@@ -24,8 +24,8 @@ type gameInfo struct {
 	locker        sync.RWMutex
 }
 
-func defaultCellIterator(live *CellLiveStatus, adjacentCells *[]*Cell, meta interface{}) (*CellLiveStatus, interface{}) {
-	var liveStatus CellLiveStatus
+func defaultCellIterator(live *bool, adjacentCells *[]*Cell, meta interface{}) (*bool, interface{}) {
+	var liveStatus bool
 	var aliveNbrsCount int = 0
 	for i := 0; i < len(*adjacentCells); i += 1 {
 		if (*adjacentCells)[i].Alive {
@@ -124,7 +124,7 @@ func (g *gameInfo) setCellToDead(c *Coordinate) {
 	g.generation[c.X][c.Y].Alive = false
 }
 
-func (g *gameInfo) SetCell(c *Coordinate, live *CellLiveStatus, meta interface{}) error {
+func (g *gameInfo) SetCell(c *Coordinate, live *bool, meta interface{}) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
