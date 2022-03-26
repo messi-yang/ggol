@@ -9,9 +9,9 @@ import (
 type Game[T any] interface {
 	Reset()
 	Iterate()
-	SetCell(*Coordinate, *T) error
+	SetCell(*Coordinate, T) error
 	GetSize() *Size
-	GetCell(*Coordinate) *T
+	GetCell(*Coordinate) (*T, error)
 	GetGeneration() *[][]*T
 }
 
@@ -103,25 +103,20 @@ func (g *gameInfo[T]) Iterate() {
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			g.setCell(&Coordinate{X: x, Y: y}, nextGeneration[x][y])
+			g.generation[x][y] = &nextGeneration[x][y]
 		}
 	}
 }
 
-// Set properties of a Cell
-func (g *gameInfo[T]) setCell(c *Coordinate, cell T) {
-	g.generation[c.X][c.Y] = &cell
-}
-
-// Set properties of a Cell, public method, have checks.
-func (g *gameInfo[T]) SetCell(c *Coordinate, cell *T) error {
+// Update the cell at the given coordinate.
+func (g *gameInfo[T]) SetCell(c *Coordinate, cell T) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
 	if g.isCoordinateOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	g.setCell(c, *cell)
+	g.generation[c.X][c.Y] = &cell
 
 	return nil
 }
@@ -135,11 +130,15 @@ func (g *gameInfo[T]) GetSize() *Size {
 }
 
 // Get the cell at the coordinate.
-func (g *gameInfo[T]) GetCell(c *Coordinate) *T {
+func (g *gameInfo[T]) GetCell(c *Coordinate) (*T, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return g.generation[c.X][c.Y]
+	if g.isCoordinateOutsideBorder(c) {
+		return nil, &ErrCoordinateIsOutsideBorder{c}
+	}
+
+	return g.generation[c.X][c.Y], nil
 }
 
 // Get the entire genetation, which is a matrix that contains all cells.

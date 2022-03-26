@@ -8,25 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MyCell struct {
+type CoolCell struct {
 	Alive bool
 }
 
-var initialMyCell MyCell = MyCell{
+var initialCoolCell CoolCell = CoolCell{
 	Alive: false,
 }
 
-func myCellIterator(cell MyCell, adjacentCells *[]*MyCell) *MyCell {
+func myCellIterator(cell CoolCell, adjacentCells *[]*CoolCell) *CoolCell {
 	newCell := cell
 
-	var aliveNbrsCount int = 0
+	var aliveAdjacentCellsCount int = 0
 	for i := 0; i < len(*adjacentCells); i += 1 {
 		if (*adjacentCells)[i].Alive {
-			aliveNbrsCount += 1
+			aliveAdjacentCellsCount += 1
 		}
 	}
 	if newCell.Alive {
-		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
+		if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
 			newCell.Alive = false
 			return &newCell
 		} else {
@@ -34,7 +34,7 @@ func myCellIterator(cell MyCell, adjacentCells *[]*MyCell) *MyCell {
 			return &newCell
 		}
 	} else {
-		if aliveNbrsCount == 3 {
+		if aliveAdjacentCellsCount == 3 {
 			newCell.Alive = true
 			return &newCell
 		} else {
@@ -44,18 +44,18 @@ func myCellIterator(cell MyCell, adjacentCells *[]*MyCell) *MyCell {
 	}
 }
 
-var g ggol.Game[MyCell]
+var g ggol.Game[CoolCell]
 var count int
 var width int = 480
 var height int = 300
 var size *ggol.Size = &ggol.Size{Width: width, Height: height}
 var period time.Duration = 200
 
-func randomlySetCells(g ggol.Game[MyCell]) {
+func randomlySetCells(g ggol.Game[CoolCell]) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, &MyCell{Alive: rand.Intn(2) == 0})
+			g.SetCell(&c, CoolCell{Alive: rand.Intn(2) == 0})
 		}
 	}
 }
@@ -73,7 +73,7 @@ func iterationTicker() {
 }
 
 func main() {
-	g, _ = ggol.NewGame(size, initialMyCell, myCellIterator)
+	g, _ = ggol.NewGame(size, initialCoolCell, myCellIterator)
 	randomlySetCells(g)
 	go iterationTicker()
 

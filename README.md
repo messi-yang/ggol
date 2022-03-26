@@ -25,57 +25,62 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
-type MyCell struct {
+// Define the type of your CustomCell, it could be anything you live.
+// But to implement Conway's Game of Life, "Alive" or alive field is necessary here.
+type CustomCell struct {
     Alive bool
 }
 
-// Initial Cell Statuses
-var initialMyCell MyCell = MyCell{
-    Alive: false,
-}
-
 // Your custom cell iterator, the example below implements the standard rules of Conway's Game of Life.
-var myCellIterator ggol.CellIterator = func(cell MyCell, adjacentCells []MyCell) MyCell {
+// You can add various kinds of fields to your CustomCell and make the game different!
+// *CAUTIOUS*, please do not change anything of adjacentCells, that will ruin the logic.
+var customCellIterator ggol.CellIterator[CustomCell] = func(cell CustomCell, adjacentCells *[]*CustomCell) *CustomCell {
     newCell := cell
 
-    var aliveNbrsCount int = 0
-    for i := 0; i < len(adjacentCells); i += 1 {
-        if adjacentCells[i].Alive {
-            aliveNbrsCount += 1
+    var aliveAdjacentCellsCount int = 0
+    for i := 0; i < len(*adjacentCells); i += 1 {
+        if (*adjacentCells)[i].Alive {
+            aliveAdjacentCellsCount += 1
         }
     }
     if newCell.Alive {
-        if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
+        if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
             newCell.Alive = false
-            return newCell
+            return &newCell
         } else {
             newCell.Alive = true
-            return newCell
+            return &newCell
         }
     } else {
-        if aliveNbrsCount == 3 {
+        if aliveAdjacentCellsCount == 3 {
             newCell.Alive = true
-            return newCell
+            return &newCell
         } else {
             newCell.Alive = false
-            return newCell
+            return &newCell
         }
     }
 }
 
 main() {
-    // Start a new game with default cell meta
-    game, _ := ggol.NewGame(&ggo.Size{Height: 3, Width: 3}, initialMyCell, myCellIterator)
+    game, _ := ggol.NewGame(
+        &ggol.Size{Height: 3, Width: 3}, // Size of the game.
+        CustomCell{Alive: false}, // Initial Custom Cell.
+        customCellIterator, // Your custom rools of the game, see above.
+    )
 
-    // Set cell at (0, 0) to alive.
-    game.SetCell(&ggol.Coordinate{X: 0, Y: 0}, initialMyCell)
+    // Bring cells at (1, 0), (1, 1), (1, 2) to alive.
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 0}, CustomCell{Alive: true})
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 1}, CustomCell{Alive: true})
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 2}, CustomCell{Alive: true})
 
     // Generate next Generation.
     game.Iterate()
 
-    // Get current next Generation
-    fmt.Println(game.GetGeneration())
-    // [[{false 0 {0}} {false 0 {0}} {false 0 {0}}] [{false 0 {0}} {false 0 {0}} {false 0 {0}}] [{false 0 {0}} {false 0 {0}} {false 0 {0}}]]
+    // We created a Blinker pattern above, let's see if cell at (0, 1)
+    // became alive in next generation :).
+    fmt.Println(*game.GetCell(&ggol.Coordinate{X: 0, Y: 1}))
+    // {true}
 }
 ```
 
@@ -97,4 +102,16 @@ And you can open your browser and view the demo on [http://localhost:8000/demo](
 
 ## Document
 
-Under construction.
+### NewGame
+
+### Reset
+
+### Iterate
+
+### SetCell
+
+### GetSize
+
+### GetCell
+
+### GetGeneration
