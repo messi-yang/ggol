@@ -6,35 +6,35 @@ import (
 
 // The Game contains all the basics operations that you need
 // for a Conway's Game of Life.
-type Game interface {
+type Game[T any] interface {
 	Reset()
 	Iterate()
-	SetCell(*Coordinate, interface{}) error
+	SetCell(*Coordinate, *T) error
 	GetSize() *Size
-	GetCell(*Coordinate) interface{}
-	GetGeneration() *Generation
+	GetCell(*Coordinate) *T
+	GetGeneration() *[][]*T
 }
 
-type gameInfo struct {
+type gameInfo[T any] struct {
 	size         Size
-	initialCell  interface{}
-	generation   Generation
-	cellIterator CellIterator
+	initialCell  T
+	generation   [][]*T
+	cellIterator CellIterator[T]
 	locker       sync.RWMutex
 }
 
 // Return a new Game with the given width and height, seed is planted
 // if it's given.
-func NewGame(
+func NewGame[T any](
 	size *Size,
-	initialCell interface{},
-	cellIterator CellIterator,
-) (*gameInfo, error) {
+	initialCell T,
+	cellIterator CellIterator[T],
+) (*gameInfo[T], error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
 	}
 
-	newG := gameInfo{
+	newG := gameInfo[T]{
 		*size,
 		initialCell,
 		*createGeneration(size, initialCell),
@@ -45,23 +45,23 @@ func NewGame(
 	return &newG, nil
 }
 
-func createGeneration(size *Size, initialCell interface{}) *Generation {
-	generation := make(Generation, size.Width)
+func createGeneration[T any](size *Size, initialCell T) *[][]*T {
+	generation := make([][]*T, size.Width)
 	for x := 0; x < size.Width; x++ {
-		generation[x] = make([]interface{}, size.Height)
+		generation[x] = make([]*T, size.Height)
 		for y := 0; y < size.Height; y++ {
-			generation[x][y] = initialCell
+			generation[x][y] = &initialCell
 		}
 	}
 	return &generation
 }
 
-func (g *gameInfo) isCoordinateOutsideBorder(c *Coordinate) bool {
+func (g *gameInfo[T]) isCoordinateOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo) getAdjacentCells(c *Coordinate) []interface{} {
-	var adjCells []interface{} = make([]interface{}, 0)
+func (g *gameInfo[T]) getAdjacentCells(c *Coordinate) *[]*T {
+	var adjCells []*T = make([]*T, 0)
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
 			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
@@ -73,11 +73,11 @@ func (g *gameInfo) getAdjacentCells(c *Coordinate) []interface{} {
 			adjCells = append(adjCells, g.generation[i][j])
 		}
 	}
-	return adjCells
+	return &adjCells
 }
 
 // Reset game.
-func (g *gameInfo) Reset() {
+func (g *gameInfo[T]) Reset() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
@@ -85,19 +85,19 @@ func (g *gameInfo) Reset() {
 }
 
 // Generate next generation.
-func (g *gameInfo) Iterate() {
+func (g *gameInfo[T]) Iterate() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
 	// A map that saves next cell metas.
-	nextGeneration := make([][]interface{}, g.size.Width)
+	nextGeneration := make([][]T, g.size.Width)
 
 	for x := 0; x < g.size.Width; x++ {
-		nextGeneration[x] = make([]interface{}, g.size.Height)
+		nextGeneration[x] = make([]T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextCell := g.cellIterator(g.generation[x][y], g.getAdjacentCells(&coord))
-			nextGeneration[x][y] = nextCell
+			nextCell := g.cellIterator(*g.generation[x][y], g.getAdjacentCells(&coord))
+			nextGeneration[x][y] = *nextCell
 		}
 	}
 
@@ -109,25 +109,25 @@ func (g *gameInfo) Iterate() {
 }
 
 // Set properties of a Cell
-func (g *gameInfo) setCell(c *Coordinate, cell interface{}) {
-	g.generation[c.X][c.Y] = cell
+func (g *gameInfo[T]) setCell(c *Coordinate, cell T) {
+	g.generation[c.X][c.Y] = &cell
 }
 
 // Set properties of a Cell, public method, have checks.
-func (g *gameInfo) SetCell(c *Coordinate, cell interface{}) error {
+func (g *gameInfo[T]) SetCell(c *Coordinate, cell *T) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
 	if g.isCoordinateOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	g.setCell(c, cell)
+	g.setCell(c, *cell)
 
 	return nil
 }
 
 // Get the size of the game.
-func (g *gameInfo) GetSize() *Size {
+func (g *gameInfo[T]) GetSize() *Size {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -135,7 +135,7 @@ func (g *gameInfo) GetSize() *Size {
 }
 
 // Get the cell at the coordinate.
-func (g *gameInfo) GetCell(c *Coordinate) interface{} {
+func (g *gameInfo[T]) GetCell(c *Coordinate) *T {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -143,7 +143,7 @@ func (g *gameInfo) GetCell(c *Coordinate) interface{} {
 }
 
 // Get the entire genetation, which is a matrix that contains all cells.
-func (g *gameInfo) GetGeneration() *Generation {
+func (g *gameInfo[T]) GetGeneration() *[][]*T {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 

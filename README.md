@@ -35,13 +35,12 @@ var initialMyCell MyCell = MyCell{
 }
 
 // Your custom cell iterator, the example below implements the standard rules of Conway's Game of Life.
-var myCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
-    newCell := cell.(MyCell)
+var myCellIterator ggol.CellIterator = func(cell MyCell, adjacentCells []MyCell) MyCell {
+    newCell := cell
 
     var aliveNbrsCount int = 0
     for i := 0; i < len(adjacentCells); i += 1 {
-        adjacentCells := adjacentCells[i].(MyCell)
-        if adjacentCells.Alive {
+        if adjacentCells[i].Alive {
             aliveNbrsCount += 1
         }
     }
@@ -69,7 +68,7 @@ main() {
     game, _ := ggol.NewGame(&ggo.Size{Height: 3, Width: 3}, initialMyCell, myCellIterator)
 
     // Set cell at (0, 0) to alive.
-    game.SetCell(&ggol.Coordinate{X: 0, Y: 0}, true, initialMyCell)
+    game.SetCell(&ggol.Coordinate{X: 0, Y: 0}, initialMyCell)
 
     // Generate next Generation.
     game.Iterate()

@@ -16,47 +16,46 @@ var initialMyCell MyCell = MyCell{
 	Alive: false,
 }
 
-var myCellIterator ggol.CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
-	newCell := cell.(MyCell)
+func myCellIterator(cell MyCell, adjacentCells *[]*MyCell) *MyCell {
+	newCell := cell
 
 	var aliveNbrsCount int = 0
-	for i := 0; i < len(adjacentCells); i += 1 {
-		adjacentCells := adjacentCells[i].(MyCell)
-		if adjacentCells.Alive {
+	for i := 0; i < len(*adjacentCells); i += 1 {
+		if (*adjacentCells)[i].Alive {
 			aliveNbrsCount += 1
 		}
 	}
 	if newCell.Alive {
 		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
 			newCell.Alive = false
-			return newCell
+			return &newCell
 		} else {
 			newCell.Alive = true
-			return newCell
+			return &newCell
 		}
 	} else {
 		if aliveNbrsCount == 3 {
 			newCell.Alive = true
-			return newCell
+			return &newCell
 		} else {
 			newCell.Alive = false
-			return newCell
+			return &newCell
 		}
 	}
 }
 
-var g ggol.Game
+var g ggol.Game[MyCell]
 var count int
 var width int = 480
 var height int = 300
 var size *ggol.Size = &ggol.Size{Width: width, Height: height}
-var period time.Duration = 1000
+var period time.Duration = 200
 
-func randomlySetCells(g ggol.Game) {
+func randomlySetCells(g ggol.Game[MyCell]) {
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, MyCell{Alive: rand.Intn(2) == 0})
+			g.SetCell(&c, &MyCell{Alive: rand.Intn(2) == 0})
 		}
 	}
 }

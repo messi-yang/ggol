@@ -4,31 +4,30 @@ var initTestCell TestCell = TestCell{
 	Alive: false,
 }
 
-var testCellIterator CellIterator = func(cell interface{}, adjacentCells []interface{}) interface{} {
-	newCell := cell.(TestCell)
+func testCellIterator(cell TestCell, adjacentCells *[]*TestCell) *TestCell {
+	newCell := cell
 
 	var aliveNbrsCount int = 0
-	for i := 0; i < len(adjacentCells); i += 1 {
-		adjacentCells := adjacentCells[i].(TestCell)
-		if adjacentCells.Alive {
+	for i := 0; i < len(*adjacentCells); i += 1 {
+		if (*adjacentCells)[i].Alive {
 			aliveNbrsCount += 1
 		}
 	}
 	if newCell.Alive {
 		if aliveNbrsCount != 2 && aliveNbrsCount != 3 {
 			newCell.Alive = false
-			return newCell
+			return &newCell
 		} else {
 			newCell.Alive = true
-			return newCell
+			return &newCell
 		}
 	} else {
 		if aliveNbrsCount == 3 {
 			newCell.Alive = true
-			return newCell
+			return &newCell
 		} else {
 			newCell.Alive = false
-			return newCell
+			return &newCell
 		}
 	}
 }
@@ -45,12 +44,12 @@ func areAliveCellsMapsEqual(a aliveCellsMap, b aliveCellsMap) bool {
 	return true
 }
 
-func convertGenerationToAliveCellsMap(g *Generation) *aliveCellsMap {
+func convertGenerationToAliveCellsMap(g *[][]*TestCell) *aliveCellsMap {
 	gMap := make(aliveCellsMap, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
 		for y := 0; y < len((*g)[x]); y++ {
-			gMap[x] = append(gMap[x], ((*g)[x][y]).(TestCell).Alive)
+			gMap[x] = append(gMap[x], (*g)[x][y].Alive)
 		}
 	}
 

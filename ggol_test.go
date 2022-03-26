@@ -42,7 +42,7 @@ func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 	c := Coordinate{X: 0, Y: 10}
-	err := g.SetCell(&c, TestCell{Alive: true})
+	err := g.SetCell(&c, &TestCell{Alive: true})
 
 	if err == nil {
 		t.Fatalf("Should get error when any seed units are outside border.")
@@ -56,8 +56,8 @@ func shouldSetCellCorrectly(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
-	g.SetCell(&c, TestCell{Alive: true})
-	newLiveStatus := (g.GetCell(&c)).(TestCell).Alive
+	g.SetCell(&c, &TestCell{Alive: true})
+	newLiveStatus := g.GetCell(&c).Alive
 
 	if newLiveStatus {
 		t.Log("Passed")
@@ -78,10 +78,10 @@ func testBlockIteratement(t *testing.T) {
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a block pattern
-	g.SetCell(&Coordinate{X: 0, Y: 0}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 0, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 0}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 0, Y: 0}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 0, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &TestCell{Alive: true})
 	g.Iterate()
 
 	nextAliveCellsMap := *convertGenerationToAliveCellsMap(&g.generation)
@@ -105,9 +105,9 @@ func testBlinkerIteratement(t *testing.T) {
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a blinker pattern
-	g.SetCell(&Coordinate{X: 1, Y: 0}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &TestCell{Alive: true})
 
 	var cellLiveMap aliveCellsMap
 
@@ -142,11 +142,11 @@ func testGliderIteratement(t *testing.T) {
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 2}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 3, Y: 2}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 3}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 3}, TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 2, Y: 2}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 3, Y: 2}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 3}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 2, Y: 3}, &TestCell{Alive: true})
 
 	var cellLiveMap aliveCellsMap
 
@@ -213,12 +213,12 @@ func testIteratementWithConcurrency(t *testing.T) {
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 0, Y: 0}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 0, Y: 2}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 0, Y: 0}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 2, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 2, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 0, Y: 2}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &TestCell{Alive: true})
 
 	wg := sync.WaitGroup{}
 
@@ -237,11 +237,11 @@ func testIteratementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	liveStatusCellOne := (g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step})).(TestCell).Alive
-	liveStatusCellTwo := (g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step})).(TestCell).Alive
-	liveStatusCellThree := (g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step})).(TestCell).Alive
-	liveStatusCellFour := (g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step})).(TestCell).Alive
-	liveStatusCellFive := (g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step})).(TestCell).Alive
+	liveStatusCellOne := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step}).Alive
+	liveStatusCellTwo := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step}).Alive
+	liveStatusCellThree := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step}).Alive
+	liveStatusCellFour := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step}).Alive
+	liveStatusCellFive := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step}).Alive
 
 	if !liveStatusCellOne || !liveStatusCellTwo || !liveStatusCellThree || !liveStatusCellFour || !liveStatusCellFive {
 		t.Fatalf("Should still be a glider pattern.")
@@ -277,9 +277,9 @@ func TestReset(t *testing.T) {
 	g, _ := NewGame(&size, initTestCell, testCellIterator)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 1, Y: 0}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 0}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 1}, &TestCell{Alive: true})
+	g.SetCell(&Coordinate{X: 1, Y: 2}, &TestCell{Alive: true})
 
 	g.Reset()
 	cellLiveMap := convertGenerationToAliveCellsMap(&g.generation)
@@ -301,16 +301,16 @@ func TestSetCellIterator(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	customCellIterator := func(cell interface{}, adjacentCells []interface{}) interface{} {
-		nextCell := cell.(TestCell)
+	customCellIterator := func(cell TestCell, adjacentCells *[]*TestCell) *TestCell {
+		nextCell := TestCell{}
 
 		// Bring back all dead cells to alive in next iteration.
 		if !nextCell.Alive {
 			nextCell.Alive = true
-			return nextCell
+			return &nextCell
 		} else {
 			nextCell.Alive = false
-			return nextCell
+			return &nextCell
 		}
 	}
 	g, _ := NewGame(&size, initTestCell, customCellIterator)
