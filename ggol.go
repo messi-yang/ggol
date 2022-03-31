@@ -64,13 +64,14 @@ func (g *gameInfo[T]) getAdjacentCells(c *Coordinate) *[]*T {
 	var adjCells []*T = make([]*T, 0)
 	for i := c.X - 1; i <= c.X+1; i++ {
 		for j := c.Y - 1; j <= c.Y+1; j++ {
-			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
-				continue
-			}
 			if i == c.X && j == c.Y {
 				continue
 			}
-			adjCells = append(adjCells, g.generation[i][j])
+			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
+				adjCells = append(adjCells, nil)
+			} else {
+				adjCells = append(adjCells, g.generation[i][j])
+			}
 		}
 	}
 	return &adjCells

@@ -39,7 +39,7 @@ var customCellIterator ggol.CellIterator[CustomCell] = func(cell CustomCell, adj
 
     var aliveAdjacentCellsCount int = 0
     for i := 0; i < len(*adjacentCells); i += 1 {
-        if (*adjacentCells)[i].Alive {
+        if (*adjacentCells)[i] != nil && (*adjacentCells)[i].Alive {
             aliveAdjacentCellsCount += 1
         }
     }
@@ -84,21 +84,28 @@ main() {
 }
 ```
 
-## Demo
+## What You Can Build?
 
-You can see a quick demo by cloning this repo to your local machine.
+You can build this
+
+![Wave](./doc/wave_game.gif)
+
+And this
+
+![Black White](./doc/black_white_game.gif)
+
+And for sure, classic game
+
+![Normal](./doc/normal_game.gif)
+
+## Build GIF
 
 ```bash
 git clone https://github.com/DumDumGeniuss/ggol.git
 cd ggol
 go mod tidy
-go run ./cmd/main.go
-# [GIN-debug] Listening and serving HTTP on :8000
+go run ./cmd/*
 ```
-
-And you can open your browser and view the demo on [http://localhost:8000/demo](http://localhost:8000/demo)
-
-![demo](./doc/demo.png)
 
 ## Document
 
