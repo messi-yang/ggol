@@ -8,7 +8,7 @@ Gonways Game of Life is a go package that provides fundamental functions for run
 
 The goal is to help you build a Conway's Game of Life in the way you like.
 
-## Installed This Package
+## Install This Package
 
 ```bash
 go get github.com/DumDumGeniuss/ggol
@@ -75,7 +75,7 @@ main() {
     game, _ := ggol.NewGame(
         &ggol.Size{Height: 3, Width: 3}, // Size of the game.
         CustomCell{Alive: false}, // Initial Custom Cell.
-        customIterateCellFunc, // Your custom rools of the game, see above.
+        customIterateCellFunc, // Your custom rules of the game, see above.
     )
 
     // Bring cells at (1, 0), (1, 1), (1, 2) to alive.
@@ -120,14 +120,28 @@ go run ./cmd/*
 
 ### NewGame
 
+Create a new Conway's Game of Life for you with your custom initial cell and your custom way of iterating cells.
+
 ### Reset
+
+Reset entire generation with intial cell.
 
 ### Iterate
 
+Iterate generation to get next generation.
+
 ### SetCell
+
+Set value of the cell at the coordinate.
 
 ### GetSize
 
+Get size of the game.
+
 ### GetCell
 
+Get cell at the coordinate.
+
 ### GetGeneration
+
+Get current genertaion.
