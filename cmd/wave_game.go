@@ -63,7 +63,7 @@ func drawWaveGameCell(coord *ggol.Coordinate, cell *WaveGameCell, unit int, imag
 	}
 	for i := 0; i < unit; i += 1 {
 		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
+			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[WhiteColorIndex])
 		}
 	}
 }

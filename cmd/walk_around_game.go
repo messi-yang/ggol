@@ -76,7 +76,23 @@ func drawWalkAroundGameCell(coord *ggol.Coordinate, cell *WalkAroundGameCell, un
 	}
 	for i := 0; i < unit; i += 1 {
 		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[cell.Strength])
+			if cell.Strength == 1 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[RedColorIndex])
+			} else if cell.Strength == 2 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[OrangeColorIndex])
+			} else if cell.Strength == 3 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[YellowColorIndex])
+			} else if cell.Strength == 4 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GreenColorIndex])
+			} else if cell.Strength == 5 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[BlueColorIndex])
+			} else if cell.Strength == 6 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[CyanColorIndex])
+			} else if cell.Strength == 7 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[PurpleColorIndex])
+			} else {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GoldColorIndex])
+			}
 		}
 	}
 }
