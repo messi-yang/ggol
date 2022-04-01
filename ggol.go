@@ -16,11 +16,11 @@ type Game[T any] interface {
 }
 
 type gameInfo[T any] struct {
-	size        Size
-	initialCell T
-	generation  [][]*T
-	iterateCell IterateCell[T]
-	locker      sync.RWMutex
+	size         Size
+	initialCell  T
+	generation   [][]*T
+	cellIterator IterateCellFunc[T]
+	locker       sync.RWMutex
 }
 
 // Return a new Game with the given width and height, seed is planted
@@ -28,7 +28,7 @@ type gameInfo[T any] struct {
 func NewGame[T any](
 	size *Size,
 	initialCell T,
-	iterateCell IterateCell[T],
+	cellIterator IterateCellFunc[T],
 ) (Game[T], error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
@@ -38,7 +38,7 @@ func NewGame[T any](
 		*size,
 		initialCell,
 		*createGeneration(size, initialCell),
-		iterateCell,
+		cellIterator,
 		sync.RWMutex{},
 	}
 
@@ -100,7 +100,7 @@ func (g *gameInfo[T]) Iterate() {
 		nextGeneration[x] = make([]T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextCell := g.iterateCell(&coord, *g.generation[x][y], g.getAdjacentCell)
+			nextCell := g.cellIterator(&coord, *g.generation[x][y], g.getAdjacentCell)
 			nextGeneration[x][y] = *nextCell
 		}
 	}

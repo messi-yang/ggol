@@ -15,7 +15,7 @@ var initialBlackWhiteGameCell BlackWhiteGameCell = BlackWhiteGameCell{
 	Alive: false,
 }
 
-func blackWhiteGameCellIterator(coord *ggol.Coordinate, cell BlackWhiteGameCell, getAdjacentCell ggol.GetAdjacentCell[BlackWhiteGameCell]) *BlackWhiteGameCell {
+func blackWhiteGameIterateCellFunc(coord *ggol.Coordinate, cell BlackWhiteGameCell, getAdjacentCell ggol.GetAdjacentCellFunc[BlackWhiteGameCell]) *BlackWhiteGameCell {
 	newCell := cell
 
 	if newCell.Alive {
@@ -38,7 +38,7 @@ func initSetBlackWhiteGameCells(g ggol.Game[BlackWhiteGameCell]) {
 }
 
 func getBlackWhiteGame() *ggol.Game[BlackWhiteGameCell] {
-	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialBlackWhiteGameCell, blackWhiteGameCellIterator)
+	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialBlackWhiteGameCell, blackWhiteGameIterateCellFunc)
 	initSetBlackWhiteGameCells(g)
 	var blackWhiteGame ggol.Game[BlackWhiteGameCell] = g
 	return &blackWhiteGame

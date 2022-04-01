@@ -6,7 +6,7 @@ var initialTestCell TestCell = TestCell{
 
 // The default cell iterator that is used for tests,
 // This cell iterator implements 4 basic rules of Conway's Game of Life.
-func defaultCellIteratorForTest(coord *Coordinate, cell TestCell, getAdjacentCell GetAdjacentCell[TestCell]) *TestCell {
+func defaultIterateCellFuncForTest(coord *Coordinate, cell TestCell, getAdjacentCell GetAdjacentCellFunc[TestCell]) *TestCell {
 	newCell := cell
 
 	var aliveAdjacentCellsCount int = 0

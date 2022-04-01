@@ -15,7 +15,11 @@ var initialNormalGameCell NormalGameCell = NormalGameCell{
 	Alive: false,
 }
 
-func normalGameCellIterator(coord *ggol.Coordinate, cell NormalGameCell, getAdjacentCell ggol.GetAdjacentCell[NormalGameCell]) *NormalGameCell {
+func normalGameIterateCellFunc(
+	coord *ggol.Coordinate,
+	cell NormalGameCell,
+	getAdjacentCell ggol.GetAdjacentCellFunc[NormalGameCell],
+) *NormalGameCell {
 	newCell := cell
 
 	var aliveAdjacentCellsCount int = 0
@@ -61,7 +65,7 @@ func initNormalGameCells(g ggol.Game[NormalGameCell]) {
 }
 
 func getNormalGame() *ggol.Game[NormalGameCell] {
-	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialNormalGameCell, normalGameCellIterator)
+	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialNormalGameCell, normalGameIterateCellFunc)
 	initNormalGameCells(g)
 	var normalGame ggol.Game[NormalGameCell] = g
 	return &normalGame

@@ -25,22 +25,31 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
-// Define the type of your CustomCell, it could be anything you live.
-// But to implement Conway's Game of Life, "Alive" or alive field is necessary here.
+// Define the type of your CustomCell, it could be anything you like.
+// But to implement Conway's Game of Life, "Alive" or something alike field is necessary here.
 type CustomCell struct {
     Alive bool
 }
 
 // Your custom cell iterator, the example below implements the standard rules of Conway's Game of Life.
 // You can add various kinds of fields to your CustomCell and make the game different!
-// *CAUTIOUS*, please do not change anything of adjacentCells, that will ruin the logic.
-var customCellIterator ggol.CellIterator[CustomCell] = func(cell CustomCell, adjacentCells *[]*CustomCell) *CustomCell {
+// *CAUTIOUS*, please do not change anything of adjacentCells, that will change the expected outcome.
+var customIterateCellFunc ggol.IterateCellFunc[CustomCell] = func(
+    coord *ggol.Coordinate,
+    cell CustomCell,
+    getAdjacentCell ggol.GetAdjacentCellFunc[CustomCell],
+) *CustomCell {
     newCell := cell
 
     var aliveAdjacentCellsCount int = 0
-    for i := 0; i < len(*adjacentCells); i += 1 {
-        if (*adjacentCells)[i] != nil && (*adjacentCells)[i].Alive {
-            aliveAdjacentCellsCount += 1
+    for i := -1; i < 2; i += 1 {
+        for j := -1; j < 2; j += 1 {
+            if !(i == 0 && j == 0) {
+                adjCell, isCrossBorder := getAdjacentCell(coord, &Coordinate{X: i, Y: j})
+                if adjCell.Alive && !isCrossBorder {
+                    aliveAdjacentCellsCount += 1
+                }
+            }
         }
     }
     if newCell.Alive {
@@ -66,7 +75,7 @@ main() {
     game, _ := ggol.NewGame(
         &ggol.Size{Height: 3, Width: 3}, // Size of the game.
         CustomCell{Alive: false}, // Initial Custom Cell.
-        customCellIterator, // Your custom rools of the game, see above.
+        customIterateCellFunc, // Your custom rools of the game, see above.
     )
 
     // Bring cells at (1, 0), (1, 1), (1, 2) to alive.
