@@ -25,21 +25,16 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
-// Define the type of your CustomCell, it could be anything you like.
-// But to implement Conway's Game of Life, "Alive" or something alike field is necessary here.
-type CustomCell struct {
+type MyCell struct {
     Alive bool
 }
 
-// Your custom cell iterator, the example below implements the standard rules of Conway's Game of Life.
-// You can add various kinds of fields to your CustomCell and make the game different!
-// *CAUTIOUS*, please do not change anything of adjacentCells, that will change the expected outcome.
-var customIterateCellFunc ggol.IterateCellFunc[CustomCell] = func(
+func cellIterator (
     coord *ggol.Coordinate,
-    cell CustomCell,
-    getAdjacentCell ggol.GetAdjacentCellFunc[CustomCell],
-) *CustomCell {
-    newCell := cell
+    cell *MyCell,
+    getAdjacentCell ggol.GetAdjacentCell[MyCell],
+) *MyCell {
+    newCell := *cell
 
     var aliveAdjacentCellsCount int = 0
     for i := -1; i < 2; i += 1 {
@@ -72,24 +67,19 @@ var customIterateCellFunc ggol.IterateCellFunc[CustomCell] = func(
 }
 
 main() {
-    game, _ := ggol.NewGame(
-        &ggol.Size{Height: 3, Width: 3}, // Size of the game.
-        CustomCell{Alive: false}, // Initial Custom Cell.
-        customIterateCellFunc, // Your custom rules of the game, see above.
+    game, _ := ggol.New(
+        &ggol.Size{Height: 3, Width: 3},
+        &MyCell{Alive: false},
+        cellIterator,
     )
 
-    // Bring cells at (1, 0), (1, 1), (1, 2) to alive.
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 0}, CustomCell{Alive: true})
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 1}, CustomCell{Alive: true})
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 2}, CustomCell{Alive: true})
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 0}, MyCell{Alive: true})
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 1}, MyCell{Alive: true})
+    game.SetCell(&ggol.Coordinate{X: 1, Y: 2}, MyCell{Alive: true})
 
-    // Generate next Generation.
     game.Iterate()
 
-    // We created a Blinker pattern above, let's see if cell at (0, 1)
-    // became alive in next generation :).
     fmt.Println(game.GetCell(&ggol.Coordinate{X: 0, Y: 1}))
-    // {true}
 }
 ```
 
@@ -118,7 +108,7 @@ go run ./cmd/*
 
 ## Document
 
-### NewGame
+### New
 
 Create a new Conway's Game of Life for you with your custom initial cell and your custom way of iterating cells.
 

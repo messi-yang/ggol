@@ -4,6 +4,6 @@ package ggol
 type aliveTestCellsMap [][]bool
 
 // A Custom Cell Type for test only.
-type TestCell struct {
+type testCell struct {
 	Alive bool
 }

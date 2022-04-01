@@ -15,12 +15,12 @@ var initialNormalGameCell NormalGameCell = NormalGameCell{
 	Alive: false,
 }
 
-func normalGameIterateCellFunc(
+func normalGameIterateCell(
 	coord *ggol.Coordinate,
-	cell NormalGameCell,
-	getAdjacentCell ggol.GetAdjacentCellFunc[NormalGameCell],
-) *NormalGameCell {
-	newCell := cell
+	cell *NormalGameCell,
+	getAdjacentCell ggol.GetAdjacentCell[NormalGameCell],
+) (nextCell *NormalGameCell) {
+	newCell := *cell
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
@@ -55,17 +55,17 @@ func normalGameIterateCellFunc(
 func initNormalGameCells(g ggol.Game[NormalGameCell]) {
 	for i := 0; i < 10; i += 1 {
 		for j := 0; j < 10; j += 1 {
-			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, &NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, &NormalGameCell{Alive: true})
 		}
 	}
 }
 
 func getNormalGame() *ggol.Game[NormalGameCell] {
-	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialNormalGameCell, normalGameIterateCellFunc)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialNormalGameCell, normalGameIterateCell)
 	initNormalGameCells(g)
 	var normalGame ggol.Game[NormalGameCell] = g
 	return &normalGame

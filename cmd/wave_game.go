@@ -15,8 +15,12 @@ var initialWaveGameCell WaveGameCell = WaveGameCell{
 	Alive: false,
 }
 
-func waveGameIterateCellFunc(coord *ggol.Coordinate, cell WaveGameCell, getAdjacentCell ggol.GetAdjacentCellFunc[WaveGameCell]) *WaveGameCell {
-	newCell := cell
+func waveGameIterateCell(
+	coord *ggol.Coordinate,
+	cell *WaveGameCell,
+	getAdjacentCell ggol.GetAdjacentCell[WaveGameCell],
+) (nextCell *WaveGameCell) {
+	newCell := *cell
 	rightAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: 0, Y: 1})
 
 	if rightAdjCell.Alive {
@@ -40,14 +44,14 @@ func initSetWaveGameCells(g ggol.Game[WaveGameCell]) {
 					margin = 10 - x%10
 				}
 				c := ggol.Coordinate{X: x, Y: y + margin}
-				g.SetCell(&c, WaveGameCell{Alive: true})
+				g.SetCell(&c, &WaveGameCell{Alive: true})
 			}
 		}
 	}
 }
 
 func getWaveGame() *ggol.Game[WaveGameCell] {
-	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialWaveGameCell, waveGameIterateCellFunc)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWaveGameCell, waveGameIterateCell)
 	initSetWaveGameCells(g)
 	var waveGame ggol.Game[WaveGameCell] = g
 	return &waveGame

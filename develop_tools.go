@@ -1,13 +1,13 @@
 package ggol
 
-var initialTestCell TestCell = TestCell{
+var initialTestCell testCell = testCell{
 	Alive: false,
 }
 
 // The default cell iterator that is used for tests,
 // This cell iterator implements 4 basic rules of Conway's Game of Life.
-func defaultIterateCellFuncForTest(coord *Coordinate, cell TestCell, getAdjacentCell GetAdjacentCellFunc[TestCell]) *TestCell {
-	newCell := cell
+func defaultIterateCellForTest(coord *Coordinate, cell *testCell, getAdjacentCell GetAdjacentCell[testCell]) *testCell {
+	newCell := *cell
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
@@ -52,12 +52,12 @@ func areAliveTestCellsMapsEqual(a aliveTestCellsMap, b aliveTestCellsMap) bool {
 }
 
 // Convert matrix of *TestCell to "aliveTestCellsMap", used for tests only.
-func convertTestCellsMatricToAliveTestCellsMap(g *[][]*TestCell) *aliveTestCellsMap {
+func convertTestCellsMatricToAliveTestCellsMap(g *[]*[]*testCell) *aliveTestCellsMap {
 	gMap := make(aliveTestCellsMap, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
-		for y := 0; y < len((*g)[x]); y++ {
-			gMap[x] = append(gMap[x], (*g)[x][y].Alive)
+		for y := 0; y < len((*(*g)[x])); y++ {
+			gMap[x] = append(gMap[x], (*(*g)[x])[y].Alive)
 		}
 	}
 

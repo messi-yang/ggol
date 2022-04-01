@@ -32,7 +32,7 @@ func TestAliveTestCellsMapsEqual(t *testing.T) {
 }
 
 func testConvertTestCellsMatricToAliveTestCellsMapCaseOne(t *testing.T) {
-	game, _ := NewGame(&Size{2, 2}, TestCell{Alive: true}, defaultIterateCellFuncForTest)
+	game, _ := New(&Size{2, 2}, &testCell{Alive: true}, defaultIterateCellForTest)
 	generation := game.GetGeneration()
 	liveCellsMap := convertTestCellsMatricToAliveTestCellsMap(generation)
 
