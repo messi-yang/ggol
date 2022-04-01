@@ -32,5 +32,7 @@ type Size struct {
 	Height int
 }
 
+type GetAdjacentCell[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (cell *T, crossBorder bool)
+
 // Decide next condition of the cell.
-type CellIterator[T any] func(cell T, adjacentCells *[]*T) (nextCell *T)
+type IterateCell[T any] func(coord *Coordinate, cell T, getAdjacentCell GetAdjacentCell[T]) (nextCell *T)

@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	height := 10
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, initialTestCell, defaultCellIteratorForTest)
-	cellLiveMap := *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap := *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 
 	if len(cellLiveMap) == width && len(cellLiveMap[0]) == height {
 		t.Log("Passed")
@@ -85,7 +85,7 @@ func testBlockIteratement(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 1}, TestCell{Alive: true})
 	g.Iterate()
 
-	nextAliveCellsMap := *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	nextAliveCellsMap := *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	expectedNextAliveCellsMap := aliveTestCellsMap{
 		{true, true, false},
 		{true, true, false},
@@ -124,13 +124,13 @@ func testBlinkerIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
 	}
@@ -181,25 +181,25 @@ func testGliderIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapOne) {
 		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapTwo) {
 		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapThree) {
 		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapFour) {
 		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
 	}
@@ -323,7 +323,7 @@ func testResetCaseOne(t *testing.T) {
 	g.SetCell(&Coordinate{X: 1, Y: 2}, TestCell{Alive: true})
 
 	g.Reset()
-	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 
 	expectedBinaryBoard := aliveTestCellsMap{
 		{false, false, false},
@@ -346,7 +346,7 @@ func testSetCellIteratorCaseOne(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	customCellIterator := func(cell TestCell, adjacentCells *[]*TestCell) *TestCell {
+	customCellIterator := func(coord *Coordinate, cell TestCell, getAdjacentCell GetAdjacentCell[TestCell]) *TestCell {
 		nextCell := TestCell{}
 
 		// Bring back all dead cells to alive in next iteration.
@@ -360,7 +360,7 @@ func testSetCellIteratorCaseOne(t *testing.T) {
 	}
 	g, _ := NewGame(&size, initialTestCell, customCellIterator)
 	g.Iterate()
-	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(&g.generation)
+	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
 
 	expectedBinaryBoard := aliveTestCellsMap{
 		{true, true, true},

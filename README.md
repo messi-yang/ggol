@@ -79,7 +79,7 @@ main() {
 
     // We created a Blinker pattern above, let's see if cell at (0, 1)
     // became alive in next generation :).
-    fmt.Println(*game.GetCell(&ggol.Coordinate{X: 0, Y: 1}))
+    fmt.Println(game.GetCell(&ggol.Coordinate{X: 0, Y: 1}))
     // {true}
 }
 ```

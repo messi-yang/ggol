@@ -16,11 +16,11 @@ type Game[T any] interface {
 }
 
 type gameInfo[T any] struct {
-	size         Size
-	initialCell  T
-	generation   [][]*T
-	cellIterator CellIterator[T]
-	locker       sync.RWMutex
+	size        Size
+	initialCell T
+	generation  [][]*T
+	iterateCell IterateCell[T]
+	locker      sync.RWMutex
 }
 
 // Return a new Game with the given width and height, seed is planted
@@ -28,8 +28,8 @@ type gameInfo[T any] struct {
 func NewGame[T any](
 	size *Size,
 	initialCell T,
-	cellIterator CellIterator[T],
-) (*gameInfo[T], error) {
+	iterateCell IterateCell[T],
+) (Game[T], error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
 	}
@@ -38,7 +38,7 @@ func NewGame[T any](
 		*size,
 		initialCell,
 		*createGeneration(size, initialCell),
-		cellIterator,
+		iterateCell,
 		sync.RWMutex{},
 	}
 
@@ -60,21 +60,24 @@ func (g *gameInfo[T]) isCoordinateOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo[T]) getAdjacentCells(c *Coordinate) *[]*T {
-	var adjCells []*T = make([]*T, 0)
-	for i := c.X - 1; i <= c.X+1; i++ {
-		for j := c.Y - 1; j <= c.Y+1; j++ {
-			if i == c.X && j == c.Y {
-				continue
-			}
-			if g.isCoordinateOutsideBorder(&Coordinate{X: i, Y: j}) {
-				adjCells = append(adjCells, nil)
-			} else {
-				adjCells = append(adjCells, g.generation[i][j])
-			}
+func (g *gameInfo[T]) getAdjacentCell(originCoord *Coordinate, relativeCoord *Coordinate) (cell *T, crossBorder bool) {
+	targetX := originCoord.X + relativeCoord.X
+	targetY := originCoord.Y + relativeCoord.Y
+	var isCrossBorder bool = false
+
+	if (g.isCoordinateOutsideBorder(&Coordinate{X: targetX, Y: targetY})) {
+		isCrossBorder = true
+		for targetX < 0 {
+			targetX += g.size.Width
 		}
+		for targetY < 0 {
+			targetY += g.size.Height
+		}
+		targetX = targetX % g.size.Width
+		targetY = targetY % g.size.Height
 	}
-	return &adjCells
+
+	return g.generation[targetX][targetY], isCrossBorder
 }
 
 // Reset game.
@@ -97,7 +100,7 @@ func (g *gameInfo[T]) Iterate() {
 		nextGeneration[x] = make([]T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextCell := g.cellIterator(*g.generation[x][y], g.getAdjacentCells(&coord))
+			nextCell := g.iterateCell(&coord, *g.generation[x][y], g.getAdjacentCell)
 			nextGeneration[x][y] = *nextCell
 		}
 	}

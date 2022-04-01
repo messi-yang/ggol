@@ -3,7 +3,6 @@ package main
 import (
 	"image"
 	"image/color"
-	"math/rand"
 
 	"github.com/DumDumGeniuss/ggol"
 )
@@ -16,13 +15,18 @@ var initialNormalGameCell NormalGameCell = NormalGameCell{
 	Alive: false,
 }
 
-func normalGameCellIterator(cell NormalGameCell, adjacentCells *[]*NormalGameCell) *NormalGameCell {
+func normalGameCellIterator(coord *ggol.Coordinate, cell NormalGameCell, getAdjacentCell ggol.GetAdjacentCell[NormalGameCell]) *NormalGameCell {
 	newCell := cell
 
 	var aliveAdjacentCellsCount int = 0
-	for i := 0; i < len(*adjacentCells); i += 1 {
-		if (*adjacentCells)[i] != nil && (*adjacentCells)[i].Alive {
-			aliveAdjacentCellsCount += 1
+	for i := -1; i < 2; i += 1 {
+		for j := -1; j < 2; j += 1 {
+			if !(i == 0 && j == 0) {
+				adjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: i, Y: j})
+				if adjCell.Alive {
+					aliveAdjacentCellsCount += 1
+				}
+			}
 		}
 	}
 	if newCell.Alive {
@@ -44,19 +48,21 @@ func normalGameCellIterator(cell NormalGameCell, adjacentCells *[]*NormalGameCel
 	}
 }
 
-func randomlySetNormalGameCells(g ggol.Game[NormalGameCell]) {
-	size := g.GetSize()
-	for x := 0; x < size.Width; x++ {
-		for y := 0; y < size.Height; y++ {
-			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, NormalGameCell{Alive: rand.Intn(2) == 0})
+func initNormalGameCells(g ggol.Game[NormalGameCell]) {
+	for i := 0; i < 10; i += 1 {
+		for j := 0; j < 10; j += 1 {
+			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, NormalGameCell{Alive: true})
+			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, NormalGameCell{Alive: true})
 		}
 	}
 }
 
 func getNormalGame() *ggol.Game[NormalGameCell] {
 	g, _ := ggol.NewGame(&ggol.Size{Width: 50, Height: 50}, initialNormalGameCell, normalGameCellIterator)
-	randomlySetNormalGameCells(g)
+	initNormalGameCells(g)
 	var normalGame ggol.Game[NormalGameCell] = g
 	return &normalGame
 }

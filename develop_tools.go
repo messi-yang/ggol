@@ -6,13 +6,18 @@ var initialTestCell TestCell = TestCell{
 
 // The default cell iterator that is used for tests,
 // This cell iterator implements 4 basic rules of Conway's Game of Life.
-func defaultCellIteratorForTest(cell TestCell, adjacentCells *[]*TestCell) *TestCell {
+func defaultCellIteratorForTest(coord *Coordinate, cell TestCell, getAdjacentCell GetAdjacentCell[TestCell]) *TestCell {
 	newCell := cell
 
 	var aliveAdjacentCellsCount int = 0
-	for i := 0; i < len(*adjacentCells); i += 1 {
-		if (*adjacentCells)[i].Alive {
-			aliveAdjacentCellsCount += 1
+	for i := -1; i < 2; i += 1 {
+		for j := -1; j < 2; j += 1 {
+			if !(i == 0 && j == 0) {
+				adjCell, isCrossBorder := getAdjacentCell(coord, &Coordinate{X: i, Y: j})
+				if adjCell.Alive && !isCrossBorder {
+					aliveAdjacentCellsCount += 1
+				}
+			}
 		}
 	}
 	if newCell.Alive {
