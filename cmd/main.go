@@ -1,6 +1,16 @@
 package main
 
+import (
+	"log"
+	"os"
+)
+
 func main() {
+	err := os.MkdirAll("output", 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	generateGif(
 		0,
 		"output/normal_game.gif",
