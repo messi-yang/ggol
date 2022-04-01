@@ -31,4 +31,11 @@ func main() {
 		getWaveGame(),
 		drawWaveGameCell,
 	)
+
+	generateGif(
+		0,
+		"output/walk_around_game.gif",
+		getWalkAroundGame(),
+		drawWalkAroundGameCell,
+	)
 }

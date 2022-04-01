@@ -93,6 +93,10 @@ And this
 
 ![Black White](./doc/black_white_game.gif)
 
+And this
+
+![Walk Around](./doc/walk_around_game.gif)
+
 And for sure, classic game
 
 ![Normal](./doc/normal_game.gif)
