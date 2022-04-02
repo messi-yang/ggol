@@ -1,46 +1,46 @@
 package ggol
 
-var initialTestCell testCell = testCell{
-	Alive: false,
+var initialTestArea testArea = testArea{
+	HasLiveCell: false,
 }
 
-// The default cell iterator that is used for tests,
-// This cell iterator implements 4 basic rules of Conway's Game of Life.
-func defaultIterateCellForTest(coord *Coordinate, cell *testCell, getAdjacentCell GetAdjacentCell[testCell]) *testCell {
-	newCell := *cell
+// The default area iterator that is used for tests,
+// This area iterator implements 4 basic rules of Conway's Game of Life.
+func defaultIterateAreaForTest(coord *Coordinate, area *testArea, getAdjacentArea GetAdjacentArea[testArea]) *testArea {
+	newArea := *area
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
 		for j := -1; j < 2; j += 1 {
 			if !(i == 0 && j == 0) {
-				adjCell, isCrossBorder := getAdjacentCell(coord, &Coordinate{X: i, Y: j})
-				if adjCell.Alive && !isCrossBorder {
+				adjArea, isCrossBorder := getAdjacentArea(coord, &Coordinate{X: i, Y: j})
+				if adjArea.HasLiveCell && !isCrossBorder {
 					aliveAdjacentCellsCount += 1
 				}
 			}
 		}
 	}
-	if newCell.Alive {
+	if newArea.HasLiveCell {
 		if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
-			newCell.Alive = false
-			return &newCell
+			newArea.HasLiveCell = false
+			return &newArea
 		} else {
-			newCell.Alive = true
-			return &newCell
+			newArea.HasLiveCell = true
+			return &newArea
 		}
 	} else {
 		if aliveAdjacentCellsCount == 3 {
-			newCell.Alive = true
-			return &newCell
+			newArea.HasLiveCell = true
+			return &newArea
 		} else {
-			newCell.Alive = false
-			return &newCell
+			newArea.HasLiveCell = false
+			return &newArea
 		}
 	}
 }
 
-// Check if two aliveTestCellsMap are equal, used for tests only.
-func areAliveTestCellsMapsEqual(a aliveTestCellsMap, b aliveTestCellsMap) bool {
+// Check if two testAreasWithLiveCellMap are equal, used for tests only.
+func areHasLiveCellTestAreasMapsEqual(a testAreasWithLiveCellMap, b testAreasWithLiveCellMap) bool {
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[i]); j++ {
 			if a[i][j] != b[i][j] {
@@ -51,13 +51,13 @@ func areAliveTestCellsMapsEqual(a aliveTestCellsMap, b aliveTestCellsMap) bool {
 	return true
 }
 
-// Convert matrix of *TestCell to "aliveTestCellsMap", used for tests only.
-func convertTestCellsMatricToAliveTestCellsMap(g *[]*[]*testCell) *aliveTestCellsMap {
-	gMap := make(aliveTestCellsMap, 0)
+// Convert matrix of *TestArea to "testAreasWithLiveCellMap", used for tests only.
+func convertTestAreasMatricToHasLiveCellTestAreasMap(g *[]*[]*testArea) *testAreasWithLiveCellMap {
+	gMap := make(testAreasWithLiveCellMap, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
 		for y := 0; y < len((*(*g)[x])); y++ {
-			gMap[x] = append(gMap[x], (*(*g)[x])[y].Alive)
+			gMap[x] = append(gMap[x], (*(*g)[x])[y].HasLiveCell)
 		}
 	}
 

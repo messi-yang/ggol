@@ -1,9 +1,9 @@
 package ggol
 
-// A matrix that contains all living statuses of all TestCells.
-type aliveTestCellsMap [][]bool
+// A matrix that contains all living statuses of all TestAreas.
+type testAreasWithLiveCellMap [][]bool
 
-// A Custom Cell Type for test only.
-type testCell struct {
-	Alive bool
+// A Custom Area Type for test only.
+type testArea struct {
+	HasLiveCell bool
 }

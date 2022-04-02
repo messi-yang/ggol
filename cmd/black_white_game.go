@@ -7,49 +7,49 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type BlackWhiteGameCell struct {
-	Alive bool
+type BlackWhiteGameArea struct {
+	HasLiveCell bool
 }
 
-var initialBlackWhiteGameCell BlackWhiteGameCell = BlackWhiteGameCell{
-	Alive: false,
+var initialBlackWhiteGameArea BlackWhiteGameArea = BlackWhiteGameArea{
+	HasLiveCell: false,
 }
 
-func blackWhiteGameIterateCell(
+func blackWhiteGameIterateArea(
 	coord *ggol.Coordinate,
-	cell *BlackWhiteGameCell,
-	getAdjacentCell ggol.GetAdjacentCell[BlackWhiteGameCell],
-) (nextCell *BlackWhiteGameCell) {
-	newCell := *cell
+	area *BlackWhiteGameArea,
+	getAdjacentArea ggol.GetAdjacentArea[BlackWhiteGameArea],
+) (nextArea *BlackWhiteGameArea) {
+	newArea := *area
 
-	if newCell.Alive {
-		newCell.Alive = false
-		return &newCell
+	if newArea.HasLiveCell {
+		newArea.HasLiveCell = false
+		return &newArea
 	} else {
-		newCell.Alive = true
-		return &newCell
+		newArea.HasLiveCell = true
+		return &newArea
 	}
 }
 
-func initSetBlackWhiteGameCells(g ggol.Game[BlackWhiteGameCell]) {
+func initSetBlackWhiteGameAreas(g ggol.Game[BlackWhiteGameArea]) {
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
 		for y := 0; y < size.Height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetCell(&c, &BlackWhiteGameCell{Alive: (x+y)%3 == 0})
+			g.SetArea(&c, &BlackWhiteGameArea{HasLiveCell: (x+y)%3 == 0})
 		}
 	}
 }
 
-func getBlackWhiteGame() *ggol.Game[BlackWhiteGameCell] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialBlackWhiteGameCell, blackWhiteGameIterateCell)
-	initSetBlackWhiteGameCells(g)
-	var blackWhiteGame ggol.Game[BlackWhiteGameCell] = g
+func getBlackWhiteGame() *ggol.Game[BlackWhiteGameArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialBlackWhiteGameArea, blackWhiteGameIterateArea)
+	initSetBlackWhiteGameAreas(g)
+	var blackWhiteGame ggol.Game[BlackWhiteGameArea] = g
 	return &blackWhiteGame
 }
 
-func drawBlackWhiteGameCell(coord *ggol.Coordinate, cell *BlackWhiteGameCell, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !cell.Alive {
+func drawBlackWhiteGameArea(coord *ggol.Coordinate, area *BlackWhiteGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+	if !area.HasLiveCell {
 		return
 	}
 	for i := 0; i < unit; i += 1 {

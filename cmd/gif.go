@@ -23,9 +23,9 @@ const (
 	GoldColorIndex
 )
 
-type DrawCell[T any] func(coord *ggol.Coordinate, cell *T, unit int, image *image.Paletted, palette *[]color.Color)
+type DrawArea[T any] func(coord *ggol.Coordinate, area *T, unit int, image *image.Paletted, palette *[]color.Color)
 
-func generateGif[T any](duration int, fileName string, g *ggol.Game[T], drawCell DrawCell[T]) {
+func generateGif[T any](duration int, fileName string, g *ggol.Game[T], drawArea DrawArea[T]) {
 	var palette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},
 		color.RGBA{0xff, 0xff, 0xff, 0xff},
@@ -50,8 +50,8 @@ func generateGif[T any](duration int, fileName string, g *ggol.Game[T], drawCell
 		for x := 0; x < size.Width; x += 1 {
 			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				cell, _ := (*g).GetCell(coord)
-				drawCell(coord, cell, unit, img, &palette)
+				area, _ := (*g).GetArea(coord)
+				drawArea(coord, area, unit, img, &palette)
 			}
 		}
 		images = append(images, img)

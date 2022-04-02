@@ -9,17 +9,17 @@ import (
 type Game[T any] interface {
 	Reset()
 	Iterate()
-	SetCell(*Coordinate, *T) error
+	SetArea(*Coordinate, *T) error
 	GetSize() *Size
-	GetCell(*Coordinate) (*T, error)
-	GetGeneration() *[]*[]*T
+	GetArea(*Coordinate) (*T, error)
+	GetField() *[]*[]*T
 }
 
 type gameInfo[T any] struct {
 	size         *Size
-	initialCell  *T
-	generation   *[]*[]*T
-	cellIterator IterateCell[T]
+	initialArea  *T
+	field        *[]*[]*T
+	areaIterator IterateArea[T]
 	locker       sync.RWMutex
 }
 
@@ -27,8 +27,8 @@ type gameInfo[T any] struct {
 // if it's given.
 func New[T any](
 	size *Size,
-	initialCell *T,
-	cellIterator IterateCell[T],
+	initialArea *T,
+	areaIterator IterateArea[T],
 ) (Game[T], error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
@@ -36,35 +36,35 @@ func New[T any](
 
 	newG := gameInfo[T]{
 		size,
-		initialCell,
-		createGeneration(size, initialCell),
-		cellIterator,
+		initialArea,
+		createField(size, initialArea),
+		areaIterator,
 		sync.RWMutex{},
 	}
 
 	return &newG, nil
 }
 
-func createGeneration[T any](size *Size, initialCell *T) *[]*[]*T {
-	generation := make([]*[]*T, size.Width)
+func createField[T any](size *Size, initialArea *T) *[]*[]*T {
+	field := make([]*[]*T, size.Width)
 	for x := 0; x < size.Width; x++ {
-		newRowOfGeneration := make([]*T, size.Height)
-		generation[x] = &newRowOfGeneration
+		newRowOfField := make([]*T, size.Height)
+		field[x] = &newRowOfField
 		for y := 0; y < size.Height; y++ {
-			(*generation[x])[y] = initialCell
+			(*field[x])[y] = initialArea
 		}
 	}
-	return &generation
+	return &field
 }
 
 func (g *gameInfo[T]) isCoordinateOutsideBorder(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
-func (g *gameInfo[T]) getAdjacentCell(
+func (g *gameInfo[T]) getAdjacentArea(
 	originCoord *Coordinate,
 	relativeCoord *Coordinate,
-) (cell *T, crossBorder bool) {
+) (area *T, crossBorder bool) {
 	targetX := originCoord.X + relativeCoord.X
 	targetY := originCoord.Y + relativeCoord.Y
 	var isCrossBorder bool = false
@@ -81,7 +81,7 @@ func (g *gameInfo[T]) getAdjacentCell(
 		targetY = targetY % g.size.Height
 	}
 
-	return (*(*g.generation)[targetX])[targetY], isCrossBorder
+	return (*(*g.field)[targetX])[targetY], isCrossBorder
 }
 
 // Reset game.
@@ -89,42 +89,41 @@ func (g *gameInfo[T]) Reset() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.generation = createGeneration(g.size, g.initialCell)
+	g.field = createField(g.size, g.initialArea)
 }
 
-// Generate next generation.
+// Generate next field.
 func (g *gameInfo[T]) Iterate() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	// A map that saves next cell metas.
-	nextGeneration := make([][]*T, g.size.Width)
+	nextField := make([][]*T, g.size.Width)
 
 	for x := 0; x < g.size.Width; x++ {
-		nextGeneration[x] = make([]*T, g.size.Height)
+		nextField[x] = make([]*T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextCell := g.cellIterator(&coord, (*(*g.generation)[x])[y], g.getAdjacentCell)
-			nextGeneration[x][y] = nextCell
+			nextArea := g.areaIterator(&coord, (*(*g.field)[x])[y], g.getAdjacentArea)
+			nextField[x][y] = nextArea
 		}
 	}
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			(*(*g.generation)[x])[y] = nextGeneration[x][y]
+			(*(*g.field)[x])[y] = nextField[x][y]
 		}
 	}
 }
 
-// Update the cell at the given coordinate.
-func (g *gameInfo[T]) SetCell(c *Coordinate, cell *T) error {
+// Update the area at the given coordinate.
+func (g *gameInfo[T]) SetArea(c *Coordinate, area *T) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
 	if g.isCoordinateOutsideBorder(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
-	(*(*g.generation)[c.X])[c.Y] = cell
+	(*(*g.field)[c.X])[c.Y] = area
 
 	return nil
 }
@@ -137,8 +136,8 @@ func (g *gameInfo[T]) GetSize() *Size {
 	return g.size
 }
 
-// Get the cell at the coordinate.
-func (g *gameInfo[T]) GetCell(c *Coordinate) (*T, error) {
+// Get the area at the coordinate.
+func (g *gameInfo[T]) GetArea(c *Coordinate) (*T, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -146,13 +145,13 @@ func (g *gameInfo[T]) GetCell(c *Coordinate) (*T, error) {
 		return nil, &ErrCoordinateIsOutsideBorder{c}
 	}
 
-	return (*(*g.generation)[c.X])[c.Y], nil
+	return (*(*g.field)[c.X])[c.Y], nil
 }
 
-// Get the entire genetation, which is a matrix that contains all cells.
-func (g *gameInfo[T]) GetGeneration() *[]*[]*T {
+// Get the entire genetation, which is a matrix that contains all areas.
+func (g *gameInfo[T]) GetField() *[]*[]*T {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return g.generation
+	return g.field
 }

@@ -15,27 +15,27 @@ func main() {
 		0,
 		"output/normal_game.gif",
 		getNormalGame(),
-		drawNormalGameCell,
+		drawNormalGameArea,
 	)
 
 	generateGif(
 		100,
 		"output/black_white_game.gif",
 		getBlackWhiteGame(),
-		drawBlackWhiteGameCell,
+		drawBlackWhiteGameArea,
 	)
 
 	generateGif(
 		0,
 		"output/wave_game.gif",
 		getWaveGame(),
-		drawWaveGameCell,
+		drawWaveGameArea,
 	)
 
 	generateGif(
 		0,
 		"output/walk_around_game.gif",
 		getWalkAroundGame(),
-		drawWalkAroundGameCell,
+		drawWalkAroundGameArea,
 	)
 }

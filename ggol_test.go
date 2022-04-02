@@ -9,10 +9,10 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
-	cellLiveMap := *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
+	areaLiveMap := *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
 
-	if len(cellLiveMap) == width && len(cellLiveMap[0]) == height {
+	if len(areaLiveMap) == width && len(areaLiveMap[0]) == height {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Size should be %v x %v", width, height)
@@ -23,7 +23,7 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
 	size := Size{Width: width, Height: height}
-	_, err := New(&size, &initialTestCell, defaultIterateCellForTest)
+	_, err := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	if err == nil {
 		t.Fatalf("Should get error when giving invalid size.")
@@ -36,13 +36,13 @@ func TestNew(t *testing.T) {
 	shouldThrowErrorWhenSizeIsInvalid(t)
 }
 
-func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
+func shouldThrowErrorWhenAreaSeedExceedBoarder(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 	c := Coordinate{X: 0, Y: 10}
-	err := g.SetCell(&c, &testCell{Alive: true})
+	err := g.SetArea(&c, &testArea{HasLiveCell: true})
 
 	if err == nil {
 		t.Fatalf("Should get error when any seed units are outside border.")
@@ -50,52 +50,52 @@ func shouldThrowErrorWhenCellSeedExceedBoarder(t *testing.T) {
 	t.Log("Passed")
 }
 
-func shouldSetCellCorrectly(t *testing.T) {
+func shouldSetAreaCorrectly(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
-	g.SetCell(&c, &testCell{Alive: true})
-	cell, _ := g.GetCell(&c)
-	newLiveStatus := cell.Alive
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
+	g.SetArea(&c, &testArea{HasLiveCell: true})
+	area, _ := g.GetArea(&c)
+	newLiveStatus := area.HasLiveCell
 
 	if newLiveStatus {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should correctly set cell.")
+		t.Fatalf("Should correctly set area.")
 	}
 }
 
-func TestSetCell(t *testing.T) {
-	shouldThrowErrorWhenCellSeedExceedBoarder(t)
-	shouldSetCellCorrectly(t)
+func TestSetArea(t *testing.T) {
+	shouldThrowErrorWhenAreaSeedExceedBoarder(t)
+	shouldSetAreaCorrectly(t)
 }
 
 func testBlockIteratement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	// Make a block pattern
-	g.SetCell(&Coordinate{X: 0, Y: 0}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 0, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 0}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &testCell{Alive: true})
+	g.SetArea(&Coordinate{X: 0, Y: 0}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 0, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 0}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &testArea{HasLiveCell: true})
 	g.Iterate()
 
-	nextAliveCellsMap := *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	expectedNextAliveCellsMap := aliveTestCellsMap{
+	nextHasLiveCellAreasMap := *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	expectedNextHasLiveCellAreasMap := testAreasWithLiveCellMap{
 		{true, true, false},
 		{true, true, false},
 		{false, false, false},
 	}
 
-	if areAliveTestCellsMapsEqual(nextAliveCellsMap, expectedNextAliveCellsMap) {
+	if areHasLiveCellTestAreasMapsEqual(nextHasLiveCellAreasMap, expectedNextHasLiveCellAreasMap) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Should generate next cellLiveMap of a block, but got %v.", nextAliveCellsMap)
+		t.Fatalf("Should generate next areaLiveMap of a block, but got %v.", nextHasLiveCellAreasMap)
 	}
 }
 
@@ -103,36 +103,36 @@ func testBlinkerIteratement(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	// Make a blinker pattern
-	g.SetCell(&Coordinate{X: 1, Y: 0}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, &testCell{Alive: true})
+	g.SetArea(&Coordinate{X: 1, Y: 0}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 2}, &testArea{HasLiveCell: true})
 
-	var cellLiveMap aliveTestCellsMap
+	var areaLiveMap testAreasWithLiveCellMap
 
-	expectedNextAliveCellsMapOne := aliveTestCellsMap{
+	expectedNextHasLiveCellAreasMapOne := testAreasWithLiveCellMap{
 		{false, true, false},
 		{false, true, false},
 		{false, true, false},
 	}
-	expectedNextAliveCellsMapTwo := aliveTestCellsMap{
+	expectedNextHasLiveCellAreasMapTwo := testAreasWithLiveCellMap{
 		{false, false, false},
 		{true, true, true},
 		{false, false, false},
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapOne) {
-		t.Fatalf("Should generate next cellLiveMap of a blinker, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedNextHasLiveCellAreasMapOne) {
+		t.Fatalf("Should generate next areaLiveMap of a blinker, but got %v.", areaLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedNextAliveCellsMapTwo) {
-		t.Fatalf("Should generate 2nd next cellLiveMap of a blinker, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedNextHasLiveCellAreasMapTwo) {
+		t.Fatalf("Should generate 2nd next areaLiveMap of a blinker, but got %v.", areaLiveMap)
 	}
 }
 
@@ -140,39 +140,39 @@ func testGliderIteratement(t *testing.T) {
 	width := 5
 	height := 5
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 2}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 3, Y: 2}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 3}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 3}, &testCell{Alive: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 2, Y: 2}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 3, Y: 2}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 3}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 2, Y: 3}, &testArea{HasLiveCell: true})
 
-	var cellLiveMap aliveTestCellsMap
+	var areaLiveMap testAreasWithLiveCellMap
 
-	expectedAliveCellsMapOne := aliveTestCellsMap{
+	expectedHasLiveCellAreasMapOne := testAreasWithLiveCellMap{
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, true, false, true, false},
 		{false, false, true, true, false},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapTwo := aliveTestCellsMap{
+	expectedHasLiveCellAreasMapTwo := testAreasWithLiveCellMap{
 		{false, false, false, false, false},
 		{false, false, true, false, false},
 		{false, false, false, true, true},
 		{false, false, true, true, false},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapThree := aliveTestCellsMap{
+	expectedHasLiveCellAreasMapThree := testAreasWithLiveCellMap{
 		{false, false, false, false, false},
 		{false, false, false, true, false},
 		{false, false, false, false, true},
 		{false, false, true, true, true},
 		{false, false, false, false, false},
 	}
-	expectedAliveCellsMapFour := aliveTestCellsMap{
+	expectedHasLiveCellAreasMapFour := testAreasWithLiveCellMap{
 		{false, false, false, false, false},
 		{false, false, false, false, false},
 		{false, false, true, false, true},
@@ -181,27 +181,27 @@ func testGliderIteratement(t *testing.T) {
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapOne) {
-		t.Fatalf("Should generate next cellLiveMap of a glider, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedHasLiveCellAreasMapOne) {
+		t.Fatalf("Should generate next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapTwo) {
-		t.Fatalf("Should generate 2nd next cellLiveMap of a glider, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedHasLiveCellAreasMapTwo) {
+		t.Fatalf("Should generate 2nd next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapThree) {
-		t.Fatalf("Should generate 3rd next next cellLiveMap of a glider, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedHasLiveCellAreasMapThree) {
+		t.Fatalf("Should generate 3rd next next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
 	g.Iterate()
-	cellLiveMap = *convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
-	if !areAliveTestCellsMapsEqual(cellLiveMap, expectedAliveCellsMapFour) {
-		t.Fatalf("Should generate 4th next next cellLiveMap of a glider, but got %v.", cellLiveMap)
+	areaLiveMap = *convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
+	if !areHasLiveCellTestAreasMapsEqual(areaLiveMap, expectedHasLiveCellAreasMapFour) {
+		t.Fatalf("Should generate 4th next next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
 	t.Log("Passed")
@@ -211,15 +211,15 @@ func testIteratementWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 0, Y: 0}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 2, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 0, Y: 2}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, &testCell{Alive: true})
+	g.SetArea(&Coordinate{X: 0, Y: 0}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 2, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 2, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 0, Y: 2}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 2}, &testArea{HasLiveCell: true})
 
 	wg := sync.WaitGroup{}
 
@@ -227,7 +227,7 @@ func testIteratementWithConcurrency(t *testing.T) {
 
 	wg.Add(step)
 	for i := 0; i < step; i++ {
-		// Let the glider fly to digonal cell in four steps.
+		// Let the glider fly to digonal area in four steps.
 		go func() {
 			g.Iterate()
 			g.Iterate()
@@ -238,13 +238,13 @@ func testIteratementWithConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 
-	cellOne, _ := g.GetCell(&Coordinate{X: 0 + step, Y: 0 + step})
-	cellTwo, _ := g.GetCell(&Coordinate{X: 0 + step, Y: 2 + step})
-	cellThree, _ := g.GetCell(&Coordinate{X: 1 + step, Y: 1 + step})
-	cellFour, _ := g.GetCell(&Coordinate{X: 1 + step, Y: 2 + step})
-	cellFive, _ := g.GetCell(&Coordinate{X: 2 + step, Y: 1 + step})
+	areaOne, _ := g.GetArea(&Coordinate{X: 0 + step, Y: 0 + step})
+	areaTwo, _ := g.GetArea(&Coordinate{X: 0 + step, Y: 2 + step})
+	areaThree, _ := g.GetArea(&Coordinate{X: 1 + step, Y: 1 + step})
+	areaFour, _ := g.GetArea(&Coordinate{X: 1 + step, Y: 2 + step})
+	areaFive, _ := g.GetArea(&Coordinate{X: 2 + step, Y: 1 + step})
 
-	if !cellOne.Alive || !cellTwo.Alive || !cellThree.Alive || !cellFour.Alive || !cellFive.Alive {
+	if !areaOne.HasLiveCell || !areaTwo.HasLiveCell || !areaThree.HasLiveCell || !areaFour.HasLiveCell || !areaFive.HasLiveCell {
 		t.Fatalf("Should still be a glider pattern.")
 	}
 
@@ -262,7 +262,7 @@ func testGetSizeCaseOne(t *testing.T) {
 	width := 3
 	height := 6
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
@@ -275,29 +275,29 @@ func TestGetSize(t *testing.T) {
 	testGetSizeCaseOne(t)
 }
 
-func testGetCellCaseOne(t *testing.T) {
+func testGetAreaCaseOne(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
 	coord := Coordinate{X: 1, Y: 0}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
-	g.SetCell(&coord, &testCell{Alive: true})
-	cell, _ := g.GetCell(&coord)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
+	g.SetArea(&coord, &testArea{HasLiveCell: true})
+	area, _ := g.GetArea(&coord)
 
-	if cell.Alive == true {
+	if area.HasLiveCell == true {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not get correct cell at the coordinate.")
+		t.Fatalf("Did not get correct area at the coordinate.")
 	}
 }
 
-func testGetCellCaseTwo(t *testing.T) {
+func testGetAreaCaseTwo(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 	coord := Coordinate{X: 1, Y: 4}
-	_, err := g.GetCell(&coord)
+	_, err := g.GetArea(&coord)
 
 	if err == nil {
 		t.Fatalf("Should get error when given coordinate is out of border.")
@@ -306,35 +306,35 @@ func testGetCellCaseTwo(t *testing.T) {
 	}
 }
 
-func TestGetCell(t *testing.T) {
-	testGetCellCaseOne(t)
-	testGetCellCaseTwo(t)
+func TestGetArea(t *testing.T) {
+	testGetAreaCaseOne(t)
+	testGetAreaCaseTwo(t)
 }
 
 func testResetCaseOne(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
 
 	// Make a glider pattern
-	g.SetCell(&Coordinate{X: 1, Y: 0}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 1}, &testCell{Alive: true})
-	g.SetCell(&Coordinate{X: 1, Y: 2}, &testCell{Alive: true})
+	g.SetArea(&Coordinate{X: 1, Y: 0}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &testArea{HasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 2}, &testArea{HasLiveCell: true})
 
 	g.Reset()
-	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
+	areaLiveMap := convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
 
-	expectedBinaryBoard := aliveTestCellsMap{
+	expectedBinaryBoard := testAreasWithLiveCellMap{
 		{false, false, false},
 		{false, false, false},
 		{false, false, false},
 	}
 
-	if areAliveTestCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
+	if areHasLiveCellTestAreasMapsEqual(*areaLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not reset cellLiveMap correctly.")
+		t.Fatalf("Did not reset areaLiveMap correctly.")
 	}
 }
 
@@ -342,60 +342,60 @@ func TestReset(t *testing.T) {
 	testResetCaseOne(t)
 }
 
-func testSetIterateCellCaseOne(t *testing.T) {
+func testSetIterateAreaCaseOne(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	customIterateCell := func(coord *Coordinate, cell *testCell, getAdjacentCell GetAdjacentCell[testCell]) *testCell {
-		nextCell := *cell
+	customIterateArea := func(coord *Coordinate, area *testArea, getAdjacentArea GetAdjacentArea[testArea]) *testArea {
+		nextArea := *area
 
-		// Bring back all dead cells to alive in next iteration.
-		if !nextCell.Alive {
-			nextCell.Alive = true
-			return &nextCell
+		// Bring back all dead areas to alive in next iteration.
+		if !nextArea.HasLiveCell {
+			nextArea.HasLiveCell = true
+			return &nextArea
 		} else {
-			nextCell.Alive = false
-			return &nextCell
+			nextArea.HasLiveCell = false
+			return &nextArea
 		}
 	}
-	g, _ := New(&size, &initialTestCell, customIterateCell)
+	g, _ := New(&size, &initialTestArea, customIterateArea)
 	g.Iterate()
-	cellLiveMap := convertTestCellsMatricToAliveTestCellsMap(g.GetGeneration())
+	areaLiveMap := convertTestAreasMatricToHasLiveCellTestAreasMap(g.GetField())
 
-	expectedBinaryBoard := aliveTestCellsMap{
+	expectedBinaryBoard := testAreasWithLiveCellMap{
 		{true, true, true},
 		{true, true, true},
 		{true, true, true},
 	}
 
-	if areAliveTestCellsMapsEqual(*cellLiveMap, expectedBinaryBoard) {
+	if areHasLiveCellTestAreasMapsEqual(*areaLiveMap, expectedBinaryBoard) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not set custom 'shouldCellDie' logic correcly.")
+		t.Fatalf("Did not set custom 'shouldAreaDie' logic correcly.")
 	}
 }
 
-func TestSetIterateCell(t *testing.T) {
-	testSetIterateCellCaseOne(t)
+func TestSetIterateArea(t *testing.T) {
+	testSetIterateAreaCaseOne(t)
 }
 
-func testGetGenerationCaseOne(t *testing.T) {
+func testGetFieldCaseOne(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialTestCell, defaultIterateCellForTest)
-	generation := g.GetGeneration()
-	aliveCellsMap := convertTestCellsMatricToAliveTestCellsMap(generation)
+	g, _ := New(&size, &initialTestArea, defaultIterateAreaForTest)
+	generation := g.GetField()
+	aliveAreasMap := convertTestAreasMatricToHasLiveCellTestAreasMap(generation)
 
-	expectedCellsMap := [][]bool{{false, false}, {false, false}}
+	expectedAreasMap := [][]bool{{false, false}, {false, false}}
 
-	if areAliveTestCellsMapsEqual(*aliveCellsMap, expectedCellsMap) {
+	if areHasLiveCellTestAreasMapsEqual(*aliveAreasMap, expectedAreasMap) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("Did not get correct generation.")
 	}
 }
 
-func TestGetGeneration(t *testing.T) {
-	testGetGenerationCaseOne(t)
+func TestGetField(t *testing.T) {
+	testGetFieldCaseOne(t)
 }

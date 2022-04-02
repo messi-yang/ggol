@@ -7,32 +7,32 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type WaveGameCell struct {
-	Alive bool
+type WaveGameArea struct {
+	HasLiveCell bool
 }
 
-var initialWaveGameCell WaveGameCell = WaveGameCell{
-	Alive: false,
+var initialWaveGameArea WaveGameArea = WaveGameArea{
+	HasLiveCell: false,
 }
 
-func waveGameIterateCell(
+func waveGameIterateArea(
 	coord *ggol.Coordinate,
-	cell *WaveGameCell,
-	getAdjacentCell ggol.GetAdjacentCell[WaveGameCell],
-) (nextCell *WaveGameCell) {
-	newCell := *cell
-	rightAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: 0, Y: 1})
+	area *WaveGameArea,
+	getAdjacentArea ggol.GetAdjacentArea[WaveGameArea],
+) (nextArea *WaveGameArea) {
+	newArea := *area
+	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
 
-	if rightAdjCell.Alive {
-		newCell.Alive = true
-		return &newCell
+	if rightAdjArea.HasLiveCell {
+		newArea.HasLiveCell = true
+		return &newArea
 	} else {
-		newCell.Alive = false
-		return &newCell
+		newArea.HasLiveCell = false
+		return &newArea
 	}
 }
 
-func initSetWaveGameCells(g ggol.Game[WaveGameCell]) {
+func initSetWaveGameAreas(g ggol.Game[WaveGameArea]) {
 	var margin int = 0
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
@@ -44,21 +44,21 @@ func initSetWaveGameCells(g ggol.Game[WaveGameCell]) {
 					margin = 10 - x%10
 				}
 				c := ggol.Coordinate{X: x, Y: y + margin}
-				g.SetCell(&c, &WaveGameCell{Alive: true})
+				g.SetArea(&c, &WaveGameArea{HasLiveCell: true})
 			}
 		}
 	}
 }
 
-func getWaveGame() *ggol.Game[WaveGameCell] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWaveGameCell, waveGameIterateCell)
-	initSetWaveGameCells(g)
-	var waveGame ggol.Game[WaveGameCell] = g
+func getWaveGame() *ggol.Game[WaveGameArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWaveGameArea, waveGameIterateArea)
+	initSetWaveGameAreas(g)
+	var waveGame ggol.Game[WaveGameArea] = g
 	return &waveGame
 }
 
-func drawWaveGameCell(coord *ggol.Coordinate, cell *WaveGameCell, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !cell.Alive {
+func drawWaveGameArea(coord *ggol.Coordinate, area *WaveGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+	if !area.HasLiveCell {
 		return
 	}
 	for i := 0; i < unit; i += 1 {

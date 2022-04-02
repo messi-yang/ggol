@@ -25,43 +25,43 @@ import {
     "github.com/DumDumGeniuss/ggol"
 )
 
-type MyCell struct {
-    Alive bool
+type MyArea struct {
+    HasLiveCell bool
 }
 
-func cellIterator (
+func areaIterator (
     coord *ggol.Coordinate,
-    cell *MyCell,
-    getAdjacentCell ggol.GetAdjacentCell[MyCell],
-) *MyCell {
-    newCell := *cell
+    area *MyArea,
+    getAdjacentArea ggol.GetAdjacentArea[MyArea],
+) *MyArea {
+    newArea := *area
 
     var aliveAdjacentCellsCount int = 0
     for i := -1; i < 2; i += 1 {
         for j := -1; j < 2; j += 1 {
             if !(i == 0 && j == 0) {
-                adjCell, isCrossBorder := getAdjacentCell(coord, &Coordinate{X: i, Y: j})
-                if adjCell.Alive && !isCrossBorder {
+                adjArea, isCrossBorder := getAdjacentArea(coord, &Coordinate{X: i, Y: j})
+                if adjArea.HasLiveCell && !isCrossBorder {
                     aliveAdjacentCellsCount += 1
                 }
             }
         }
     }
-    if newCell.Alive {
+    if newArea.HasLiveCell {
         if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
-            newCell.Alive = false
-            return &newCell
+            newArea.HasLiveCell = false
+            return &newArea
         } else {
-            newCell.Alive = true
-            return &newCell
+            newArea.HasLiveCell = true
+            return &newArea
         }
     } else {
         if aliveAdjacentCellsCount == 3 {
-            newCell.Alive = true
-            return &newCell
+            newArea.HasLiveCell = true
+            return &newArea
         } else {
-            newCell.Alive = false
-            return &newCell
+            newArea.HasLiveCell = false
+            return &newArea
         }
     }
 }
@@ -69,17 +69,17 @@ func cellIterator (
 main() {
     game, _ := ggol.New(
         &ggol.Size{Height: 3, Width: 3},
-        &MyCell{Alive: false},
-        cellIterator,
+        &MyArea{HasLiveCell: false},
+        areaIterator,
     )
 
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 0}, MyCell{Alive: true})
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 1}, MyCell{Alive: true})
-    game.SetCell(&ggol.Coordinate{X: 1, Y: 2}, MyCell{Alive: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, MyArea{HasLiveCell: true})
 
     game.Iterate()
 
-    fmt.Println(game.GetCell(&ggol.Coordinate{X: 0, Y: 1}))
+    fmt.Println(game.GetArea(&ggol.Coordinate{X: 0, Y: 1}))
 }
 ```
 
@@ -114,28 +114,28 @@ go run ./cmd/*
 
 ### New
 
-Create a new Conway's Game of Life for you with your custom initial cell and your custom way of iterating cells.
+Create a new Conway's Game of Life for you with your custom initial area and your custom way of iterating areas.
 
 ### Reset
 
-Reset entire generation with intial cell.
+Reset entire generation with intial area.
 
 ### Iterate
 
 Iterate generation to get next generation.
 
-### SetCell
+### SetArea
 
-Set value of the cell at the coordinate.
+Set value of the area at the coordinate.
 
 ### GetSize
 
 Get size of the game.
 
-### GetCell
+### GetArea
 
-Get cell at the coordinate.
+Get area at the coordinate.
 
-### GetGeneration
+### GetField
 
 Get current genertaion.

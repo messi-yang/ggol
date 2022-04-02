@@ -17,78 +17,78 @@ const (
 	DirectionRight
 )
 
-type WalkAroundGameCell struct {
+type WalkAroundGameArea struct {
 	Direction Direction
 	Strength  int
 }
 
-var initialWalkAroundGameCell WalkAroundGameCell = WalkAroundGameCell{
+var initialWalkAroundGameArea WalkAroundGameArea = WalkAroundGameArea{
 	Direction: 0,
 	Strength:  0,
 }
 
-func walkAroundGameIterateCell(
+func walkAroundGameIterateArea(
 	coord *ggol.Coordinate,
-	cell *WalkAroundGameCell,
-	getAdjacentCell ggol.GetAdjacentCell[WalkAroundGameCell],
-) (nextCell *WalkAroundGameCell) {
-	newCell := *cell
-	topAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: 0, Y: -1})
-	leftAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: -1, Y: 0})
-	bottomAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: 0, Y: 1})
-	rightAdjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: 1, Y: 0})
+	area *WalkAroundGameArea,
+	getAdjacentArea ggol.GetAdjacentArea[WalkAroundGameArea],
+) (nextArea *WalkAroundGameArea) {
+	newArea := *area
+	topAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
+	leftAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: -1, Y: 0})
+	bottomAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
+	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 1, Y: 0})
 
-	newCell.Strength = 0
-	if topAdjCell.Direction == DirectionBottom {
-		newCell.Strength += topAdjCell.Strength
+	newArea.Strength = 0
+	if topAdjArea.Direction == DirectionBottom {
+		newArea.Strength += topAdjArea.Strength
 	}
-	if leftAdjCell.Direction == DirectionRight {
-		newCell.Strength += leftAdjCell.Strength
+	if leftAdjArea.Direction == DirectionRight {
+		newArea.Strength += leftAdjArea.Strength
 	}
-	if bottomAdjCell.Direction == DirectionTop {
-		newCell.Strength += bottomAdjCell.Strength
+	if bottomAdjArea.Direction == DirectionTop {
+		newArea.Strength += bottomAdjArea.Strength
 	}
-	if rightAdjCell.Direction == DirectionLeft {
-		newCell.Strength += rightAdjCell.Strength
+	if rightAdjArea.Direction == DirectionLeft {
+		newArea.Strength += rightAdjArea.Strength
 	}
-	newCell.Direction = Direction(rand.Intn(4))
+	newArea.Direction = Direction(rand.Intn(4))
 
-	return &newCell
+	return &newArea
 }
 
-func initSetWalkAroundGameCells(g ggol.Game[WalkAroundGameCell]) {
+func initSetWalkAroundGameAreas(g ggol.Game[WalkAroundGameArea]) {
 	size := g.GetSize()
 	for i := 0; i < 500; i += 1 {
-		g.SetCell(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &WalkAroundGameCell{Strength: 1, Direction: 0})
+		g.SetArea(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &WalkAroundGameArea{Strength: 1, Direction: 0})
 	}
 }
 
-func getWalkAroundGame() *ggol.Game[WalkAroundGameCell] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWalkAroundGameCell, walkAroundGameIterateCell)
-	initSetWalkAroundGameCells(g)
-	var walkAroundGame ggol.Game[WalkAroundGameCell] = g
+func getWalkAroundGame() *ggol.Game[WalkAroundGameArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWalkAroundGameArea, walkAroundGameIterateArea)
+	initSetWalkAroundGameAreas(g)
+	var walkAroundGame ggol.Game[WalkAroundGameArea] = g
 	return &walkAroundGame
 }
 
-func drawWalkAroundGameCell(coord *ggol.Coordinate, cell *WalkAroundGameCell, unit int, image *image.Paletted, palette *[]color.Color) {
-	if cell.Strength == 0 {
+func drawWalkAroundGameArea(coord *ggol.Coordinate, area *WalkAroundGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+	if area.Strength == 0 {
 		return
 	}
 	for i := 0; i < unit; i += 1 {
 		for j := 0; j < unit; j += 1 {
-			if cell.Strength == 1 {
+			if area.Strength == 1 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[RedColorIndex])
-			} else if cell.Strength == 2 {
+			} else if area.Strength == 2 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[OrangeColorIndex])
-			} else if cell.Strength == 3 {
+			} else if area.Strength == 3 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[YellowColorIndex])
-			} else if cell.Strength == 4 {
+			} else if area.Strength == 4 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GreenColorIndex])
-			} else if cell.Strength == 5 {
+			} else if area.Strength == 5 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[BlueColorIndex])
-			} else if cell.Strength == 6 {
+			} else if area.Strength == 6 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[CyanColorIndex])
-			} else if cell.Strength == 7 {
+			} else if area.Strength == 7 {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[PurpleColorIndex])
 			} else {
 				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GoldColorIndex])

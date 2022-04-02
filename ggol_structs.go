@@ -20,7 +20,7 @@ func (e *ErrCoordinateIsOutsideBorder) Error() string {
 	return fmt.Sprintf("Coordinate (%v, %v) is outside game border.", e.Coordinate.X, e.Coordinate.Y)
 }
 
-// This contains X and Y, which represents a coordinate in cellLiveMap.
+// Coordinate that indicates the pisition of the area.
 type Coordinate struct {
 	X int
 	Y int
@@ -32,7 +32,7 @@ type Size struct {
 	Height int
 }
 
-type GetAdjacentCell[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (cell *T, isCrossBorder bool)
+type GetAdjacentArea[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
 
-// Decide next condition of the cell.
-type IterateCell[T any] func(coord *Coordinate, cell *T, getAdjacentCell GetAdjacentCell[T]) (nextCell *T)
+// Get next status of the area.
+type IterateArea[T any] func(coord *Coordinate, area *T, getAdjacentArea GetAdjacentArea[T]) (nextArea *T)

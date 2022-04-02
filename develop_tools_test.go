@@ -4,47 +4,47 @@ import (
 	"testing"
 )
 
-func testareAliveTestCellsMapsEqualCaseOne(t *testing.T) {
-	g1 := aliveTestCellsMap{{true, false}, {true, false}}
-	g2 := aliveTestCellsMap{{true, false}, {true, false}}
+func testAreHasLiveCellTestAreasMapsEqualCaseOne(t *testing.T) {
+	g1 := testAreasWithLiveCellMap{{true, false}, {true, false}}
+	g2 := testAreasWithLiveCellMap{{true, false}, {true, false}}
 
-	if areAliveTestCellsMapsEqual(g1, g2) {
+	if areHasLiveCellTestAreasMapsEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should be equal.")
 	}
 }
 
-func testareAliveTestCellsMapsEqualCaseTwo(t *testing.T) {
-	g1 := aliveTestCellsMap{{true, false}, {true, false}}
-	g2 := aliveTestCellsMap{{true, false}, {true, true}}
+func testAreHasLiveCellTestAreasMapsEqualCaseTwo(t *testing.T) {
+	g1 := testAreasWithLiveCellMap{{true, false}, {true, false}}
+	g2 := testAreasWithLiveCellMap{{true, false}, {true, true}}
 
-	if !areAliveTestCellsMapsEqual(g1, g2) {
+	if !areHasLiveCellTestAreasMapsEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should not be equal.")
 	}
 }
 
-func TestAliveTestCellsMapsEqual(t *testing.T) {
-	testareAliveTestCellsMapsEqualCaseOne(t)
-	testareAliveTestCellsMapsEqualCaseTwo(t)
+func TestHasLiveCellTestAreasMapsEqual(t *testing.T) {
+	testAreHasLiveCellTestAreasMapsEqualCaseOne(t)
+	testAreHasLiveCellTestAreasMapsEqualCaseTwo(t)
 }
 
-func testConvertTestCellsMatricToAliveTestCellsMapCaseOne(t *testing.T) {
-	game, _ := New(&Size{2, 2}, &testCell{Alive: true}, defaultIterateCellForTest)
-	generation := game.GetGeneration()
-	liveCellsMap := convertTestCellsMatricToAliveTestCellsMap(generation)
+func testConvertTestAreasMatricToHasLiveCellTestAreasMapCaseOne(t *testing.T) {
+	game, _ := New(&Size{2, 2}, &testArea{HasLiveCell: true}, defaultIterateAreaForTest)
+	generation := game.GetField()
+	liveAreasMap := convertTestAreasMatricToHasLiveCellTestAreasMap(generation)
 
-	expectedMap := aliveTestCellsMap{{true, true}, {true, true}}
+	expectedMap := testAreasWithLiveCellMap{{true, true}, {true, true}}
 
-	if areAliveTestCellsMapsEqual(*liveCellsMap, expectedMap) {
+	if areHasLiveCellTestAreasMapsEqual(*liveAreasMap, expectedMap) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not convert matrix of *TestCell to aliveTestCellsMap successfully.")
+		t.Fatalf("Did not convert matrix of *TestArea to testAreasWithLiveCellMap successfully.")
 	}
 }
 
-func TestConvertTestCellsMatricToAliveTestCellsMap(t *testing.T) {
-	testConvertTestCellsMatricToAliveTestCellsMapCaseOne(t)
+func TestConvertTestAreasMatricToHasLiveCellTestAreasMap(t *testing.T) {
+	testConvertTestAreasMatricToHasLiveCellTestAreasMapCaseOne(t)
 }

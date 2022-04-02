@@ -7,72 +7,72 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type NormalGameCell struct {
-	Alive bool
+type NormalGameArea struct {
+	HasLiveCell bool
 }
 
-var initialNormalGameCell NormalGameCell = NormalGameCell{
-	Alive: false,
+var initialNormalGameArea NormalGameArea = NormalGameArea{
+	HasLiveCell: false,
 }
 
-func normalGameIterateCell(
+func normalGameIterateArea(
 	coord *ggol.Coordinate,
-	cell *NormalGameCell,
-	getAdjacentCell ggol.GetAdjacentCell[NormalGameCell],
-) (nextCell *NormalGameCell) {
-	newCell := *cell
+	area *NormalGameArea,
+	getAdjacentArea ggol.GetAdjacentArea[NormalGameArea],
+) (nextArea *NormalGameArea) {
+	newArea := *area
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
 		for j := -1; j < 2; j += 1 {
 			if !(i == 0 && j == 0) {
-				adjCell, _ := getAdjacentCell(coord, &ggol.Coordinate{X: i, Y: j})
-				if adjCell.Alive {
+				adjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: i, Y: j})
+				if adjArea.HasLiveCell {
 					aliveAdjacentCellsCount += 1
 				}
 			}
 		}
 	}
-	if newCell.Alive {
+	if newArea.HasLiveCell {
 		if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
-			newCell.Alive = false
-			return &newCell
+			newArea.HasLiveCell = false
+			return &newArea
 		} else {
-			newCell.Alive = true
-			return &newCell
+			newArea.HasLiveCell = true
+			return &newArea
 		}
 	} else {
 		if aliveAdjacentCellsCount == 3 {
-			newCell.Alive = true
-			return &newCell
+			newArea.HasLiveCell = true
+			return &newArea
 		} else {
-			newCell.Alive = false
-			return &newCell
+			newArea.HasLiveCell = false
+			return &newArea
 		}
 	}
 }
 
-func initNormalGameCells(g ggol.Game[NormalGameCell]) {
+func initNormalGameAreas(g ggol.Game[NormalGameArea]) {
 	for i := 0; i < 10; i += 1 {
 		for j := 0; j < 10; j += 1 {
-			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, &NormalGameCell{Alive: true})
-			g.SetCell(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, &NormalGameCell{Alive: true})
+			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &NormalGameArea{HasLiveCell: true})
+			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &NormalGameArea{HasLiveCell: true})
+			g.SetArea(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &NormalGameArea{HasLiveCell: true})
+			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, &NormalGameArea{HasLiveCell: true})
+			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, &NormalGameArea{HasLiveCell: true})
 		}
 	}
 }
 
-func getNormalGame() *ggol.Game[NormalGameCell] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialNormalGameCell, normalGameIterateCell)
-	initNormalGameCells(g)
-	var normalGame ggol.Game[NormalGameCell] = g
+func getNormalGame() *ggol.Game[NormalGameArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialNormalGameArea, normalGameIterateArea)
+	initNormalGameAreas(g)
+	var normalGame ggol.Game[NormalGameArea] = g
 	return &normalGame
 }
 
-func drawNormalGameCell(coord *ggol.Coordinate, cell *NormalGameCell, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !cell.Alive {
+func drawNormalGameArea(coord *ggol.Coordinate, area *NormalGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+	if !area.HasLiveCell {
 		return
 	}
 	for i := 0; i < unit; i += 1 {
