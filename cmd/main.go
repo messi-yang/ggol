@@ -34,8 +34,8 @@ func main() {
 
 	generateGif(
 		0,
-		"output/walk_around_game.gif",
-		getWalkAroundGame(),
-		drawWalkAroundGameArea,
+		"output/who_is_king_game.gif",
+		getWhoIsKingGame(),
+		drawWhoIsKingGameArea,
 	)
 }
