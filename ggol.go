@@ -13,13 +13,13 @@ type Game[T any] interface {
 	// Set your area iterator to tell the game how you want to iterate your areas.
 	SetAreaIterator(iterator AreaIterator[T])
 	// Set the status of the area at the given coordinate.
-	SetArea(*Coordinate, *T) error
+	SetArea(coord *Coordinate, area *T) (err error)
 	// Get the size of the field of the game.
-	GetSize() *Size
+	GetSize() (size *Size)
 	// Get the status of the area at the given coordinate.
-	GetArea(*Coordinate) (*T, error)
+	GetArea(coord *Coordinate) (area *T, err error)
 	// Get a matric that contains informaiton of all fields.
-	GetField() *[]*[]*T
+	GetField() (field *[]*[]*T)
 }
 
 type gameInfo[T any] struct {
