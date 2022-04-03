@@ -52,7 +52,7 @@ func main() {
 	)
 
 	generateGif(
-		100,
+		200,
 		10,
 		0,
 		"output/game_of_matrix.gif",
