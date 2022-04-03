@@ -4,9 +4,11 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)](https://goreportcard.com/report/github.com/DumDumGeniuss/ggol)
 [![Build Status](https://app.travis-ci.com/DumDumGeniuss/ggol.svg?branch=main)](https://app.travis-ci.com/DumDumGeniuss/ggol)
 
-Gonways Game of Life is a go package that provides fundamental functions for running [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life),
+Gonways Game of Life is a go package that provides a set of API for you to implement the [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) effortlessly.
 
-The goal is to help you build a Conway's Game of Life in the way you like.
+You can even build a completely new type of game with it :).
+
+Please check [API document](https://pkg.go.dev/github.com/DumDumGeniuss/ggol) here.
 
 ## Features
 
@@ -22,9 +24,9 @@ go get github.com/DumDumGeniuss/ggol
 
 ## Usage
 
-### Standard Game
+### Build Conway's Game of Life
 
-The example below shows you how to buil a standard Conway's Game of Life with the API.
+The example below shows you how to buil a the Conway's Game of Life with the API.
 
 ```go
 package main
@@ -165,20 +167,4 @@ git clone https://github.com/DumDumGeniuss/ggol.git
 cd ggol
 go mod tidy
 go run example/*
-```
-
-## Type
-
-### Game
-
-```go
-type Game[T any] interface {
-    Reset()
-    Iterate()
-    SetAreaIterator(iterator AreaIterator[T])
-    SetArea(*Coordinate, *T) error
-    GetSize() *Size
-    GetArea(*Coordinate) (*T, error)
-    GetField() *[]*[]*T
-}
 ```
