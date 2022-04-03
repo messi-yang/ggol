@@ -46,7 +46,7 @@ type MyArea struct {
 // how to iterate to get next stage of the area.
 // This iterator implement 4 basic rules of Conways Game
 // of Life, you can custom your rules here :).
-func areaIterator (
+func iterateArea (
     coord *ggol.Coordinate,
     area *MyArea,
     getAdjacentArea ggol.GetAdjacentArea[MyArea],
@@ -68,23 +68,22 @@ func areaIterator (
         }
     }
     if newArea.HasLiveCell {
-        // Can this live cell survive?
         if liveAdjacentCellsCount == 2 || liveAdjacentCellsCount == 3 {
+            // Cell survives due to rule 2.
             newArea.HasLiveCell = true
             return &newArea
         } else {
+            // Died of rule 1 or rule 3.
             newArea.HasLiveCell = false
             return &newArea
         }
     } else {
-        // Can this dead cell revice?
+        // Cell becomes alive due to rule 4.
         if liveAdjacentCellsCount == 3 {
             newArea.HasLiveCell = true
             return &newArea
-        } else {
-            newArea.HasLiveCell = false
-            return &newArea
         }
+        return &newArea
     }
 }
 
@@ -96,7 +95,7 @@ main() {
     game, _ := ggol.New(
         &ggol.Size{Height: 3, Width: 3},
         &MyArea{HasLiveCell: false},
-        areaIterator,
+        iterateArea,
     )
 
     // Let's revice 3 cells to form a Blinker pattern :).
@@ -118,43 +117,43 @@ main() {
 
 ### Conway's Game of Life
 
-[Sample Code](./cmd/normal_game.go)
+[Sample Code](./example/conways_game_of_life.go)
 
-![Normal](./doc/normal_game.gif)
+![Normal](./doc/conways_game_of_life.gif)
 
-### Waves
+### Game of Wave
 
-Build multiple waves that keep going up forever.
+Build multiple wave that keep going up forever.
 
-[Sample Code](./cmd/wave_game.go)
+[Sample Code](./example/game_of_wave.go)
 
-![Wave](./doc/wave_game.gif)
+![Wave](./doc/game_of_wave.gif)
 
-### Black or White
+### Game of Black and White
 
 You can switch black and white in every iteration.
 
-[Sample Code](./cmd/black_white_game.go)
+[Sample Code](./example/game_of_black_and_white.go)
 
-![Black White](./doc/black_white_game.gif)
+![Black White](./doc/game_of_black_and_white.gif)
 
 ### Who Is King
 
 When cells collide, they get more power, cells with greatest power will show in gold color.
 
-[Sample Code](./cmd/who_is_king_game.go)
+[Sample Code](./example/game_of_king.go)
 
-![Who Is King](./doc/who_is_king_game.gif)
+![Who Is King](./doc/game_of_king.gif)
 
 ## Build Sample GIF
 
-You can refer to sample code in [here](./cmd/) to build GIFs of your custom games.
+You can refer to sample code in [here](./example/) to build GIFs of your custom games.
 
 ```bash
 git clone https://github.com/DumDumGeniuss/ggol.git
 cd ggol
 go mod tidy
-go run ./cmd/*
+go run example/*
 ```
 
 ## Document

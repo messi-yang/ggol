@@ -8,30 +8,21 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type Direction int
-
-const (
-	DirectionTop Direction = iota
-	DirectionLeft
-	DirectionBottom
-	DirectionRight
-)
-
-type WhoIsKingGameArea struct {
+type gameOfKingArea struct {
 	Direction Direction
 	Strength  int
 }
 
-var initialWhoIsKingGameArea WhoIsKingGameArea = WhoIsKingGameArea{
+var initialGameOfKingArea gameOfKingArea = gameOfKingArea{
 	Direction: 0,
 	Strength:  0,
 }
 
-func whoIsKingGameIterateArea(
+func gameOfKingIterateArea(
 	coord *ggol.Coordinate,
-	area *WhoIsKingGameArea,
-	getAdjacentArea ggol.GetAdjacentArea[WhoIsKingGameArea],
-) (nextArea *WhoIsKingGameArea) {
+	area *gameOfKingArea,
+	getAdjacentArea ggol.GetAdjacentArea[gameOfKingArea],
+) (nextArea *gameOfKingArea) {
 	newArea := *area
 	topAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
 	leftAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: -1, Y: 0})
@@ -56,21 +47,21 @@ func whoIsKingGameIterateArea(
 	return &newArea
 }
 
-func initSetWhoIsKingGameAreas(g ggol.Game[WhoIsKingGameArea]) {
+func initSetGameOfKingAreas(g ggol.Game[gameOfKingArea]) {
 	size := g.GetSize()
 	for i := 0; i < 500; i += 1 {
-		g.SetArea(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &WhoIsKingGameArea{Strength: 1, Direction: 0})
+		g.SetArea(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &gameOfKingArea{Strength: 1, Direction: 0})
 	}
 }
 
-func getWhoIsKingGame() *ggol.Game[WhoIsKingGameArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWhoIsKingGameArea, whoIsKingGameIterateArea)
-	initSetWhoIsKingGameAreas(g)
-	var whoIsKingGame ggol.Game[WhoIsKingGameArea] = g
-	return &whoIsKingGame
+func getGameOfKing() *ggol.Game[gameOfKingArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfKingArea, gameOfKingIterateArea)
+	initSetGameOfKingAreas(g)
+	var gameOfKing ggol.Game[gameOfKingArea] = g
+	return &gameOfKing
 }
 
-func drawWhoIsKingGameArea(coord *ggol.Coordinate, area *WhoIsKingGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if area.Strength == 0 {
 		return
 	}

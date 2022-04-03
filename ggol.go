@@ -57,7 +57,7 @@ func createField[T any](size *Size, initialArea *T) *[]*[]*T {
 	return &field
 }
 
-func (g *gameInfo[T]) isCoordinateOutsideBorder(c *Coordinate) bool {
+func (g *gameInfo[T]) isCoordinateOutsideField(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
@@ -69,7 +69,7 @@ func (g *gameInfo[T]) getAdjacentArea(
 	targetY := originCoord.Y + relativeCoord.Y
 	var isCrossBorder bool = false
 
-	if (g.isCoordinateOutsideBorder(&Coordinate{X: targetX, Y: targetY})) {
+	if (g.isCoordinateOutsideField(&Coordinate{X: targetX, Y: targetY})) {
 		isCrossBorder = true
 		for targetX < 0 {
 			targetX += g.size.Width
@@ -120,7 +120,7 @@ func (g *gameInfo[T]) SetArea(c *Coordinate, area *T) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	if g.isCoordinateOutsideBorder(c) {
+	if g.isCoordinateOutsideField(c) {
 		return &ErrCoordinateIsOutsideBorder{c}
 	}
 	(*(*g.field)[c.X])[c.Y] = area
@@ -141,7 +141,7 @@ func (g *gameInfo[T]) GetArea(c *Coordinate) (*T, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	if g.isCoordinateOutsideBorder(c) {
+	if g.isCoordinateOutsideField(c) {
 		return nil, &ErrCoordinateIsOutsideBorder{c}
 	}
 

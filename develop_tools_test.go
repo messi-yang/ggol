@@ -5,10 +5,10 @@ import (
 )
 
 func testAreHasLiveCellTestAreasMapsEqualCaseOne(t *testing.T) {
-	g1 := testAreasWithLiveCellMap{{true, false}, {true, false}}
-	g2 := testAreasWithLiveCellMap{{true, false}, {true, false}}
+	g1 := areasHavingLiveCellForTest{{true, false}, {true, false}}
+	g2 := areasHavingLiveCellForTest{{true, false}, {true, false}}
 
-	if areHasLiveCellTestAreasMapsEqual(g1, g2) {
+	if areTwoAreasHavingLiveCellForTestEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should be equal.")
@@ -16,10 +16,10 @@ func testAreHasLiveCellTestAreasMapsEqualCaseOne(t *testing.T) {
 }
 
 func testAreHasLiveCellTestAreasMapsEqualCaseTwo(t *testing.T) {
-	g1 := testAreasWithLiveCellMap{{true, false}, {true, false}}
-	g2 := testAreasWithLiveCellMap{{true, false}, {true, true}}
+	g1 := areasHavingLiveCellForTest{{true, false}, {true, false}}
+	g2 := areasHavingLiveCellForTest{{true, false}, {true, true}}
 
-	if !areHasLiveCellTestAreasMapsEqual(g1, g2) {
+	if !areTwoAreasHavingLiveCellForTestEqual(g1, g2) {
 		t.Log("Passed")
 	} else {
 		t.Fatalf("g1 and g2 should not be equal.")
@@ -32,16 +32,16 @@ func TestHasLiveCellTestAreasMapsEqual(t *testing.T) {
 }
 
 func testConvertTestAreasMatricToHasLiveCellTestAreasMapCaseOne(t *testing.T) {
-	game, _ := New(&Size{2, 2}, &testArea{HasLiveCell: true}, defaultIterateAreaForTest)
+	game, _ := New(&Size{2, 2}, &areaForTest{hasLiveCell: true}, defauAreaForTestIterator)
 	generation := game.GetField()
-	liveAreasMap := convertTestAreasMatricToHasLiveCellTestAreasMap(generation)
+	liveAreasMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(generation)
 
-	expectedMap := testAreasWithLiveCellMap{{true, true}, {true, true}}
+	expectedMap := areasHavingLiveCellForTest{{true, true}, {true, true}}
 
-	if areHasLiveCellTestAreasMapsEqual(*liveAreasMap, expectedMap) {
+	if areTwoAreasHavingLiveCellForTestEqual(*liveAreasMap, expectedMap) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not convert matrix of *TestArea to testAreasWithLiveCellMap successfully.")
+		t.Fatalf("Did not convert matrix of *TestArea to areasHavingLiveCellForTest successfully.")
 	}
 }
 

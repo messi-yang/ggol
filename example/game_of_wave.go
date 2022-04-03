@@ -7,19 +7,19 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type WaveGameArea struct {
+type gameOfWaveArea struct {
 	HasLiveCell bool
 }
 
-var initialWaveGameArea WaveGameArea = WaveGameArea{
+var initialGameOfWaveArea gameOfWaveArea = gameOfWaveArea{
 	HasLiveCell: false,
 }
 
-func waveGameIterateArea(
+func gameOfWaveIterateArea(
 	coord *ggol.Coordinate,
-	area *WaveGameArea,
-	getAdjacentArea ggol.GetAdjacentArea[WaveGameArea],
-) (nextArea *WaveGameArea) {
+	area *gameOfWaveArea,
+	getAdjacentArea ggol.GetAdjacentArea[gameOfWaveArea],
+) (nextArea *gameOfWaveArea) {
 	newArea := *area
 	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
 
@@ -32,7 +32,7 @@ func waveGameIterateArea(
 	}
 }
 
-func initSetWaveGameAreas(g ggol.Game[WaveGameArea]) {
+func initSetGameOfWaveAreas(g ggol.Game[gameOfWaveArea]) {
 	var margin int = 0
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
@@ -44,20 +44,20 @@ func initSetWaveGameAreas(g ggol.Game[WaveGameArea]) {
 					margin = 10 - x%10
 				}
 				c := ggol.Coordinate{X: x, Y: y + margin}
-				g.SetArea(&c, &WaveGameArea{HasLiveCell: true})
+				g.SetArea(&c, &gameOfWaveArea{HasLiveCell: true})
 			}
 		}
 	}
 }
 
-func getWaveGame() *ggol.Game[WaveGameArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialWaveGameArea, waveGameIterateArea)
-	initSetWaveGameAreas(g)
-	var waveGame ggol.Game[WaveGameArea] = g
-	return &waveGame
+func getGameOfWave() *ggol.Game[gameOfWaveArea] {
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfWaveArea, gameOfWaveIterateArea)
+	initSetGameOfWaveAreas(g)
+	var gameOfWave ggol.Game[gameOfWaveArea] = g
+	return &gameOfWave
 }
 
-func drawWaveGameArea(coord *ggol.Coordinate, area *WaveGameArea, unit int, image *image.Paletted, palette *[]color.Color) {
+func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if !area.HasLiveCell {
 		return
 	}
