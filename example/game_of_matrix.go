@@ -12,16 +12,18 @@ type gameOfMatrixArea struct {
 	Head                 bool
 	RemainingWordsLength int
 	WordsLength          int
-	WordsCount           int
+	// One column can only have a word stream at a time, so we have this count
+	CountFieldHight int
 }
 
 var initialGameOfMatrixArea gameOfMatrixArea = gameOfMatrixArea{
 	Head:                 false,
 	RemainingWordsLength: 0,
 	WordsLength:          0,
-	WordsCount:           50,
+	CountFieldHight:      50,
 }
 
+// A field can only have 20 word of streams in total
 var totalWordStreamsCount = 0
 
 func gameOfMatrixAreaIterator(
@@ -31,12 +33,12 @@ func gameOfMatrixAreaIterator(
 ) (nextArea *gameOfMatrixArea) {
 	newArea := *area
 	if coord.Y == 0 {
-		if area.WordsLength == 0 && area.WordsCount >= 50 && totalWordStreamsCount < 20 {
+		if area.WordsLength == 0 && area.CountFieldHight >= 50 && totalWordStreamsCount < 20 {
 			if rand.Intn(30) == 29 {
 				newArea.Head = true
 				newArea.WordsLength = 10 + rand.Intn(40)
 				newArea.RemainingWordsLength = newArea.WordsLength
-				newArea.WordsCount = 0
+				newArea.CountFieldHight = 0
 				totalWordStreamsCount += 1
 			}
 		} else if area.Head {
@@ -49,7 +51,7 @@ func gameOfMatrixAreaIterator(
 			newArea.RemainingWordsLength = 0
 			totalWordStreamsCount -= 1
 		}
-		newArea.WordsCount += 1
+		newArea.CountFieldHight += 1
 		return &newArea
 	} else {
 		prevArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
