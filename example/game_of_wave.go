@@ -58,13 +58,18 @@ func getGameOfWave() *ggol.Game[gameOfWaveArea] {
 	return &gameOfWave
 }
 
+var gameOfWavePalette = []color.Color{
+	color.RGBA{0x00, 0x00, 0x00, 0xff},
+	color.RGBA{0xff, 0xff, 0xff, 0xff},
+}
+
 func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if !area.HasLiveCell {
 		return
 	}
 	for i := 0; i < unit; i += 1 {
 		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[WhiteColorIndex])
+			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
 		}
 	}
 }

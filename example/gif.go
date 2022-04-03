@@ -10,34 +10,9 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-const (
-	BlackColorIndex = iota
-	WhiteColorIndex
-	RedColorIndex
-	BlueColorIndex
-	CyanColorIndex
-	GreenColorIndex
-	YellowColorIndex
-	OrangeColorIndex
-	PurpleColorIndex
-	GoldColorIndex
-)
-
 type DrawArea[T any] func(coord *ggol.Coordinate, area *T, unit int, image *image.Paletted, palette *[]color.Color)
 
-func generateGif[T any](step int, unit int, duration int, fileName string, g *ggol.Game[T], drawArea DrawArea[T]) {
-	var palette = []color.Color{
-		color.RGBA{0x00, 0x00, 0x00, 0xff},
-		color.RGBA{0xff, 0xff, 0xff, 0xff},
-		color.RGBA{0xe5, 0x73, 0x73, 0xff},
-		color.RGBA{0x1e, 0x88, 0xe5, 0xff},
-		color.RGBA{0x00, 0xac, 0xc1, 0xff},
-		color.RGBA{0x43, 0xa0, 0x47, 0xff},
-		color.RGBA{0xfd, 0xd8, 0x35, 0xff},
-		color.RGBA{0xfb, 0x8c, 0x00, 0xff},
-		color.RGBA{0x8e, 0x24, 0xaa, 0xff},
-		color.RGBA{0xff, 0xd7, 0x00, 0xff},
-	}
+func generateGif[T any](step int, unit int, duration int, fileName string, g *ggol.Game[T], drawArea DrawArea[T], palette []color.Color) {
 	var images []*image.Paletted
 	var delays []int
 	var img *image.Paletted

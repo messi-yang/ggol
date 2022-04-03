@@ -150,13 +150,21 @@ You can switch black and white in every iteration.
 
 ![Black White](./doc/game_of_black_and_white.gif)
 
-### Who Is King
+### Game of King
 
 When cells collide, they get more power, cells with greatest power will show in gold color.
 
 [Sample Code](./example/game_of_king.go)
 
 ![Who Is King](./doc/game_of_king.gif)
+
+### Game of Matrix
+
+The rain of code in the movie Matrix.
+
+[Sample Code](./example/game_of_matrix.go)
+
+![Who Is King](./doc/game_of_matrix.gif)
 
 ## Build Sample GIF
 

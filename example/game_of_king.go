@@ -64,28 +64,28 @@ func getGameOfKing() *ggol.Game[gameOfKingArea] {
 	return &gameOfKing
 }
 
+var gameOfKingPalette = []color.Color{
+	color.RGBA{0x00, 0x00, 0x00, 0xff},
+	color.RGBA{0xe5, 0x73, 0x73, 0xff},
+	color.RGBA{0x1e, 0x88, 0xe5, 0xff},
+	color.RGBA{0x00, 0xac, 0xc1, 0xff},
+	color.RGBA{0x43, 0xa0, 0x47, 0xff},
+	color.RGBA{0xfd, 0xd8, 0x35, 0xff},
+	color.RGBA{0xfb, 0x8c, 0x00, 0xff},
+	color.RGBA{0x8e, 0x24, 0xaa, 0xff},
+	color.RGBA{0xff, 0xd7, 0x00, 0xff},
+}
+
 func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if area.Strength == 0 {
 		return
 	}
 	for i := 0; i < unit; i += 1 {
 		for j := 0; j < unit; j += 1 {
-			if area.Strength == 1 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[RedColorIndex])
-			} else if area.Strength == 2 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[OrangeColorIndex])
-			} else if area.Strength == 3 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[YellowColorIndex])
-			} else if area.Strength == 4 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GreenColorIndex])
-			} else if area.Strength == 5 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[BlueColorIndex])
-			} else if area.Strength == 6 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[CyanColorIndex])
-			} else if area.Strength == 7 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[PurpleColorIndex])
+			if area.Strength < 8 {
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[area.Strength])
 			} else {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[GoldColorIndex])
+				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[8])
 			}
 		}
 	}
