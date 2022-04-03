@@ -49,13 +49,15 @@ func gameOfKingAreaIterator(
 
 func initSetGameOfKingAreas(g ggol.Game[gameOfKingArea]) {
 	size := g.GetSize()
-	for i := 0; i < 500; i += 1 {
+	cellsCount := int((size.Width * size.Height) / 2)
+	for i := 0; i < cellsCount; i += 1 {
 		g.SetArea(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &gameOfKingArea{Strength: 1, Direction: 0})
 	}
 }
 
 func getGameOfKing() *ggol.Game[gameOfKingArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfKingArea)
+	size := ggol.Size{Width: 250, Height: 250}
+	g, _ := ggol.New(&size, &initialGameOfKingArea)
 	g.SetAreaIterator(gameOfKingAreaIterator)
 	initSetGameOfKingAreas(g)
 	var gameOfKing ggol.Game[gameOfKingArea] = g

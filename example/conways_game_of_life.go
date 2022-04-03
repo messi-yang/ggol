@@ -53,8 +53,9 @@ func conwaysGameOfLifeAreaIterator(
 }
 
 func initConwaysGameOfLifeAreas(g ggol.Game[conwaysGameOfLifeArea]) {
-	for i := 0; i < 10; i += 1 {
-		for j := 0; j < 10; j += 1 {
+	size := g.GetSize()
+	for i := 0; i < size.Height; i += 1 {
+		for j := 0; j < size.Height; j += 1 {
 			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &conwaysGameOfLifeArea{HasLiveCell: true})
 			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
 			g.SetArea(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
@@ -65,7 +66,8 @@ func initConwaysGameOfLifeAreas(g ggol.Game[conwaysGameOfLifeArea]) {
 }
 
 func getConwaysGameOfLife() *ggol.Game[conwaysGameOfLifeArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialConwaysGameOfLifeArea)
+	size := ggol.Size{Width: 50, Height: 50}
+	g, _ := ggol.New(&size, &initialConwaysGameOfLifeArea)
 	g.SetAreaIterator(conwaysGameOfLifeAreaIterator)
 	initConwaysGameOfLifeAreas(g)
 	var conwaysGameOfLife ggol.Game[conwaysGameOfLifeArea] = g
