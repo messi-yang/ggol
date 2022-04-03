@@ -15,10 +15,10 @@ var initialConwaysGameOfLifeArea conwaysGameOfLifeArea = conwaysGameOfLifeArea{
 	HasLiveCell: false,
 }
 
-func conwaysGameOfLifeIterateArea(
+func conwaysGameOfLifeAreaIterator(
 	coord *ggol.Coordinate,
 	area *conwaysGameOfLifeArea,
-	getAdjacentArea ggol.GetAdjacentArea[conwaysGameOfLifeArea],
+	getAdjacentArea ggol.AdjacentAreaGetter[conwaysGameOfLifeArea],
 ) (nextArea *conwaysGameOfLifeArea) {
 	newArea := *area
 
@@ -65,7 +65,8 @@ func initConwaysGameOfLifeAreas(g ggol.Game[conwaysGameOfLifeArea]) {
 }
 
 func getConwaysGameOfLife() *ggol.Game[conwaysGameOfLifeArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialConwaysGameOfLifeArea, conwaysGameOfLifeIterateArea)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialConwaysGameOfLifeArea)
+	g.SetAreaIterator(conwaysGameOfLifeAreaIterator)
 	initConwaysGameOfLifeAreas(g)
 	var conwaysGameOfLife ggol.Game[conwaysGameOfLifeArea] = g
 	return &conwaysGameOfLife

@@ -9,6 +9,7 @@ import (
 type Game[T any] interface {
 	Reset()
 	Iterate()
+	SetAreaIterator(iterator AreaIterator[T])
 	SetArea(*Coordinate, *T) error
 	GetSize() *Size
 	GetArea(*Coordinate) (*T, error)
@@ -19,8 +20,12 @@ type gameInfo[T any] struct {
 	size         *Size
 	initialArea  *T
 	field        *[]*[]*T
-	areaIterator IterateArea[T]
+	areaIterator AreaIterator[T]
 	locker       sync.RWMutex
+}
+
+func defaultAreaIterator[T any](coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T) {
+	return area
 }
 
 // Return a new Game with the given width and height, seed is planted
@@ -28,7 +33,6 @@ type gameInfo[T any] struct {
 func New[T any](
 	size *Size,
 	initialArea *T,
-	areaIterator IterateArea[T],
 ) (Game[T], error) {
 	if size.Width < 0 || size.Height < 0 {
 		return nil, &ErrSizeIsNotValid{size}
@@ -38,7 +42,7 @@ func New[T any](
 		size,
 		initialArea,
 		createField(size, initialArea),
-		areaIterator,
+		defaultAreaIterator[T],
 		sync.RWMutex{},
 	}
 
@@ -113,6 +117,10 @@ func (g *gameInfo[T]) Iterate() {
 			(*(*g.field)[x])[y] = nextField[x][y]
 		}
 	}
+}
+
+func (g *gameInfo[T]) SetAreaIterator(iterator AreaIterator[T]) {
+	g.areaIterator = iterator
 }
 
 // Update the area at the given coordinate.

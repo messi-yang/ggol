@@ -18,10 +18,10 @@ var initialGameOfKingArea gameOfKingArea = gameOfKingArea{
 	Strength:  0,
 }
 
-func gameOfKingIterateArea(
+func gameOfKingAreaIterator(
 	coord *ggol.Coordinate,
 	area *gameOfKingArea,
-	getAdjacentArea ggol.GetAdjacentArea[gameOfKingArea],
+	getAdjacentArea ggol.AdjacentAreaGetter[gameOfKingArea],
 ) (nextArea *gameOfKingArea) {
 	newArea := *area
 	topAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
@@ -55,7 +55,8 @@ func initSetGameOfKingAreas(g ggol.Game[gameOfKingArea]) {
 }
 
 func getGameOfKing() *ggol.Game[gameOfKingArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfKingArea, gameOfKingIterateArea)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfKingArea)
+	g.SetAreaIterator(gameOfKingAreaIterator)
 	initSetGameOfKingAreas(g)
 	var gameOfKing ggol.Game[gameOfKingArea] = g
 	return &gameOfKing

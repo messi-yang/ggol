@@ -10,7 +10,7 @@ var initialAreaForTest areaForTest = areaForTest{
 	hasLiveCell: false,
 }
 
-func defauAreaForTestIterator(coord *Coordinate, area *areaForTest, getAdjacentArea GetAdjacentArea[areaForTest]) *areaForTest {
+func defauAreaForTestIterator(coord *Coordinate, area *areaForTest, getAdjacentArea AdjacentAreaGetter[areaForTest]) *areaForTest {
 	newArea := *area
 
 	var aliveAdjacentCellsCount int = 0

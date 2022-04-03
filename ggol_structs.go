@@ -32,7 +32,7 @@ type Size struct {
 	Height int
 }
 
-type GetAdjacentArea[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
+type AdjacentAreaGetter[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
 
 // Get next status of the area.
-type IterateArea[T any] func(coord *Coordinate, area *T, getAdjacentArea GetAdjacentArea[T]) (nextArea *T)
+type AreaIterator[T any] func(coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T)

@@ -15,10 +15,10 @@ var initialGameOfBlackAndWhiteArea gameOfBlackAndWhiteArea = gameOfBlackAndWhite
 	HasLiveCell: false,
 }
 
-func gameOfBlackAndWhiteIterateArea(
+func gameOfBlackAndWhiteAreaIterator(
 	coord *ggol.Coordinate,
 	area *gameOfBlackAndWhiteArea,
-	getAdjacentArea ggol.GetAdjacentArea[gameOfBlackAndWhiteArea],
+	getAdjacentArea ggol.AdjacentAreaGetter[gameOfBlackAndWhiteArea],
 ) (nextArea *gameOfBlackAndWhiteArea) {
 	newArea := *area
 
@@ -42,7 +42,8 @@ func initSetGameOfBlackAndWhiteAreas(g ggol.Game[gameOfBlackAndWhiteArea]) {
 }
 
 func getGameOfBlackAndWhite() *ggol.Game[gameOfBlackAndWhiteArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfBlackAndWhiteArea, gameOfBlackAndWhiteIterateArea)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfBlackAndWhiteArea)
+	g.SetAreaIterator(gameOfBlackAndWhiteAreaIterator)
 	initSetGameOfBlackAndWhiteAreas(g)
 	var gameOfBlackAndWhite ggol.Game[gameOfBlackAndWhiteArea] = g
 	return &gameOfBlackAndWhite

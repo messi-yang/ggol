@@ -46,11 +46,14 @@ type MyArea struct {
 // how to iterate to get next stage of the area.
 // This iterator implement 4 basic rules of Conways Game
 // of Life, you can custom your rules here :).
-func iterateArea (
+func myAreaIterator (
+    // Coordinate of the area that is going to be iterated.
     coord *ggol.Coordinate,
+    // Pointer to the current area status.
     area *MyArea,
-    getAdjacentArea ggol.GetAdjacentArea[MyArea],
-) *MyArea {
+    // A getter for getting adjacent areas, check this type ggol.AdjacentAreaGetter[T] for details.
+    getAdjacentArea ggol.AdjacentAreaGetter[MyArea],
+) (nextMyArea *MyArea) {
     newArea := *area
 
     // Get live adjacent cells count
@@ -95,8 +98,8 @@ main() {
     game, _ := ggol.New(
         &ggol.Size{Height: 3, Width: 3},
         &MyArea{HasLiveCell: false},
-        iterateArea,
     )
+    game.SetAreaIterator(myAreaIterator)
 
     // Let's revice 3 cells to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
@@ -170,9 +173,13 @@ Reset entire generation with intial area.
 
 Iterate generation to get next generation.
 
+### SetAreaIterator
+
+Tell us how you want to iterate your areas.
+
 ### SetArea
 
-Set value of the area at the coordinate.
+Set status of the area at the given coordinate.
 
 ### GetSize
 
@@ -180,8 +187,8 @@ Get size of the game.
 
 ### GetArea
 
-Get area at the coordinate.
+Get area at the given coordinate.
 
 ### GetField
 
-Get current genertaion.
+Get current field, which is a matrix that saves all area statuses.

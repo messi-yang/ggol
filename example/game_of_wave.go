@@ -15,10 +15,10 @@ var initialGameOfWaveArea gameOfWaveArea = gameOfWaveArea{
 	HasLiveCell: false,
 }
 
-func gameOfWaveIterateArea(
+func gameOfWaveAreaIterator(
 	coord *ggol.Coordinate,
 	area *gameOfWaveArea,
-	getAdjacentArea ggol.GetAdjacentArea[gameOfWaveArea],
+	getAdjacentArea ggol.AdjacentAreaGetter[gameOfWaveArea],
 ) (nextArea *gameOfWaveArea) {
 	newArea := *area
 	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
@@ -51,7 +51,8 @@ func initSetGameOfWaveAreas(g ggol.Game[gameOfWaveArea]) {
 }
 
 func getGameOfWave() *ggol.Game[gameOfWaveArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfWaveArea, gameOfWaveIterateArea)
+	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfWaveArea)
+	g.SetAreaIterator(gameOfWaveAreaIterator)
 	initSetGameOfWaveAreas(g)
 	var gameOfWave ggol.Game[gameOfWaveArea] = g
 	return &gameOfWave
