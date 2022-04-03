@@ -29,9 +29,9 @@ The example below shows you how to buil a standard Conway's Game of Life with th
 ```go
 package main
 
-import {
+import (
     "fmt"
-    
+
     "github.com/DumDumGeniuss/ggol"
 )
 
@@ -46,7 +46,7 @@ type MyArea struct {
 // how to iterate to get next stage of the area.
 // This iterator implement 4 basic rules of Conways Game
 // of Life, you can custom your rules here :).
-func myAreaIterator (
+func myAreaIterator(
     // Coordinate of the area that is going to be iterated.
     coord *ggol.Coordinate,
     // Pointer to the current area status.
@@ -63,7 +63,7 @@ func myAreaIterator (
     for i := -1; i < 2; i += 1 {
         for j := -1; j < 2; j += 1 {
             if !(i == 0 && j == 0) {
-                adjArea, isCrossBorder := getAdjacentArea(coord, &Coordinate{X: i, Y: j})
+                adjArea, isCrossBorder := getAdjacentArea(coord, &ggol.Coordinate{X: i, Y: j})
                 if adjArea.HasLiveCell && !isCrossBorder {
                     liveAdjacentCellsCount += 1
                 }
@@ -90,31 +90,39 @@ func myAreaIterator (
     }
 }
 
-main() {
+func main() {
+    // Declare game size.
+    gameSize := ggol.Size{Height: 3, Width: 3}
+    // Initial status of all areas.
+    initialMyArea := MyArea{HasLiveCell: false}
+
     // Alrighty, let's create a new game with size of 3x3,
     // you also need to tell the game what's the initial status
     // of each area, let's assume all areas are without any live cells at beginning.
     // At the end, you need to pass in your custom iterator you just declared above.
     game, _ := ggol.New(
-        &ggol.Size{Height: 3, Width: 3},
-        &MyArea{HasLiveCell: false},
+        &gameSize,
+        &initialMyArea,
     )
+    // Set area iterator.
     game.SetAreaIterator(myAreaIterator)
 
     // Let's revice 3 cells to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, MyArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, MyArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, &MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, &MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, &MyArea{HasLiveCell: true})
 
     // This will iterate all areas with your custom iterator.
     game.Iterate()
 
     // Let's see if we iterate the Blinker correctly.
     // If it's correct, all areas below should have "HasLiveCell" as true.
-    fmt.Println(game.GetArea(&ggol.Coordinate{X: 0, Y: 1}))
-    fmt.Println(game.GetArea(&ggol.Coordinate{X: 1, Y: 1}))
-    fmt.Println(game.GetArea(&ggol.Coordinate{X: 2, Y: 1}))
+    for x := 0; x < gameSize.Width; x += 1 {
+        area, _ := game.GetArea(&ggol.Coordinate{X: x, Y: 1})
+        fmt.Printf("%v ", area.HasLiveCell)
+    }
+    // true true true
 }
 ```
 
@@ -159,36 +167,18 @@ go mod tidy
 go run example/*
 ```
 
-## Document
+## Type
 
-### New
+### Game
 
-Create a new Conway's Game of Life for you with your custom initial area and your custom way of iterating areas.
-
-### Reset
-
-Reset entire generation with intial area.
-
-### Iterate
-
-Iterate generation to get next generation.
-
-### SetAreaIterator
-
-Tell us how you want to iterate your areas.
-
-### SetArea
-
-Set status of the area at the given coordinate.
-
-### GetSize
-
-Get size of the game.
-
-### GetArea
-
-Get area at the given coordinate.
-
-### GetField
-
-Get current field, which is a matrix that saves all area statuses.
+```go
+type Game[T any] interface {
+    Reset()
+    Iterate()
+    SetAreaIterator(iterator AreaIterator[T])
+    SetArea(*Coordinate, *T) error
+    GetSize() *Size
+    GetArea(*Coordinate) (*T, error)
+    GetField() *[]*[]*T
+}
+```

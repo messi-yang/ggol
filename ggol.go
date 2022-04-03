@@ -4,15 +4,21 @@ import (
 	"sync"
 )
 
-// The Game contains all the basics operations that you need
-// for a Conway's Game of Life.
+// The value in type of Game will be returned after you call New function.
 type Game[T any] interface {
+	// Reset all areas with initial area.
 	Reset()
+	// Iterate all areas with given area iterator to get next iteration of the field.
 	Iterate()
+	// Set your area iterator to tell the game how you want to iterate your areas.
 	SetAreaIterator(iterator AreaIterator[T])
+	// Set the status of the area at the given coordinate.
 	SetArea(*Coordinate, *T) error
+	// Get the size of the field of the game.
 	GetSize() *Size
+	// Get the status of the area at the given coordinate.
 	GetArea(*Coordinate) (*T, error)
+	// Get a matric that contains informaiton of all fields.
 	GetField() *[]*[]*T
 }
 
@@ -129,7 +135,7 @@ func (g *gameInfo[T]) SetArea(c *Coordinate, area *T) error {
 	defer g.locker.Unlock()
 
 	if g.isCoordinateOutsideField(c) {
-		return &ErrCoordinateIsOutsideBorder{c}
+		return &ErrCoordinateIsOutsideField{c}
 	}
 	(*(*g.field)[c.X])[c.Y] = area
 
@@ -150,7 +156,7 @@ func (g *gameInfo[T]) GetArea(c *Coordinate) (*T, error) {
 	defer g.locker.RUnlock()
 
 	if g.isCoordinateOutsideField(c) {
-		return nil, &ErrCoordinateIsOutsideBorder{c}
+		return nil, &ErrCoordinateIsOutsideField{c}
 	}
 
 	return (*(*g.field)[c.X])[c.Y], nil
