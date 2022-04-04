@@ -65,6 +65,9 @@ func cgolAreaIterator(
     for i := -1; i < 2; i += 1 {
         for j := -1; j < 2; j += 1 {
             if !(i == 0 && j == 0) {
+                // Pay attention to "isCrossBorder", if the adjacent area in relative coordinate
+                // is on other side of the field, "isCrossBorder" will be true.
+                // So if you want to allow your cells to cross border, ignore "isCrossBorder".
                 adjArea, isCrossBorder := getAdjacentArea(coord, &ggol.Coordinate{X: i, Y: j})
                 if adjArea.HasLiveCell && !isCrossBorder {
                     liveAdjacentCellsCount += 1

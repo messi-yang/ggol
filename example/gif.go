@@ -12,12 +12,16 @@ import (
 
 type DrawArea[T any] func(coord *ggol.Coordinate, area *T, unit int, image *image.Paletted, palette *[]color.Color)
 
-func generateGif[T any](step int, unit int, duration int, fileName string, g *ggol.Game[T], drawArea DrawArea[T], palette []color.Color) {
+func generateGif[T any](priorStep int, step int, unit int, duration int, fileName string, g *ggol.Game[T], drawArea DrawArea[T], palette []color.Color) {
 	var images []*image.Paletted
 	var delays []int
 	var img *image.Paletted
 
 	size := (*g).GetSize()
+
+	for i := 0; i < priorStep; i += 1 {
+		(*g).Iterate()
+	}
 
 	for i := 0; i < step; i += 1 {
 		img = image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), palette)

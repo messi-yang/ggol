@@ -12,6 +12,7 @@ func main() {
 	}
 
 	generateGif(
+		0,
 		100,
 		10,
 		0,
@@ -22,6 +23,7 @@ func main() {
 	)
 
 	generateGif(
+		0,
 		100,
 		10,
 		100,
@@ -32,6 +34,7 @@ func main() {
 	)
 
 	generateGif(
+		0,
 		100,
 		10,
 		0,
@@ -42,6 +45,7 @@ func main() {
 	)
 
 	generateGif(
+		0,
 		100,
 		2,
 		0,
@@ -52,6 +56,7 @@ func main() {
 	)
 
 	generateGif(
+		100,
 		200,
 		10,
 		0,
