@@ -1,14 +1,14 @@
-# Gonways Game of Life
+# Go's Game of Liberty
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/DumDumGeniuss/ggol.svg)](https://pkg.go.dev/github.com/DumDumGeniuss/ggol)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DumDumGeniuss/ggol)](https://goreportcard.com/report/github.com/DumDumGeniuss/ggol)
 [![Build Status](https://app.travis-ci.com/DumDumGeniuss/ggol.svg?branch=main)](https://app.travis-ci.com/DumDumGeniuss/ggol)
 
-Gonways Game of Life is a go package that provides a set of API for you to implement the [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) effortlessly.
+Go's Game of Liberty is a go package that provides a set of API for you to build a game in 2d map, this API was initially for helping you build the [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), but later we found more possibilities of it, so the Go's Game of Liberty came out.
 
-You can even build a completely new type of game with it :).
+Looking forward to seeing your masterpiece built with the API :).
 
-Please check [API document](https://pkg.go.dev/github.com/DumDumGeniuss/ggol) here.
+For more details, please check [API document](https://pkg.go.dev/github.com/DumDumGeniuss/ggol) here.
 
 ## Features
 
@@ -40,7 +40,7 @@ import (
 // Define your area type, in standard Conway's
 // Game of Life, an area can have a live cell at most,
 // so we need the field "HasLiveCell" here.
-type MyArea struct {
+type CgolArea struct {
     HasLiveCell bool
 }
 
@@ -48,14 +48,14 @@ type MyArea struct {
 // how to iterate to get next stage of the area.
 // This iterator implement 4 basic rules of Conways Game
 // of Life, you can custom your rules here :).
-func myAreaIterator(
+func cgolAreaIterator(
     // Coordinate of the area that is going to be iterated.
     coord *ggol.Coordinate,
     // Pointer to the current area status.
-    area *MyArea,
+    area *CgolArea,
     // A getter for getting adjacent areas, check this type ggol.AdjacentAreaGetter[T] for details.
-    getAdjacentArea ggol.AdjacentAreaGetter[MyArea],
-) (nextMyArea *MyArea) {
+    getAdjacentArea ggol.AdjacentAreaGetter[CgolArea],
+) (nextCgolArea *CgolArea) {
     newArea := *area
 
     // Get live adjacent cells count
@@ -96,7 +96,7 @@ func main() {
     // Declare game size.
     gameSize := ggol.Size{Height: 3, Width: 3}
     // Initial status of all areas.
-    initialMyArea := MyArea{HasLiveCell: false}
+    initialCgolArea := CgolArea{HasLiveCell: false}
 
     // Alrighty, let's create a new game with size of 3x3,
     // you also need to tell the game what's the initial status
@@ -104,16 +104,16 @@ func main() {
     // At the end, you need to pass in your custom iterator you just declared above.
     game, _ := ggol.New(
         &gameSize,
-        &initialMyArea,
+        &initialCgolArea,
     )
     // Set area iterator.
-    game.SetAreaIterator(myAreaIterator)
+    game.SetAreaIterator(cgolAreaIterator)
 
     // Let's revice 3 cells to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, &MyArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, &MyArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, &MyArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, &CgolArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, &CgolArea{HasLiveCell: true})
+    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, &CgolArea{HasLiveCell: true})
 
     // This will iterate all areas with your custom iterator.
     game.Iterate()
@@ -176,3 +176,8 @@ cd ggol
 go mod tidy
 go run example/*
 ```
+
+
+## License
+
+[MIT](./LICENSE)
