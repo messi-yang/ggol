@@ -8,10 +8,11 @@ import (
 type Game[T any] interface {
 	// Reset all areas with initial area.
 	Reset()
-	// Iterate all areas with given area iterator to get next iteration of the field.
-	Iterate()
-	// Set your area iterator to tell the game how you want to iterate your areas.
-	SetAreaIterator(iterator AreaIterator[T])
+	// Generate next field, the way you generate next field will be depending on the NextAreaGenerator function
+	// you passed in SetNextAreaGenerator.
+	GenerateNextField()
+	// Set NextAreaGenerator, which tells the game how you want to generate next area of the given area.
+	SetNextAreaGenerator(iterator NextAreaGenerator[T])
 	// Set the status of the area at the given coordinate.
 	SetArea(coord *Coordinate, area *T) (err error)
 	// Get the size of the field of the game.
@@ -26,11 +27,11 @@ type gameInfo[T any] struct {
 	size         *Size
 	initialArea  *T
 	field        *[]*[]*T
-	areaIterator AreaIterator[T]
+	areaIterator NextAreaGenerator[T]
 	locker       sync.RWMutex
 }
 
-func defaultAreaIterator[T any](coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T) {
+func defaultNextAreaGenerator[T any](coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T) {
 	return area
 }
 
@@ -48,7 +49,7 @@ func New[T any](
 		size,
 		initialArea,
 		createField(size, initialArea),
-		defaultAreaIterator[T],
+		defaultNextAreaGenerator[T],
 		sync.RWMutex{},
 	}
 
@@ -103,7 +104,7 @@ func (g *gameInfo[T]) Reset() {
 }
 
 // Generate next field.
-func (g *gameInfo[T]) Iterate() {
+func (g *gameInfo[T]) GenerateNextField() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
@@ -125,7 +126,7 @@ func (g *gameInfo[T]) Iterate() {
 	}
 }
 
-func (g *gameInfo[T]) SetAreaIterator(iterator AreaIterator[T]) {
+func (g *gameInfo[T]) SetNextAreaGenerator(iterator NextAreaGenerator[T]) {
 	g.areaIterator = iterator
 }
 

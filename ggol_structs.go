@@ -32,8 +32,8 @@ type Size struct {
 	Height int
 }
 
-// This function will be passed into AreaIterator, this is how you can adajcent areas in AreaIterator.
+// This function will be passed into NextAreaGenerator, this is how you can adajcent areas in NextAreaGenerator.
 type AdjacentAreaGetter[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
 
-// AreaIterator tells the game how your areas will be iterated in each field's iteration, the passed arguements.
-type AreaIterator[T any] func(coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T)
+// NextAreaGenerator tells the game how you're gonna generate next area status of the given area.
+type NextAreaGenerator[T any] func(coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T)

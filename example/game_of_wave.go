@@ -15,7 +15,7 @@ var initialGameOfWaveArea gameOfWaveArea = gameOfWaveArea{
 	HasLiveCell: false,
 }
 
-func gameOfWaveAreaIterator(
+func gameOfWaveNextAreaGenerator(
 	coord *ggol.Coordinate,
 	area *gameOfWaveArea,
 	getAdjacentArea ggol.AdjacentAreaGetter[gameOfWaveArea],
@@ -64,7 +64,7 @@ func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, 
 func executeGameOfWave() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialGameOfWaveArea)
-	game.SetAreaIterator(gameOfWaveAreaIterator)
+	game.SetNextAreaGenerator(gameOfWaveNextAreaGenerator)
 	initializeGameOfWaveField(game)
 
 	var gameOfWavePalette = []color.Color{
@@ -88,7 +88,7 @@ func executeGameOfWave() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	outputGif("output/game_of_wave.gif", images, delays)

@@ -15,7 +15,7 @@ var initialConwaysGameOfLifeArea conwaysGameOfLifeArea = conwaysGameOfLifeArea{
 	HasLiveCell: false,
 }
 
-func conwaysGameOfLifeAreaIterator(
+func conwaysGameOfLifeNextAreaGenerator(
 	coord *ggol.Coordinate,
 	area *conwaysGameOfLifeArea,
 	getAdjacentArea ggol.AdjacentAreaGetter[conwaysGameOfLifeArea],
@@ -79,7 +79,7 @@ func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeAr
 func executeGameOfLife() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialConwaysGameOfLifeArea)
-	game.SetAreaIterator(conwaysGameOfLifeAreaIterator)
+	game.SetNextAreaGenerator(conwaysGameOfLifeNextAreaGenerator)
 	initializeConwaysGameOfLifeField(game)
 
 	var conwaysGameOfLifePalette = []color.Color{
@@ -103,7 +103,7 @@ func executeGameOfLife() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	outputGif("output/conways_game_of_life.gif", images, delays)

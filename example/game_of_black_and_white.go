@@ -15,7 +15,7 @@ var initialGameOfBlackAndWhiteArea gameOfBlackAndWhiteArea = gameOfBlackAndWhite
 	HasLiveCell: false,
 }
 
-func gameOfBlackAndWhiteAreaIterator(
+func gameOfBlackAndWhiteNextAreaGenerator(
 	coord *ggol.Coordinate,
 	area *gameOfBlackAndWhiteArea,
 	getAdjacentArea ggol.AdjacentAreaGetter[gameOfBlackAndWhiteArea],
@@ -55,7 +55,7 @@ func drawGameOfBlackAndWhiteArea(coord *ggol.Coordinate, area *gameOfBlackAndWhi
 func executeGameOfBlackAndWhite() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialGameOfBlackAndWhiteArea)
-	game.SetAreaIterator(gameOfBlackAndWhiteAreaIterator)
+	game.SetNextAreaGenerator(gameOfBlackAndWhiteNextAreaGenerator)
 	initializeGameOfBlackAndWhiteField(game)
 
 	var gameOfBlackAndWhitePalette = []color.Color{
@@ -79,7 +79,7 @@ func executeGameOfBlackAndWhite() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	outputGif("output/game_of_black_and_white.gif", images, delays)

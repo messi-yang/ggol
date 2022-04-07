@@ -45,11 +45,11 @@ type CgolArea struct {
 }
 
 // This is the core part of the game, it tells the game
-// how to iterate to get next stage of the area.
-// This iterator implement 4 basic rules of Conways Game
-// of Life, you can custom your rules here :).
-func cgolAreaIterator(
-    // Coordinate of the area that is going to be iterated.
+// how to generate the next status of the given area.
+// This generator here implements 4 basic rules of Conways Game
+// of Life, if you want, you can add your custom rules here :).
+func cgolNextAreaGenerator(
+    // Coordinate of the given area.
     coord *ggol.Coordinate,
     // Pointer to the current area status.
     area *CgolArea,
@@ -110,7 +110,7 @@ func main() {
         &initialCgolArea,
     )
     // Set area iterator.
-    game.SetAreaIterator(cgolAreaIterator)
+    game.SetNextAreaGenerator(cgolNextAreaGenerator)
 
     // Let's revice 3 cells to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
@@ -118,10 +118,11 @@ func main() {
     game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, &CgolArea{HasLiveCell: true})
     game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, &CgolArea{HasLiveCell: true})
 
-    // This will iterate all areas with your custom iterator.
-    game.Iterate()
+    // This will generate next field, the next field is depending on "cgolNextAreaGenerator"
+    // you just passed in "SetNextAreaGenerator" above.
+    game.GenerateNextField()
 
-    // Let's see if we iterate the Blinker correctly.
+    // Let's see if we generate the next status of the Blinker correctly.
     // If it's correct, all areas below should have "HasLiveCell" as true.
     for x := 0; x < gameSize.Width; x += 1 {
         area, _ := game.GetArea(&ggol.Coordinate{X: x, Y: 1})

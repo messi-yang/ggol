@@ -18,7 +18,7 @@ var initialGameOfKingArea gameOfKingArea = gameOfKingArea{
 	Strength:  0,
 }
 
-func gameOfKingAreaIterator(
+func gameOfKingNextAreaGenerator(
 	coord *ggol.Coordinate,
 	area *gameOfKingArea,
 	getAdjacentArea ggol.AdjacentAreaGetter[gameOfKingArea],
@@ -73,7 +73,7 @@ func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, 
 func executeGameOfKing() {
 	size := ggol.Size{Width: 250, Height: 250}
 	game, _ := ggol.New(&size, &initialGameOfKingArea)
-	game.SetAreaIterator(gameOfKingAreaIterator)
+	game.SetNextAreaGenerator(gameOfKingNextAreaGenerator)
 	initializeGameOfKingField(game)
 
 	var gameOfKingPalette = []color.Color{
@@ -104,7 +104,7 @@ func executeGameOfKing() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	outputGif("output/game_of_king.gif", images, delays)

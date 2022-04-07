@@ -10,7 +10,7 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	height := 10
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	areaLiveMap := *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 
 	if len(areaLiveMap) == width && len(areaLiveMap[0]) == height {
@@ -42,7 +42,7 @@ func shouldThrowErrorWhenAreaSeedExceedBoarder(t *testing.T) {
 	height := 2
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetArea(&c, &areaForTest{hasLiveCell: true})
 
@@ -58,7 +58,7 @@ func shouldSetAreaCorrectly(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	g.SetArea(&c, &areaForTest{hasLiveCell: true})
 	area, _ := g.GetArea(&c)
 	newLiveStatus := area.hasLiveCell
@@ -75,19 +75,19 @@ func TestSetArea(t *testing.T) {
 	shouldSetAreaCorrectly(t)
 }
 
-func testBlockIteratement(t *testing.T) {
+func testBlockPattern(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a block pattern
 	g.SetArea(&Coordinate{X: 0, Y: 0}, &areaForTest{hasLiveCell: true})
 	g.SetArea(&Coordinate{X: 0, Y: 1}, &areaForTest{hasLiveCell: true})
 	g.SetArea(&Coordinate{X: 1, Y: 0}, &areaForTest{hasLiveCell: true})
 	g.SetArea(&Coordinate{X: 1, Y: 1}, &areaForTest{hasLiveCell: true})
-	g.Iterate()
+	g.GenerateNextField()
 
 	nexthasLiveCellAreasMap := *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	expectedNexthasLiveCellAreasMap := areasHavingLiveCellForTest{
@@ -103,12 +103,12 @@ func testBlockIteratement(t *testing.T) {
 	}
 }
 
-func testBlinkerIteratement(t *testing.T) {
+func testBlinkerPattern(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a blinker pattern
 	g.SetArea(&Coordinate{X: 1, Y: 0}, &areaForTest{hasLiveCell: true})
@@ -128,25 +128,25 @@ func testBlinkerIteratement(t *testing.T) {
 		{false, false, false},
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedNexthasLiveCellAreasMapOne) {
 		t.Fatalf("Should generate next areaLiveMap of a blinker, but got %v.", areaLiveMap)
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedNexthasLiveCellAreasMapTwo) {
 		t.Fatalf("Should generate 2nd next areaLiveMap of a blinker, but got %v.", areaLiveMap)
 	}
 }
 
-func testGliderIteratement(t *testing.T) {
+func testGliderPattern(t *testing.T) {
 	width := 5
 	height := 5
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
 	g.SetArea(&Coordinate{X: 1, Y: 1}, &areaForTest{hasLiveCell: true})
@@ -186,25 +186,25 @@ func testGliderIteratement(t *testing.T) {
 		{false, false, false, true, false},
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedhasLiveCellAreasMapOne) {
 		t.Fatalf("Should generate next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedhasLiveCellAreasMapTwo) {
 		t.Fatalf("Should generate 2nd next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedhasLiveCellAreasMapThree) {
 		t.Fatalf("Should generate 3rd next next areaLiveMap of a glider, but got %v.", areaLiveMap)
 	}
 
-	g.Iterate()
+	g.GenerateNextField()
 	areaLiveMap = *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 	if !areTwoAreasHavingLiveCellForTestEqual(areaLiveMap, expectedhasLiveCellAreasMapFour) {
 		t.Fatalf("Should generate 4th next next areaLiveMap of a glider, but got %v.", areaLiveMap)
@@ -213,12 +213,12 @@ func testGliderIteratement(t *testing.T) {
 	t.Log("Passed")
 }
 
-func testIteratementWithConcurrency(t *testing.T) {
+func testGliderPatternWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
 	g.SetArea(&Coordinate{X: 0, Y: 0}, &areaForTest{hasLiveCell: true})
@@ -236,10 +236,10 @@ func testIteratementWithConcurrency(t *testing.T) {
 	for i := 0; i < step; i++ {
 		// Let the glider fly to digonal area in four steps.
 		go func() {
-			g.Iterate()
-			g.Iterate()
-			g.Iterate()
-			g.Iterate()
+			g.GenerateNextField()
+			g.GenerateNextField()
+			g.GenerateNextField()
+			g.GenerateNextField()
 			wg.Done()
 		}()
 	}
@@ -258,11 +258,11 @@ func testIteratementWithConcurrency(t *testing.T) {
 	t.Log("Passed")
 }
 
-func TestIterate(t *testing.T) {
-	testBlockIteratement(t)
-	testBlinkerIteratement(t)
-	testGliderIteratement(t)
-	testIteratementWithConcurrency(t)
+func TestGenerateNextField(t *testing.T) {
+	testBlockPattern(t)
+	testBlinkerPattern(t)
+	testGliderPattern(t)
+	testGliderPatternWithConcurrency(t)
 }
 
 func testGetSizeCaseOne(t *testing.T) {
@@ -270,7 +270,7 @@ func testGetSizeCaseOne(t *testing.T) {
 	height := 6
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
 		t.Log("Passed")
@@ -289,7 +289,7 @@ func testGetAreaCaseOne(t *testing.T) {
 	size := Size{Width: width, Height: height}
 	coord := Coordinate{X: 1, Y: 0}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	g.SetArea(&coord, &areaForTest{hasLiveCell: true})
 	area, _ := g.GetArea(&coord)
 
@@ -305,7 +305,7 @@ func testGetAreaCaseTwo(t *testing.T) {
 	height := 2
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	coord := Coordinate{X: 1, Y: 4}
 	_, err := g.GetArea(&coord)
 
@@ -326,7 +326,7 @@ func testResetCaseOne(t *testing.T) {
 	height := 3
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
 	g.SetArea(&Coordinate{X: 1, Y: 0}, &areaForTest{hasLiveCell: true})
@@ -353,11 +353,11 @@ func TestReset(t *testing.T) {
 	testResetCaseOne(t)
 }
 
-func testSetAreaIteratorCaseOne(t *testing.T) {
+func testSetNextAreaGeneratorCaseOne(t *testing.T) {
 	width := 3
 	height := 3
 	size := Size{Width: width, Height: height}
-	customAreaIterator := func(coord *Coordinate, area *areaForTest, getAdjacentArea AdjacentAreaGetter[areaForTest]) *areaForTest {
+	customNextAreaGenerator := func(coord *Coordinate, area *areaForTest, getAdjacentArea AdjacentAreaGetter[areaForTest]) *areaForTest {
 		nextArea := *area
 
 		// Bring back all dead areas to alive in next iteration.
@@ -370,8 +370,8 @@ func testSetAreaIteratorCaseOne(t *testing.T) {
 		}
 	}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(customAreaIterator)
-	g.Iterate()
+	g.SetNextAreaGenerator(customNextAreaGenerator)
+	g.GenerateNextField()
 	areaLiveMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 
 	expectedBinaryBoard := areasHavingLiveCellForTest{
@@ -387,8 +387,8 @@ func testSetAreaIteratorCaseOne(t *testing.T) {
 	}
 }
 
-func TestSetAreaIterator(t *testing.T) {
-	testSetAreaIteratorCaseOne(t)
+func TestSetNextAreaGenerator(t *testing.T) {
+	testSetNextAreaGeneratorCaseOne(t)
 }
 
 func testGetFieldCaseOne(t *testing.T) {
@@ -396,7 +396,7 @@ func testGetFieldCaseOne(t *testing.T) {
 	height := 2
 	size := Size{Width: width, Height: height}
 	g, _ := New(&size, &initialAreaForTest)
-	g.SetAreaIterator(defauAreaForTestIterator)
+	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	generation := g.GetField()
 	aliveAreasMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(generation)
 

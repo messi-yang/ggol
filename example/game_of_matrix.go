@@ -24,7 +24,7 @@ var initialGameOfMatrixArea gameOfMatrixArea = gameOfMatrixArea{
 // A field can only have 20 word of streams in total
 var totalWordStreamsCount = 0
 
-func gameOfMatrixAreaIterator(
+func gameOfMatrixNextAreaGenerator(
 	coord *ggol.Coordinate,
 	area *gameOfMatrixArea,
 	getAdjacentArea ggol.AdjacentAreaGetter[gameOfMatrixArea],
@@ -79,12 +79,12 @@ func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit i
 func executeGameOfMatrix() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialGameOfMatrixArea)
-	game.SetAreaIterator(gameOfMatrixAreaIterator)
+	game.SetNextAreaGenerator(gameOfMatrixNextAreaGenerator)
 	initializeGameOfMatrixField(game)
 
 	previousSteps := 100
 	for i := 0; i < previousSteps; i += 1 {
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	var gameOfMatrixPalette = []color.Color{
@@ -116,7 +116,7 @@ func executeGameOfMatrix() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.Iterate()
+		game.GenerateNextField()
 	}
 
 	outputGif("output/game_of_matrix.gif", images, delays)
