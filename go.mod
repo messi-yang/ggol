@@ -3,6 +3,8 @@ module github.com/DumDumGeniuss/ggol
 go 1.18
 
 retract (
+	// Retract v1.0.4 and v1.0.3
+	v1.0.4
 	// Wrong tag by mistake
 	v1.0.3
 	// Too early for released version 1
