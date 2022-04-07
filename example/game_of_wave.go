@@ -32,7 +32,7 @@ func gameOfWaveAreaIterator(
 	}
 }
 
-func initializeSetGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
+func initializeGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
 	var margin int = 0
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
@@ -65,7 +65,7 @@ func executeGameOfWave() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialGameOfWaveArea)
 	game.SetAreaIterator(gameOfWaveAreaIterator)
-	initializeSetGameOfWaveField(game)
+	initializeGameOfWaveField(game)
 
 	var gameOfWavePalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},
@@ -78,15 +78,15 @@ func executeGameOfWave() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfWavePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfWavePalette)
 		for x := 0; x < size.Width; x += 1 {
 			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				area, _ := game.GetArea(coord)
-				drawGameOfWaveArea(coord, area, unit, img, &gameOfWavePalette)
+				drawGameOfWaveArea(coord, area, unit, newImage, &gameOfWavePalette)
 			}
 		}
-		images = append(images, img)
+		images = append(images, newImage)
 		delays = append(delays, duration)
 		game.Iterate()
 	}

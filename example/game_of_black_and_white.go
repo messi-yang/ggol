@@ -31,7 +31,7 @@ func gameOfBlackAndWhiteAreaIterator(
 	}
 }
 
-func initializeSetGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteArea]) {
+func initializeGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteArea]) {
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
 		for y := 0; y < size.Height; y++ {
@@ -56,7 +56,7 @@ func executeGameOfBlackAndWhite() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.New(&size, &initialGameOfBlackAndWhiteArea)
 	game.SetAreaIterator(gameOfBlackAndWhiteAreaIterator)
-	initializeSetGameOfBlackAndWhiteField(game)
+	initializeGameOfBlackAndWhiteField(game)
 
 	var gameOfBlackAndWhitePalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},
@@ -69,15 +69,15 @@ func executeGameOfBlackAndWhite() {
 	duration := 100
 
 	for i := 0; i < iterationsCount; i += 1 {
-		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfBlackAndWhitePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfBlackAndWhitePalette)
 		for x := 0; x < size.Width; x += 1 {
 			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				area, _ := game.GetArea(coord)
-				drawGameOfBlackAndWhiteArea(coord, area, unit, img, &gameOfBlackAndWhitePalette)
+				drawGameOfBlackAndWhiteArea(coord, area, unit, newImage, &gameOfBlackAndWhitePalette)
 			}
 		}
-		images = append(images, img)
+		images = append(images, newImage)
 		delays = append(delays, duration)
 		game.Iterate()
 	}

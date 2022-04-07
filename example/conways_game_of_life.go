@@ -93,15 +93,15 @@ func executeGameOfLife() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), conwaysGameOfLifePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), conwaysGameOfLifePalette)
 		for x := 0; x < size.Width; x += 1 {
 			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				area, _ := game.GetArea(coord)
-				drawConwaysGameOfLifeArea(coord, area, unit, img, &conwaysGameOfLifePalette)
+				drawConwaysGameOfLifeArea(coord, area, unit, newImage, &conwaysGameOfLifePalette)
 			}
 		}
-		images = append(images, img)
+		images = append(images, newImage)
 		delays = append(delays, duration)
 		game.Iterate()
 	}
