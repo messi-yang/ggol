@@ -31,7 +31,7 @@ func gameOfBlackAndWhiteAreaIterator(
 	}
 }
 
-func initSetGameOfBlackAndWhiteAreas(g ggol.Game[gameOfBlackAndWhiteArea]) {
+func initializeSetGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteArea]) {
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
 		for y := 0; y < size.Height; y++ {
@@ -39,19 +39,6 @@ func initSetGameOfBlackAndWhiteAreas(g ggol.Game[gameOfBlackAndWhiteArea]) {
 			g.SetArea(&c, &gameOfBlackAndWhiteArea{HasLiveCell: (x+y)%3 == 0})
 		}
 	}
-}
-
-func getGameOfBlackAndWhite() *ggol.Game[gameOfBlackAndWhiteArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfBlackAndWhiteArea)
-	g.SetAreaIterator(gameOfBlackAndWhiteAreaIterator)
-	initSetGameOfBlackAndWhiteAreas(g)
-	var gameOfBlackAndWhite ggol.Game[gameOfBlackAndWhiteArea] = g
-	return &gameOfBlackAndWhite
-}
-
-var gameOfBlackAndWhitePalette = []color.Color{
-	color.RGBA{0x00, 0x00, 0x00, 0xff},
-	color.RGBA{0xff, 0xff, 0xff, 0xff},
 }
 
 func drawGameOfBlackAndWhiteArea(coord *ggol.Coordinate, area *gameOfBlackAndWhiteArea, unit int, image *image.Paletted, palette *[]color.Color) {
@@ -63,4 +50,37 @@ func drawGameOfBlackAndWhiteArea(coord *ggol.Coordinate, area *gameOfBlackAndWhi
 			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
 		}
 	}
+}
+
+func executeGameOfBlackAndWhite() {
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.New(&size, &initialGameOfBlackAndWhiteArea)
+	game.SetAreaIterator(gameOfBlackAndWhiteAreaIterator)
+	initializeSetGameOfBlackAndWhiteField(game)
+
+	var gameOfBlackAndWhitePalette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0xff, 0xff, 0xff, 0xff},
+	}
+	var images []*image.Paletted
+	var delays []int
+	unit := 10
+	iterationsCount := 100
+	duration := 100
+
+	for i := 0; i < iterationsCount; i += 1 {
+		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfBlackAndWhitePalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
+				coord := &ggol.Coordinate{X: x, Y: y}
+				area, _ := game.GetArea(coord)
+				drawGameOfBlackAndWhiteArea(coord, area, unit, img, &gameOfBlackAndWhitePalette)
+			}
+		}
+		images = append(images, img)
+		delays = append(delays, duration)
+		game.Iterate()
+	}
+
+	outputGif("output/game_of_black_and_white.gif", images, delays)
 }

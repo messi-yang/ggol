@@ -32,7 +32,7 @@ func gameOfWaveAreaIterator(
 	}
 }
 
-func initSetGameOfWaveAreas(g ggol.Game[gameOfWaveArea]) {
+func initializeSetGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
 	var margin int = 0
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
@@ -50,19 +50,6 @@ func initSetGameOfWaveAreas(g ggol.Game[gameOfWaveArea]) {
 	}
 }
 
-func getGameOfWave() *ggol.Game[gameOfWaveArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfWaveArea)
-	g.SetAreaIterator(gameOfWaveAreaIterator)
-	initSetGameOfWaveAreas(g)
-	var gameOfWave ggol.Game[gameOfWaveArea] = g
-	return &gameOfWave
-}
-
-var gameOfWavePalette = []color.Color{
-	color.RGBA{0x00, 0x00, 0x00, 0xff},
-	color.RGBA{0xff, 0xff, 0xff, 0xff},
-}
-
 func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if !area.HasLiveCell {
 		return
@@ -72,4 +59,37 @@ func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, 
 			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
 		}
 	}
+}
+
+func executeGameOfWave() {
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.New(&size, &initialGameOfWaveArea)
+	game.SetAreaIterator(gameOfWaveAreaIterator)
+	initializeSetGameOfWaveField(game)
+
+	var gameOfWavePalette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0xff, 0xff, 0xff, 0xff},
+	}
+	var images []*image.Paletted
+	var delays []int
+	unit := 10
+	iterationsCount := 100
+	duration := 0
+
+	for i := 0; i < iterationsCount; i += 1 {
+		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfWavePalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
+				coord := &ggol.Coordinate{X: x, Y: y}
+				area, _ := game.GetArea(coord)
+				drawGameOfWaveArea(coord, area, unit, img, &gameOfWavePalette)
+			}
+		}
+		images = append(images, img)
+		delays = append(delays, duration)
+		game.Iterate()
+	}
+
+	outputGif("output/game_of_wave.gif", images, delays)
 }

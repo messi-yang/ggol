@@ -54,29 +54,8 @@ func gameOfMatrixAreaIterator(
 	}
 }
 
-func initSetGameOfMatrixAreas(g ggol.Game[gameOfMatrixArea]) {
+func initializeSetGameOfMatrixField(g ggol.Game[gameOfMatrixArea]) {
 	// Do nothing
-}
-
-func getGameOfMatrix() *ggol.Game[gameOfMatrixArea] {
-	g, _ := ggol.New(&ggol.Size{Width: 50, Height: 50}, &initialGameOfMatrixArea)
-	g.SetAreaIterator(gameOfMatrixAreaIterator)
-	initSetGameOfMatrixAreas(g)
-	var gameOfMatrix ggol.Game[gameOfMatrixArea] = g
-	return &gameOfMatrix
-}
-
-var gameOfMatrixPalette = []color.Color{
-	color.RGBA{0x00, 0x00, 0x00, 0xff},
-	color.RGBA{0xff, 0xff, 0xff, 0xff},
-	color.RGBA{0x16, 0xa3, 0x4a, 0xff},
-	color.RGBA{0x15, 0x80, 0x3d, 0xff},
-	color.RGBA{0x16, 0x65, 0x34, 0xff},
-	color.RGBA{0x14, 0x53, 0x2d, 0xff},
-	color.RGBA{0x14, 0x41, 0x20, 0xff},
-	color.RGBA{0x14, 0x30, 0x15, 0xff},
-	color.RGBA{0x14, 0x20, 0x10, 0xff},
-	color.RGBA{0x14, 0x10, 0x5, 0xff},
 }
 
 func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit int, image *image.Paletted, palette *[]color.Color) {
@@ -95,4 +74,50 @@ func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit i
 			}
 		}
 	}
+}
+
+func executeGameOfMatrix() {
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.New(&size, &initialGameOfMatrixArea)
+	game.SetAreaIterator(gameOfMatrixAreaIterator)
+	initializeSetGameOfMatrixField(game)
+
+	previousSteps := 100
+	for i := 0; i < previousSteps; i += 1 {
+		game.Iterate()
+	}
+
+	var gameOfMatrixPalette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0xff, 0xff, 0xff, 0xff},
+		color.RGBA{0x16, 0xa3, 0x4a, 0xff},
+		color.RGBA{0x15, 0x80, 0x3d, 0xff},
+		color.RGBA{0x16, 0x65, 0x34, 0xff},
+		color.RGBA{0x14, 0x53, 0x2d, 0xff},
+		color.RGBA{0x14, 0x41, 0x20, 0xff},
+		color.RGBA{0x14, 0x30, 0x15, 0xff},
+		color.RGBA{0x14, 0x20, 0x10, 0xff},
+		color.RGBA{0x14, 0x10, 0x5, 0xff},
+	}
+	var images []*image.Paletted
+	var delays []int
+	unit := 10
+	iterationsCount := 200
+	duration := 0
+
+	for i := 0; i < iterationsCount; i += 1 {
+		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfMatrixPalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
+				coord := &ggol.Coordinate{X: x, Y: y}
+				area, _ := game.GetArea(coord)
+				drawGameOfMatrixArea(coord, area, unit, img, &gameOfMatrixPalette)
+			}
+		}
+		images = append(images, img)
+		delays = append(delays, duration)
+		game.Iterate()
+	}
+
+	outputGif("output/game_of_matrix.gif", images, delays)
 }

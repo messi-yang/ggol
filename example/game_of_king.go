@@ -47,33 +47,12 @@ func gameOfKingAreaIterator(
 	return &newArea
 }
 
-func initSetGameOfKingAreas(g ggol.Game[gameOfKingArea]) {
+func initializeSetGameOfKingField(g ggol.Game[gameOfKingArea]) {
 	size := g.GetSize()
 	cellsCount := int((size.Width * size.Height) / 2)
 	for i := 0; i < cellsCount; i += 1 {
 		g.SetArea(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &gameOfKingArea{Strength: 1, Direction: 0})
 	}
-}
-
-func getGameOfKing() *ggol.Game[gameOfKingArea] {
-	size := ggol.Size{Width: 250, Height: 250}
-	g, _ := ggol.New(&size, &initialGameOfKingArea)
-	g.SetAreaIterator(gameOfKingAreaIterator)
-	initSetGameOfKingAreas(g)
-	var gameOfKing ggol.Game[gameOfKingArea] = g
-	return &gameOfKing
-}
-
-var gameOfKingPalette = []color.Color{
-	color.RGBA{0x00, 0x00, 0x00, 0xff},
-	color.RGBA{0xe5, 0x73, 0x73, 0xff},
-	color.RGBA{0x1e, 0x88, 0xe5, 0xff},
-	color.RGBA{0x00, 0xac, 0xc1, 0xff},
-	color.RGBA{0x43, 0xa0, 0x47, 0xff},
-	color.RGBA{0xfd, 0xd8, 0x35, 0xff},
-	color.RGBA{0xfb, 0x8c, 0x00, 0xff},
-	color.RGBA{0x8e, 0x24, 0xaa, 0xff},
-	color.RGBA{0xff, 0xd7, 0x00, 0xff},
 }
 
 func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, image *image.Paletted, palette *[]color.Color) {
@@ -89,4 +68,44 @@ func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, 
 			}
 		}
 	}
+}
+
+func executeGameOfKing() {
+	size := ggol.Size{Width: 250, Height: 250}
+	game, _ := ggol.New(&size, &initialGameOfKingArea)
+	game.SetAreaIterator(gameOfKingAreaIterator)
+	initializeSetGameOfKingField(game)
+
+	var gameOfKingPalette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0xe5, 0x73, 0x73, 0xff},
+		color.RGBA{0x1e, 0x88, 0xe5, 0xff},
+		color.RGBA{0x00, 0xac, 0xc1, 0xff},
+		color.RGBA{0x43, 0xa0, 0x47, 0xff},
+		color.RGBA{0xfd, 0xd8, 0x35, 0xff},
+		color.RGBA{0xfb, 0x8c, 0x00, 0xff},
+		color.RGBA{0x8e, 0x24, 0xaa, 0xff},
+		color.RGBA{0xff, 0xd7, 0x00, 0xff},
+	}
+	var images []*image.Paletted
+	var delays []int
+	unit := 2
+	iterationsCount := 100
+	duration := 0
+
+	for i := 0; i < iterationsCount; i += 1 {
+		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfKingPalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
+				coord := &ggol.Coordinate{X: x, Y: y}
+				area, _ := game.GetArea(coord)
+				drawGameOfKingArea(coord, area, unit, img, &gameOfKingPalette)
+			}
+		}
+		images = append(images, img)
+		delays = append(delays, duration)
+		game.Iterate()
+	}
+
+	outputGif("output/game_of_king.gif", images, delays)
 }

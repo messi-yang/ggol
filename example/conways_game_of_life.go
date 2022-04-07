@@ -52,7 +52,7 @@ func conwaysGameOfLifeAreaIterator(
 	}
 }
 
-func initConwaysGameOfLifeAreas(g ggol.Game[conwaysGameOfLifeArea]) {
+func initializeConwaysGameOfLifeField(g ggol.Game[conwaysGameOfLifeArea]) {
 	size := g.GetSize()
 	for i := 0; i < size.Height; i += 1 {
 		for j := 0; j < size.Height; j += 1 {
@@ -65,20 +65,6 @@ func initConwaysGameOfLifeAreas(g ggol.Game[conwaysGameOfLifeArea]) {
 	}
 }
 
-func getConwaysGameOfLife() *ggol.Game[conwaysGameOfLifeArea] {
-	size := ggol.Size{Width: 50, Height: 50}
-	g, _ := ggol.New(&size, &initialConwaysGameOfLifeArea)
-	g.SetAreaIterator(conwaysGameOfLifeAreaIterator)
-	initConwaysGameOfLifeAreas(g)
-	var conwaysGameOfLife ggol.Game[conwaysGameOfLifeArea] = g
-	return &conwaysGameOfLife
-}
-
-var conwaysGameOfLifePalette = []color.Color{
-	color.RGBA{0x00, 0x00, 0x00, 0xff},
-	color.RGBA{0xff, 0xff, 0xff, 0xff},
-}
-
 func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeArea, unit int, image *image.Paletted, palette *[]color.Color) {
 	if !area.HasLiveCell {
 		return
@@ -88,4 +74,37 @@ func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeAr
 			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
 		}
 	}
+}
+
+func executeGameOfLife() {
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.New(&size, &initialConwaysGameOfLifeArea)
+	game.SetAreaIterator(conwaysGameOfLifeAreaIterator)
+	initializeConwaysGameOfLifeField(game)
+
+	var conwaysGameOfLifePalette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0xff, 0xff, 0xff, 0xff},
+	}
+	var images []*image.Paletted
+	var delays []int
+	unit := 10
+	iterationsCount := 100
+	duration := 0
+
+	for i := 0; i < iterationsCount; i += 1 {
+		img := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), conwaysGameOfLifePalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
+				coord := &ggol.Coordinate{X: x, Y: y}
+				area, _ := game.GetArea(coord)
+				drawConwaysGameOfLifeArea(coord, area, unit, img, &conwaysGameOfLifePalette)
+			}
+		}
+		images = append(images, img)
+		delays = append(delays, duration)
+		game.Iterate()
+	}
+
+	outputGif("output/conways_game_of_life.gif", images, delays)
 }
