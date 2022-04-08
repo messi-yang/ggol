@@ -105,7 +105,7 @@ func main() {
     // you also need to tell the game what's the initial status
     // of each area, let's assume all areas are without any live cells at beginning.
     // At the end, you need to pass in your custom iterator you just declared above.
-    game, _ := ggol.New(
+    game, _ := ggol.NewGame(
         &fieldSize,
         &initialCgolArea,
     )

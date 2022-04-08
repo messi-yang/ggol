@@ -54,7 +54,7 @@ func drawGameOfBlackAndWhiteArea(coord *ggol.Coordinate, area *gameOfBlackAndWhi
 
 func executeGameOfBlackAndWhite() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.New(&fieldSize, &initialGameOfBlackAndWhiteArea)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfBlackAndWhiteArea)
 	game.SetNextAreaGenerator(gameOfBlackAndWhiteNextAreaGenerator)
 	initializeGameOfBlackAndWhiteField(game)
 

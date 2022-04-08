@@ -32,7 +32,7 @@ func TestHasLiveCellTestAreasMapsEqual(t *testing.T) {
 }
 
 func testConvertTestAreasMatricToHasLiveCellTestAreasMapCaseOne(t *testing.T) {
-	game, _ := New(&FieldSize{2, 2}, &areaForTest{hasLiveCell: true})
+	game, _ := NewGame(&FieldSize{2, 2}, &areaForTest{hasLiveCell: true})
 	game.SetNextAreaGenerator(defauAreaForTestIterator)
 	generation := game.GetField()
 	liveAreasMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(generation)

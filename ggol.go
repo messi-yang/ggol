@@ -36,7 +36,7 @@ func defaultNextAreaGenerator[T any](coord *Coordinate, area *T, getAdjacentArea
 }
 
 // Return a new Game with the given fieldSize and initalArea.
-func New[T any](
+func NewGame[T any](
 	fieldSize *FieldSize,
 	initialArea *T,
 ) (Game[T], error) {

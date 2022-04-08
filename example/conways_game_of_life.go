@@ -78,7 +78,7 @@ func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeAr
 
 func executeGameOfLife() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.New(&fieldSize, &initialConwaysGameOfLifeArea)
+	game, _ := ggol.NewGame(&fieldSize, &initialConwaysGameOfLifeArea)
 	game.SetNextAreaGenerator(conwaysGameOfLifeNextAreaGenerator)
 	initializeConwaysGameOfLifeField(game)
 

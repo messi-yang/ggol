@@ -63,7 +63,7 @@ func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, 
 
 func executeGameOfWave() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.New(&fieldSize, &initialGameOfWaveArea)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfWaveArea)
 	game.SetNextAreaGenerator(gameOfWaveNextAreaGenerator)
 	initializeGameOfWaveField(game)
 

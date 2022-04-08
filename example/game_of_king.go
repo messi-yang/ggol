@@ -72,7 +72,7 @@ func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, 
 
 func executeGameOfKing() {
 	fieldSize := ggol.FieldSize{Width: 250, Height: 250}
-	game, _ := ggol.New(&fieldSize, &initialGameOfKingArea)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfKingArea)
 	game.SetNextAreaGenerator(gameOfKingNextAreaGenerator)
 	initializeGameOfKingField(game)
 

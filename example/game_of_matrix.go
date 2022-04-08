@@ -78,7 +78,7 @@ func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit i
 
 func executeGameOfMatrix() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.New(&fieldSize, &initialGameOfMatrixArea)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfMatrixArea)
 	game.SetNextAreaGenerator(gameOfMatrixNextAreaGenerator)
 	initializeGameOfMatrixField(game)
 
