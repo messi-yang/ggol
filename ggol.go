@@ -19,7 +19,7 @@ type Game[T any] interface {
 	GetFieldSize() (fieldSize *FieldSize)
 	// Get the status of the area at the given coordinate.
 	GetArea(coord *Coordinate) (area *T, err error)
-	// Get a matric that contains informaiton of all fields.
+	// Get the field of the area, it's a matrix that contains all areas in the game.
 	GetField() (field *[]*[]*T)
 }
 
