@@ -170,7 +170,22 @@ The rain of code in the movie Matrix.
 
 ![Who Is King](./doc/game_of_matrix.gif)
 
-## Build Sample GIF
+## Development
+
+### Run Tests
+
+```bash
+go test -v
+```
+
+### Setup Pre-commit Hook
+
+```bash
+brew install pre-commit
+pre-commit install
+```
+
+### Run The Code To Build Sample GIFs
 
 You can refer to sample code in [here](./example/) to build GIFs of your custom games.
 

@@ -35,8 +35,7 @@ func defaultNextAreaGenerator[T any](coord *Coordinate, area *T, getAdjacentArea
 	return area
 }
 
-// Return a new Game with the given width and height, seed is planted
-// if it's given.
+// Return a new Game with the given size and initalArea.
 func New[T any](
 	size *Size,
 	initialArea *T,
