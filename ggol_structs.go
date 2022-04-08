@@ -2,13 +2,13 @@ package ggol
 
 import "fmt"
 
-// This error will be thrown when you try to create a new game with invalid size.
-type ErrSizeIsNotValid struct {
-	Size *Size
+// This error will be thrown when you try to create a new game with invalid field size.
+type ErrFieldSizeIsNotValid struct {
+	FieldSize *FieldSize
 }
 
-func (e *ErrSizeIsNotValid) Error() string {
-	return fmt.Sprintf("The game size (%v x %v) is not valid.", e.Size.Width, e.Size.Height)
+func (e *ErrFieldSizeIsNotValid) Error() string {
+	return fmt.Sprintf("The game field size (%v x %v) is not valid.", e.FieldSize.Width, e.FieldSize.Height)
 }
 
 // This error will be thrown when you're trying to set or get an area with invalid coordinate.
@@ -26,14 +26,15 @@ type Coordinate struct {
 	Y int
 }
 
-// The size of the field of the game.
-type Size struct {
+// The field size of the field of the game.
+type FieldSize struct {
 	Width  int
 	Height int
 }
 
 // This function will be passed into NextAreaGenerator, this is how you can adajcent areas in NextAreaGenerator.
+// Also, 2nd argument "isCrossBorder" tells you if the adjacent area is on ohter side of the field.
 type AdjacentAreaGetter[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
 
-// NextAreaGenerator tells the game how you're gonna generate next area status of the given area.
+// NextAreaGenerator tells the game how you're gonna generate next status of the given area.
 type NextAreaGenerator[T any] func(coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T)

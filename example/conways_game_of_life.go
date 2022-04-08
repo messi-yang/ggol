@@ -53,9 +53,9 @@ func conwaysGameOfLifeNextAreaGenerator(
 }
 
 func initializeConwaysGameOfLifeField(g ggol.Game[conwaysGameOfLifeArea]) {
-	size := g.GetSize()
-	for i := 0; i < size.Height; i += 1 {
-		for j := 0; j < size.Height; j += 1 {
+	fieldSize := g.GetFieldSize()
+	for i := 0; i < fieldSize.Height; i += 1 {
+		for j := 0; j < fieldSize.Height; j += 1 {
 			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &conwaysGameOfLifeArea{HasLiveCell: true})
 			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
 			g.SetArea(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
@@ -77,8 +77,8 @@ func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeAr
 }
 
 func executeGameOfLife() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.New(&size, &initialConwaysGameOfLifeArea)
+	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
+	game, _ := ggol.New(&fieldSize, &initialConwaysGameOfLifeArea)
 	game.SetNextAreaGenerator(conwaysGameOfLifeNextAreaGenerator)
 	initializeConwaysGameOfLifeField(game)
 
@@ -93,9 +93,9 @@ func executeGameOfLife() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), conwaysGameOfLifePalette)
-		for x := 0; x < size.Width; x += 1 {
-			for y := 0; y < size.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), conwaysGameOfLifePalette)
+		for x := 0; x < fieldSize.Width; x += 1 {
+			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				area, _ := game.GetArea(coord)
 				drawConwaysGameOfLifeArea(coord, area, unit, newImage, &conwaysGameOfLifePalette)

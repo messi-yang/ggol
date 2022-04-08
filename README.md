@@ -96,17 +96,17 @@ func cgolNextAreaGenerator(
 }
 
 func main() {
-    // Declare game size.
-    gameSize := ggol.Size{Height: 3, Width: 3}
+    // Declare field size.
+    fieldSize := ggol.FieldSize{Height: 3, Width: 3}
     // Initial status of all areas.
     initialCgolArea := CgolArea{HasLiveCell: false}
 
-    // Alrighty, let's create a new game with size of 3x3,
+    // Alrighty, let's create a new game with field size of 3x3,
     // you also need to tell the game what's the initial status
     // of each area, let's assume all areas are without any live cells at beginning.
     // At the end, you need to pass in your custom iterator you just declared above.
     game, _ := ggol.New(
-        &gameSize,
+        &fieldSize,
         &initialCgolArea,
     )
     // Set area iterator.
@@ -124,7 +124,7 @@ func main() {
 
     // Let's see if we generate the next status of the Blinker correctly.
     // If it's correct, all areas below should have "HasLiveCell" as true.
-    for x := 0; x < gameSize.Width; x += 1 {
+    for x := 0; x < fieldSize.Width; x += 1 {
         area, _ := game.GetArea(&ggol.Coordinate{X: x, Y: 1})
         fmt.Printf("%v ", area.HasLiveCell)
     }

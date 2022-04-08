@@ -5,43 +5,43 @@ import (
 	"testing"
 )
 
-func shouldInitializeGameWithCorrectSize(t *testing.T) {
+func shouldInitializeGameWithCorrectFieldSize(t *testing.T) {
 	width := 30
 	height := 10
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	areaLiveMap := *convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 
 	if len(areaLiveMap) == width && len(areaLiveMap[0]) == height {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Size should be %v x %v", width, height)
+		t.Fatalf("FieldSize should be %v x %v", width, height)
 	}
 }
 
-func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
+func shouldThrowErrorWhenFieldSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
-	size := Size{Width: width, Height: height}
-	_, err := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	_, err := New(&fieldSize, &initialAreaForTest)
 
 	if err == nil {
-		t.Fatalf("Should get error when giving invalid size.")
+		t.Fatalf("Should get error when giving invalid fieldSize.")
 	}
 	t.Log("Passed")
 }
 
 func TestNew(t *testing.T) {
-	shouldInitializeGameWithCorrectSize(t)
-	shouldThrowErrorWhenSizeIsInvalid(t)
+	shouldInitializeGameWithCorrectFieldSize(t)
+	shouldThrowErrorWhenFieldSizeIsInvalid(t)
 }
 
 func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetArea(&c, &areaForTest{hasLiveCell: true})
@@ -55,9 +55,9 @@ func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 func shouldSetAreaCorrectly(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
+	fieldSize := FieldSize{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
-	g, _ := New(&size, &initialAreaForTest)
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	g.SetArea(&c, &areaForTest{hasLiveCell: true})
 	area, _ := g.GetArea(&c)
@@ -78,8 +78,8 @@ func TestSetArea(t *testing.T) {
 func testBlockPattern(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a block pattern
@@ -106,8 +106,8 @@ func testBlockPattern(t *testing.T) {
 func testBlinkerPattern(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a blinker pattern
@@ -144,8 +144,8 @@ func testBlinkerPattern(t *testing.T) {
 func testGliderPattern(t *testing.T) {
 	width := 5
 	height := 5
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
@@ -216,8 +216,8 @@ func testGliderPattern(t *testing.T) {
 func testGliderPatternWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
@@ -265,30 +265,30 @@ func TestGenerateNextField(t *testing.T) {
 	testGliderPatternWithConcurrency(t)
 }
 
-func testGetSizeCaseOne(t *testing.T) {
+func testGetFieldSizeCaseOne(t *testing.T) {
 	width := 3
 	height := 6
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
-	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
+	if g.GetFieldSize().Width == 3 && g.GetFieldSize().Height == 6 {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Size is not correct.")
+		t.Fatalf("FieldSize is not correct.")
 	}
 }
 
-func TestGetSize(t *testing.T) {
-	testGetSizeCaseOne(t)
+func TestGetFieldSize(t *testing.T) {
+	testGetFieldSizeCaseOne(t)
 }
 
 func testGetAreaCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
+	fieldSize := FieldSize{Width: width, Height: height}
 	coord := Coordinate{X: 1, Y: 0}
-	g, _ := New(&size, &initialAreaForTest)
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	g.SetArea(&coord, &areaForTest{hasLiveCell: true})
 	area, _ := g.GetArea(&coord)
@@ -303,8 +303,8 @@ func testGetAreaCaseOne(t *testing.T) {
 func testGetAreaCaseTwo(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	coord := Coordinate{X: 1, Y: 4}
 	_, err := g.GetArea(&coord)
@@ -321,11 +321,11 @@ func TestGetArea(t *testing.T) {
 	testGetAreaCaseTwo(t)
 }
 
-func testResetCaseOne(t *testing.T) {
+func testResetFieldCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 
 	// Make a glider pattern
@@ -333,7 +333,7 @@ func testResetCaseOne(t *testing.T) {
 	g.SetArea(&Coordinate{X: 1, Y: 1}, &areaForTest{hasLiveCell: true})
 	g.SetArea(&Coordinate{X: 1, Y: 2}, &areaForTest{hasLiveCell: true})
 
-	g.Reset()
+	g.ResetField()
 	areaLiveMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
 
 	expectedBinaryBoard := areasHavingLiveCellForTest{
@@ -349,14 +349,14 @@ func testResetCaseOne(t *testing.T) {
 	}
 }
 
-func TestReset(t *testing.T) {
-	testResetCaseOne(t)
+func TestResetField(t *testing.T) {
+	testResetFieldCaseOne(t)
 }
 
 func testSetNextAreaGeneratorCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
+	fieldSize := FieldSize{Width: width, Height: height}
 	customNextAreaGenerator := func(coord *Coordinate, area *areaForTest, getAdjacentArea AdjacentAreaGetter[areaForTest]) *areaForTest {
 		nextArea := *area
 
@@ -369,7 +369,7 @@ func testSetNextAreaGeneratorCaseOne(t *testing.T) {
 			return &nextArea
 		}
 	}
-	g, _ := New(&size, &initialAreaForTest)
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(customNextAreaGenerator)
 	g.GenerateNextField()
 	areaLiveMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(g.GetField())
@@ -394,8 +394,8 @@ func TestSetNextAreaGenerator(t *testing.T) {
 func testGetFieldCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := New(&size, &initialAreaForTest)
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := New(&fieldSize, &initialAreaForTest)
 	g.SetNextAreaGenerator(defauAreaForTestIterator)
 	generation := g.GetField()
 	aliveAreasMap := convertAreaForTestMatrixToAreasHavingLiveCellForTest(generation)

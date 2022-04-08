@@ -34,9 +34,9 @@ func gameOfWaveNextAreaGenerator(
 
 func initializeGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
 	var margin int = 0
-	size := g.GetSize()
-	for x := 0; x < size.Width; x++ {
-		for y := 0; y < size.Height; y++ {
+	fieldSize := g.GetFieldSize()
+	for x := 0; x < fieldSize.Width; x++ {
+		for y := 0; y < fieldSize.Height; y++ {
 			if y%10 == 0 {
 				if x%10 < 5 {
 					margin = x % 10
@@ -62,8 +62,8 @@ func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, 
 }
 
 func executeGameOfWave() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.New(&size, &initialGameOfWaveArea)
+	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
+	game, _ := ggol.New(&fieldSize, &initialGameOfWaveArea)
 	game.SetNextAreaGenerator(gameOfWaveNextAreaGenerator)
 	initializeGameOfWaveField(game)
 
@@ -78,9 +78,9 @@ func executeGameOfWave() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*unit, size.Height*unit), gameOfWavePalette)
-		for x := 0; x < size.Width; x += 1 {
-			for y := 0; y < size.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), gameOfWavePalette)
+		for x := 0; x < fieldSize.Width; x += 1 {
+			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				area, _ := game.GetArea(coord)
 				drawGameOfWaveArea(coord, area, unit, newImage, &gameOfWavePalette)

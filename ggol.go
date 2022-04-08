@@ -4,10 +4,10 @@ import (
 	"sync"
 )
 
-// The value in type of Game will be returned after you call New function.
+// "T" in the Game interface represents the type of area, it's defined by you.
 type Game[T any] interface {
-	// Reset all areas with initial area.
-	Reset()
+	// Reset entire field with initial area.
+	ResetField()
 	// Generate next field, the way you generate next field will be depending on the NextAreaGenerator function
 	// you passed in SetNextAreaGenerator.
 	GenerateNextField()
@@ -15,8 +15,8 @@ type Game[T any] interface {
 	SetNextAreaGenerator(iterator NextAreaGenerator[T])
 	// Set the status of the area at the given coordinate.
 	SetArea(coord *Coordinate, area *T) (err error)
-	// Get the size of the field of the game.
-	GetSize() (size *Size)
+	// Get the size of the field.
+	GetFieldSize() (fieldSize *FieldSize)
 	// Get the status of the area at the given coordinate.
 	GetArea(coord *Coordinate) (area *T, err error)
 	// Get a matric that contains informaiton of all fields.
@@ -24,7 +24,7 @@ type Game[T any] interface {
 }
 
 type gameInfo[T any] struct {
-	size         *Size
+	fieldSize    *FieldSize
 	initialArea  *T
 	field        *[]*[]*T
 	areaIterator NextAreaGenerator[T]
@@ -35,19 +35,19 @@ func defaultNextAreaGenerator[T any](coord *Coordinate, area *T, getAdjacentArea
 	return area
 }
 
-// Return a new Game with the given size and initalArea.
+// Return a new Game with the given fieldSize and initalArea.
 func New[T any](
-	size *Size,
+	fieldSize *FieldSize,
 	initialArea *T,
 ) (Game[T], error) {
-	if size.Width < 0 || size.Height < 0 {
-		return nil, &ErrSizeIsNotValid{size}
+	if fieldSize.Width < 0 || fieldSize.Height < 0 {
+		return nil, &ErrFieldSizeIsNotValid{fieldSize}
 	}
 
 	newG := gameInfo[T]{
-		size,
+		fieldSize,
 		initialArea,
-		createField(size, initialArea),
+		createField(fieldSize, initialArea),
 		defaultNextAreaGenerator[T],
 		sync.RWMutex{},
 	}
@@ -55,12 +55,12 @@ func New[T any](
 	return &newG, nil
 }
 
-func createField[T any](size *Size, initialArea *T) *[]*[]*T {
-	field := make([]*[]*T, size.Width)
-	for x := 0; x < size.Width; x++ {
-		newRowOfField := make([]*T, size.Height)
+func createField[T any](fieldSize *FieldSize, initialArea *T) *[]*[]*T {
+	field := make([]*[]*T, fieldSize.Width)
+	for x := 0; x < fieldSize.Width; x++ {
+		newRowOfField := make([]*T, fieldSize.Height)
 		field[x] = &newRowOfField
-		for y := 0; y < size.Height; y++ {
+		for y := 0; y < fieldSize.Height; y++ {
 			(*field[x])[y] = initialArea
 		}
 	}
@@ -68,7 +68,7 @@ func createField[T any](size *Size, initialArea *T) *[]*[]*T {
 }
 
 func (g *gameInfo[T]) isCoordinateOutsideField(c *Coordinate) bool {
-	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
+	return c.X < 0 || c.X >= g.fieldSize.Width || c.Y < 0 || c.Y >= g.fieldSize.Height
 }
 
 func (g *gameInfo[T]) getAdjacentArea(
@@ -82,24 +82,24 @@ func (g *gameInfo[T]) getAdjacentArea(
 	if (g.isCoordinateOutsideField(&Coordinate{X: targetX, Y: targetY})) {
 		isCrossBorder = true
 		for targetX < 0 {
-			targetX += g.size.Width
+			targetX += g.fieldSize.Width
 		}
 		for targetY < 0 {
-			targetY += g.size.Height
+			targetY += g.fieldSize.Height
 		}
-		targetX = targetX % g.size.Width
-		targetY = targetY % g.size.Height
+		targetX = targetX % g.fieldSize.Width
+		targetY = targetY % g.fieldSize.Height
 	}
 
 	return (*(*g.field)[targetX])[targetY], isCrossBorder
 }
 
-// Reset game.
-func (g *gameInfo[T]) Reset() {
+// ResetField game.
+func (g *gameInfo[T]) ResetField() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.field = createField(g.size, g.initialArea)
+	g.field = createField(g.fieldSize, g.initialArea)
 }
 
 // Generate next field.
@@ -107,19 +107,19 @@ func (g *gameInfo[T]) GenerateNextField() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	nextField := make([][]*T, g.size.Width)
+	nextField := make([][]*T, g.fieldSize.Width)
 
-	for x := 0; x < g.size.Width; x++ {
-		nextField[x] = make([]*T, g.size.Height)
-		for y := 0; y < g.size.Height; y++ {
+	for x := 0; x < g.fieldSize.Width; x++ {
+		nextField[x] = make([]*T, g.fieldSize.Height)
+		for y := 0; y < g.fieldSize.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
 			nextArea := g.areaIterator(&coord, (*(*g.field)[x])[y], g.getAdjacentArea)
 			nextField[x][y] = nextArea
 		}
 	}
 
-	for x := 0; x < g.size.Width; x++ {
-		for y := 0; y < g.size.Height; y++ {
+	for x := 0; x < g.fieldSize.Width; x++ {
+		for y := 0; y < g.fieldSize.Height; y++ {
 			(*(*g.field)[x])[y] = nextField[x][y]
 		}
 	}
@@ -142,12 +142,12 @@ func (g *gameInfo[T]) SetArea(c *Coordinate, area *T) error {
 	return nil
 }
 
-// Get the size of the game.
-func (g *gameInfo[T]) GetSize() *Size {
+// Get the field size.
+func (g *gameInfo[T]) GetFieldSize() *FieldSize {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return g.size
+	return g.fieldSize
 }
 
 // Get the area at the coordinate.
