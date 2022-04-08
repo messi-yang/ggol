@@ -37,7 +37,7 @@ func TestNew(t *testing.T) {
 	shouldThrowErrorWhenSizeIsInvalid(t)
 }
 
-func shouldThrowErrorWhenAreaSeedExceedBoarder(t *testing.T) {
+func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 	width := 2
 	height := 2
 	size := Size{Width: width, Height: height}
@@ -47,7 +47,7 @@ func shouldThrowErrorWhenAreaSeedExceedBoarder(t *testing.T) {
 	err := g.SetArea(&c, &areaForTest{hasLiveCell: true})
 
 	if err == nil {
-		t.Fatalf("Should get error when any seed units are outside border.")
+		t.Fatalf("Should get error when coordinate is outside the field.")
 	}
 	t.Log("Passed")
 }
@@ -71,7 +71,7 @@ func shouldSetAreaCorrectly(t *testing.T) {
 }
 
 func TestSetArea(t *testing.T) {
-	shouldThrowErrorWhenAreaSeedExceedBoarder(t)
+	shouldThrowErrorWhenCoordinateExceedsBoarder(t)
 	shouldSetAreaCorrectly(t)
 }
 
