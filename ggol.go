@@ -16,19 +16,19 @@ type Game[T any] interface {
 	// Set the status of the unit at the given coordinate.
 	SetUnit(coord *Coordinate, unit *T) (err error)
 	// Get the size of the field.
-	GetFieldSize() (fieldSize *FieldSize)
+	GetFieldSize() (size *Size)
 	// Get the status of the unit at the given coordinate.
 	GetUnit(coord *Coordinate) (unit *T, err error)
 	// Get the field, it's a matrix that contains all units in the game.
-	GetField() (field *Field[T])
+	GetField() (field *Units[T])
 	// Iterate through entire field
-	IterateField(callback FieldIteratorCallback[T])
+	IterateField(callback UnitsIteratorCallback[T])
 }
 
 type gameInfo[T any] struct {
-	fieldSize    *FieldSize
+	size         *Size
 	initialUnit  *T
-	field        *Field[T]
+	field        *Units[T]
 	unitIterator NextUnitGenerator[T]
 	locker       sync.RWMutex
 }
@@ -37,19 +37,19 @@ func defaultNextUnitGenerator[T any](coord *Coordinate, unit *T, getAdjacentUnit
 	return unit
 }
 
-// Return a new Game with the given fieldSize and initalUnit.
+// Return a new Game with the given size and initalUnit.
 func NewGame[T any](
-	fieldSize *FieldSize,
+	size *Size,
 	initialUnit *T,
 ) (Game[T], error) {
-	if fieldSize.Width < 0 || fieldSize.Height < 0 {
-		return nil, &ErrFieldSizeIsNotValid{fieldSize}
+	if size.Width < 0 || size.Height < 0 {
+		return nil, &ErrSizeIsNotValid{size}
 	}
 
 	newG := gameInfo[T]{
-		fieldSize,
+		size,
 		initialUnit,
-		createField(fieldSize, initialUnit),
+		createField(size, initialUnit),
 		defaultNextUnitGenerator[T],
 		sync.RWMutex{},
 	}
@@ -57,12 +57,12 @@ func NewGame[T any](
 	return &newG, nil
 }
 
-func createField[T any](fieldSize *FieldSize, initialUnit *T) *Field[T] {
-	field := make(Field[T], fieldSize.Width)
-	for x := 0; x < fieldSize.Width; x++ {
-		newRowOfField := make([]*T, fieldSize.Height)
+func createField[T any](size *Size, initialUnit *T) *Units[T] {
+	field := make(Units[T], size.Width)
+	for x := 0; x < size.Width; x++ {
+		newRowOfField := make([]*T, size.Height)
 		field[x] = &newRowOfField
-		for y := 0; y < fieldSize.Height; y++ {
+		for y := 0; y < size.Height; y++ {
 			(*field[x])[y] = initialUnit
 		}
 	}
@@ -70,7 +70,7 @@ func createField[T any](fieldSize *FieldSize, initialUnit *T) *Field[T] {
 }
 
 func (g *gameInfo[T]) isCoordinateOutsideField(c *Coordinate) bool {
-	return c.X < 0 || c.X >= g.fieldSize.Width || c.Y < 0 || c.Y >= g.fieldSize.Height
+	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
 }
 
 func (g *gameInfo[T]) getAdjacentUnit(
@@ -84,13 +84,13 @@ func (g *gameInfo[T]) getAdjacentUnit(
 	if (g.isCoordinateOutsideField(&Coordinate{X: targetX, Y: targetY})) {
 		isCrossBorder = true
 		for targetX < 0 {
-			targetX += g.fieldSize.Width
+			targetX += g.size.Width
 		}
 		for targetY < 0 {
-			targetY += g.fieldSize.Height
+			targetY += g.size.Height
 		}
-		targetX = targetX % g.fieldSize.Width
-		targetY = targetY % g.fieldSize.Height
+		targetX = targetX % g.size.Width
+		targetY = targetY % g.size.Height
 	}
 
 	return (*(*g.field)[targetX])[targetY], isCrossBorder
@@ -101,7 +101,7 @@ func (g *gameInfo[T]) ResetField() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.field = createField(g.fieldSize, g.initialUnit)
+	g.field = createField(g.size, g.initialUnit)
 }
 
 // Generate next field.
@@ -109,19 +109,19 @@ func (g *gameInfo[T]) GenerateNextField() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	nextField := make([][]*T, g.fieldSize.Width)
+	nextField := make([][]*T, g.size.Width)
 
-	for x := 0; x < g.fieldSize.Width; x++ {
-		nextField[x] = make([]*T, g.fieldSize.Height)
-		for y := 0; y < g.fieldSize.Height; y++ {
+	for x := 0; x < g.size.Width; x++ {
+		nextField[x] = make([]*T, g.size.Height)
+		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
 			nextUnit := g.unitIterator(&coord, (*(*g.field)[x])[y], g.getAdjacentUnit)
 			nextField[x][y] = nextUnit
 		}
 	}
 
-	for x := 0; x < g.fieldSize.Width; x++ {
-		for y := 0; y < g.fieldSize.Height; y++ {
+	for x := 0; x < g.size.Width; x++ {
+		for y := 0; y < g.size.Height; y++ {
 			(*(*g.field)[x])[y] = nextField[x][y]
 		}
 	}
@@ -145,11 +145,11 @@ func (g *gameInfo[T]) SetUnit(c *Coordinate, unit *T) error {
 }
 
 // Get the field size.
-func (g *gameInfo[T]) GetFieldSize() *FieldSize {
+func (g *gameInfo[T]) GetFieldSize() *Size {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return g.fieldSize
+	return g.size
 }
 
 // Get the unit at the coordinate.
@@ -165,7 +165,7 @@ func (g *gameInfo[T]) GetUnit(c *Coordinate) (*T, error) {
 }
 
 // Get the entire genetation, which is a matrix that contains all units.
-func (g *gameInfo[T]) GetField() *Field[T] {
+func (g *gameInfo[T]) GetField() *Units[T] {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -173,9 +173,9 @@ func (g *gameInfo[T]) GetField() *Field[T] {
 }
 
 // We will iterate field and call the callback func that you passes in.
-func (g *gameInfo[T]) IterateField(callback FieldIteratorCallback[T]) {
-	for x := 0; x < g.fieldSize.Width; x++ {
-		for y := 0; y < g.fieldSize.Height; y++ {
+func (g *gameInfo[T]) IterateField(callback UnitsIteratorCallback[T]) {
+	for x := 0; x < g.size.Width; x++ {
+		for y := 0; y < g.size.Height; y++ {
 			callback(&Coordinate{X: x, Y: y}, (*(*g.field)[x])[y])
 		}
 	}

@@ -32,7 +32,7 @@ func TestHasLiveCellTestUnitsMapsEqual(t *testing.T) {
 }
 
 func testConvertTestUnitsMatricToHasLiveCellTestUnitsMapCaseOne(t *testing.T) {
-	game, _ := NewGame(&FieldSize{2, 2}, &unitForTest{hasLiveCell: true})
+	game, _ := NewGame(&Size{2, 2}, &unitForTest{hasLiveCell: true})
 	game.SetNextUnitGenerator(defauUnitForTestIterator)
 	generation := game.GetField()
 	liveUnitsMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(generation)

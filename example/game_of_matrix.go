@@ -77,8 +77,8 @@ func drawGameOfMatrixUnit(coord *ggol.Coordinate, unit *gameOfMatrixUnit, blockS
 }
 
 func executeGameOfMatrix() {
-	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfMatrixUnit)
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.NewGame(&size, &initialGameOfMatrixUnit)
 	game.SetNextUnitGenerator(gameOfMatrixNextUnitGenerator)
 	initializeGameOfMatrixField(game)
 
@@ -106,9 +106,9 @@ func executeGameOfMatrix() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfMatrixPalette)
-		for x := 0; x < fieldSize.Width; x += 1 {
-			for y := 0; y < fieldSize.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*blockSize, size.Height*blockSize), gameOfMatrixPalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				unit, _ := game.GetUnit(coord)
 				drawGameOfMatrixUnit(coord, unit, blockSize, newImage, &gameOfMatrixPalette)

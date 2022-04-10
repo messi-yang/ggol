@@ -34,9 +34,9 @@ func gameOfWaveNextUnitGenerator(
 
 func initializeGameOfWaveField(g ggol.Game[gameOfWaveUnit]) {
 	var margin int = 0
-	fieldSize := g.GetFieldSize()
-	for x := 0; x < fieldSize.Width; x++ {
-		for y := 0; y < fieldSize.Height; y++ {
+	size := g.GetFieldSize()
+	for x := 0; x < size.Width; x++ {
+		for y := 0; y < size.Height; y++ {
 			if y%10 == 0 {
 				if x%10 < 5 {
 					margin = x % 10
@@ -62,8 +62,8 @@ func drawGameOfWaveUnit(coord *ggol.Coordinate, unit *gameOfWaveUnit, blockSize 
 }
 
 func executeGameOfWave() {
-	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfWaveUnit)
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.NewGame(&size, &initialGameOfWaveUnit)
 	game.SetNextUnitGenerator(gameOfWaveNextUnitGenerator)
 	initializeGameOfWaveField(game)
 
@@ -78,9 +78,9 @@ func executeGameOfWave() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfWavePalette)
-		for x := 0; x < fieldSize.Width; x += 1 {
-			for y := 0; y < fieldSize.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*blockSize, size.Height*blockSize), gameOfWavePalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				unit, _ := game.GetUnit(coord)
 				drawGameOfWaveUnit(coord, unit, blockSize, newImage, &gameOfWavePalette)

@@ -97,15 +97,15 @@ func cgolNextUnitGenerator(
 
 func main() {
     // Declare field size.
-    fieldSize := ggol.FieldSize{Height: 3, Width: 3}
+    size := ggol.Size{Height: 3, Width: 3}
     // Initial status of all units.
     initialCgolUnit := CgolUnit{Alive: false}
 
-    // Alrighty, let's create a new game with field size of 3x3,
+    // Alrighty, let's create a new game with size of 3x3,
     // you also need to tell the game what's the initial status
     // of each unit, let's say all units are not alive.
     game, _ := ggol.NewGame(
-        &fieldSize,
+        &size,
         &initialCgolUnit,
     )
     // Set generator of next unit.
@@ -123,7 +123,7 @@ func main() {
 
     // Let's see if we generate the next status of the Blinker correctly.
     // If it's correct, all units below should have "Alive" attribute as true.
-    for x := 0; x < fieldSize.Width; x += 1 {
+    for x := 0; x < size.Width; x += 1 {
         unit, _ := game.GetUnit(&ggol.Coordinate{X: x, Y: 1})
         fmt.Printf("%v ", unit.Alive)
     }

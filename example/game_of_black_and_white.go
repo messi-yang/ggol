@@ -32,9 +32,9 @@ func gameOfBlackAndWhiteNextUnitGenerator(
 }
 
 func initializeGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteUnit]) {
-	fieldSize := g.GetFieldSize()
-	for x := 0; x < fieldSize.Width; x++ {
-		for y := 0; y < fieldSize.Height; y++ {
+	size := g.GetFieldSize()
+	for x := 0; x < size.Width; x++ {
+		for y := 0; y < size.Height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
 			g.SetUnit(&c, &gameOfBlackAndWhiteUnit{HasLiveCell: (x+y)%3 == 0})
 		}
@@ -53,8 +53,8 @@ func drawGameOfBlackAndWhiteUnit(coord *ggol.Coordinate, unit *gameOfBlackAndWhi
 }
 
 func executeGameOfBlackAndWhite() {
-	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfBlackAndWhiteUnit)
+	size := ggol.Size{Width: 50, Height: 50}
+	game, _ := ggol.NewGame(&size, &initialGameOfBlackAndWhiteUnit)
 	game.SetNextUnitGenerator(gameOfBlackAndWhiteNextUnitGenerator)
 	initializeGameOfBlackAndWhiteField(game)
 
@@ -69,9 +69,9 @@ func executeGameOfBlackAndWhite() {
 	duration := 100
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfBlackAndWhitePalette)
-		for x := 0; x < fieldSize.Width; x += 1 {
-			for y := 0; y < fieldSize.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*blockSize, size.Height*blockSize), gameOfBlackAndWhitePalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				unit, _ := game.GetUnit(coord)
 				drawGameOfBlackAndWhiteUnit(coord, unit, blockSize, newImage, &gameOfBlackAndWhitePalette)

@@ -5,43 +5,43 @@ import (
 	"testing"
 )
 
-func shouldInitializeGameWithCorrectFieldSize(t *testing.T) {
+func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	width := 30
 	height := 10
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	unitLiveMap := *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetField())
 
 	if len(unitLiveMap) == width && len(unitLiveMap[0]) == height {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("FieldSize should be %v x %v", width, height)
+		t.Fatalf("Size should be %v x %v", width, height)
 	}
 }
 
-func shouldThrowErrorWhenFieldSizeIsInvalid(t *testing.T) {
+func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 	width := -1
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
-	_, err := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	_, err := NewGame(&size, &initialUnitForTest)
 
 	if err == nil {
-		t.Fatalf("Should get error when giving invalid fieldSize.")
+		t.Fatalf("Should get error when giving invalid size.")
 	}
 	t.Log("Passed")
 }
 
 func TestNew(t *testing.T) {
-	shouldInitializeGameWithCorrectFieldSize(t)
-	shouldThrowErrorWhenFieldSizeIsInvalid(t)
+	shouldInitializeGameWithCorrectSize(t)
+	shouldThrowErrorWhenSizeIsInvalid(t)
 }
 
 func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 	width := 2
 	height := 2
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetUnit(&c, &unitForTest{hasLiveCell: true})
@@ -55,9 +55,9 @@ func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 func shouldSetUnitCorrectly(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	c := Coordinate{X: 1, Y: 1}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	g.SetUnit(&c, &unitForTest{hasLiveCell: true})
 	unit, _ := g.GetUnit(&c)
@@ -78,8 +78,8 @@ func TestSetUnit(t *testing.T) {
 func testBlockPattern(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a block pattern
@@ -106,8 +106,8 @@ func testBlockPattern(t *testing.T) {
 func testBlinkerPattern(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a blinker pattern
@@ -144,8 +144,8 @@ func testBlinkerPattern(t *testing.T) {
 func testGliderPattern(t *testing.T) {
 	width := 5
 	height := 5
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a glider pattern
@@ -216,8 +216,8 @@ func testGliderPattern(t *testing.T) {
 func testGliderPatternWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a glider pattern
@@ -268,14 +268,14 @@ func TestGenerateNextField(t *testing.T) {
 func testGetFieldSizeCaseOne(t *testing.T) {
 	width := 3
 	height := 6
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	if g.GetFieldSize().Width == 3 && g.GetFieldSize().Height == 6 {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("FieldSize is not correct.")
+		t.Fatalf("Size is not correct.")
 	}
 }
 
@@ -286,9 +286,9 @@ func TestGetFieldSize(t *testing.T) {
 func testGetUnitCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	fieldSize := FieldSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	coord := Coordinate{X: 1, Y: 0}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	g.SetUnit(&coord, &unitForTest{hasLiveCell: true})
 	unit, _ := g.GetUnit(&coord)
@@ -303,8 +303,8 @@ func testGetUnitCaseOne(t *testing.T) {
 func testGetUnitCaseTwo(t *testing.T) {
 	width := 2
 	height := 2
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	coord := Coordinate{X: 1, Y: 4}
 	_, err := g.GetUnit(&coord)
@@ -324,8 +324,8 @@ func TestGetUnit(t *testing.T) {
 func testResetFieldCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a glider pattern
@@ -356,7 +356,7 @@ func TestResetField(t *testing.T) {
 func testSetNextUnitGeneratorCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
+	size := Size{Width: width, Height: height}
 	customNextUnitGenerator := func(coord *Coordinate, unit *unitForTest, getAdjacentUnit AdjacentUnitGetter[unitForTest]) *unitForTest {
 		nextUnit := *unit
 
@@ -369,7 +369,7 @@ func testSetNextUnitGeneratorCaseOne(t *testing.T) {
 			return &nextUnit
 		}
 	}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(customNextUnitGenerator)
 	g.GenerateNextField()
 	unitLiveMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetField())
@@ -394,8 +394,8 @@ func TestSetNextUnitGenerator(t *testing.T) {
 func testGetFieldCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	generation := g.GetField()
 	aliveUnitsMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(generation)
@@ -416,8 +416,8 @@ func TestGetField(t *testing.T) {
 func testIterateFieldCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	fieldSize := FieldSize{Width: width, Height: height}
-	g, _ := NewGame(&fieldSize, &initialUnitForTest)
+	size := Size{Width: width, Height: height}
+	g, _ := NewGame(&size, &initialUnitForTest)
 	g.SetUnit(&Coordinate{X: 1, Y: 0}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 1}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 2}, &unitForTest{hasLiveCell: true})

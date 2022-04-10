@@ -48,10 +48,10 @@ func gameOfKingNextUnitGenerator(
 }
 
 func initializeGameOfKingField(g ggol.Game[gameOfKingUnit]) {
-	fieldSize := g.GetFieldSize()
-	cellsCount := int((fieldSize.Width * fieldSize.Height) / 2)
+	size := g.GetFieldSize()
+	cellsCount := int((size.Width * size.Height) / 2)
 	for i := 0; i < cellsCount; i += 1 {
-		g.SetUnit(&ggol.Coordinate{X: rand.Intn(fieldSize.Width), Y: rand.Intn(fieldSize.Height)}, &gameOfKingUnit{Strength: 1, Direction: 0})
+		g.SetUnit(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &gameOfKingUnit{Strength: 1, Direction: 0})
 	}
 }
 
@@ -71,8 +71,8 @@ func drawGameOfKingUnit(coord *ggol.Coordinate, unit *gameOfKingUnit, blockSize 
 }
 
 func executeGameOfKing() {
-	fieldSize := ggol.FieldSize{Width: 250, Height: 250}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfKingUnit)
+	size := ggol.Size{Width: 250, Height: 250}
+	game, _ := ggol.NewGame(&size, &initialGameOfKingUnit)
 	game.SetNextUnitGenerator(gameOfKingNextUnitGenerator)
 	initializeGameOfKingField(game)
 
@@ -94,9 +94,9 @@ func executeGameOfKing() {
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfKingPalette)
-		for x := 0; x < fieldSize.Width; x += 1 {
-			for y := 0; y < fieldSize.Height; y += 1 {
+		newImage := image.NewPaletted(image.Rect(0, 0, size.Width*blockSize, size.Height*blockSize), gameOfKingPalette)
+		for x := 0; x < size.Width; x += 1 {
+			for y := 0; y < size.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
 				unit, _ := game.GetUnit(coord)
 				drawGameOfKingUnit(coord, unit, blockSize, newImage, &gameOfKingPalette)
