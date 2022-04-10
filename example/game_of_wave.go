@@ -32,9 +32,9 @@ func gameOfWaveNextUnitGenerator(
 	}
 }
 
-func initializeGameOfWaveField(g ggol.Game[gameOfWaveUnit]) {
+func initializeGameOfWaveUnits(g ggol.Game[gameOfWaveUnit]) {
 	var margin int = 0
-	size := g.GetFieldSize()
+	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
 		for y := 0; y < size.Height; y++ {
 			if y%10 == 0 {
@@ -65,7 +65,7 @@ func executeGameOfWave() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.NewGame(&size, &initialGameOfWaveUnit)
 	game.SetNextUnitGenerator(gameOfWaveNextUnitGenerator)
-	initializeGameOfWaveField(game)
+	initializeGameOfWaveUnits(game)
 
 	var gameOfWavePalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},
@@ -88,7 +88,7 @@ func executeGameOfWave() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.GenerateNextField()
+		game.GenerateNextUnits()
 	}
 
 	outputGif("output/game_of_wave.gif", images, delays)

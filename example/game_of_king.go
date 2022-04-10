@@ -47,8 +47,8 @@ func gameOfKingNextUnitGenerator(
 	return &newUnit
 }
 
-func initializeGameOfKingField(g ggol.Game[gameOfKingUnit]) {
-	size := g.GetFieldSize()
+func initializeGameOfKingUnits(g ggol.Game[gameOfKingUnit]) {
+	size := g.GetSize()
 	cellsCount := int((size.Width * size.Height) / 2)
 	for i := 0; i < cellsCount; i += 1 {
 		g.SetUnit(&ggol.Coordinate{X: rand.Intn(size.Width), Y: rand.Intn(size.Height)}, &gameOfKingUnit{Strength: 1, Direction: 0})
@@ -74,7 +74,7 @@ func executeGameOfKing() {
 	size := ggol.Size{Width: 250, Height: 250}
 	game, _ := ggol.NewGame(&size, &initialGameOfKingUnit)
 	game.SetNextUnitGenerator(gameOfKingNextUnitGenerator)
-	initializeGameOfKingField(game)
+	initializeGameOfKingUnits(game)
 
 	var gameOfKingPalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},
@@ -104,7 +104,7 @@ func executeGameOfKing() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.GenerateNextField()
+		game.GenerateNextUnits()
 	}
 
 	outputGif("output/game_of_king.gif", images, delays)

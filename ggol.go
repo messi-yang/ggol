@@ -6,31 +6,35 @@ import (
 
 // "T" in the Game interface represents the type of unit, it's defined by you.
 type Game[T any] interface {
-	// Reset entire field with initial unit.
-	ResetField()
-	// Generate next field, the way you generate next field will be depending on the NextUnitGenerator function
+	// ResetUnits all units with initial unit.
+	ResetUnits()
+	// Generate next units, the way you generate next units will be depending on the NextUnitGenerator function
 	// you passed in SetNextUnitGenerator.
-	GenerateNextField()
+	GenerateNextUnits()
 	// Set NextUnitGenerator, which tells the game how you want to generate next unit of the given unit.
 	SetNextUnitGenerator(nextUnitGenerator NextUnitGenerator[T])
 	// Set the status of the unit at the given coordinate.
 	SetUnit(coord *Coordinate, unit *T) (err error)
-	// Get the size of the field.
-	GetFieldSize() (size *Size)
+	// Get the size of the game.
+	GetSize() (size *Size)
 	// Get the status of the unit at the given coordinate.
 	GetUnit(coord *Coordinate) (unit *T, err error)
-	// Get the field, it's a matrix that contains all units in the game.
-	GetField() (field *Units[T])
-	// Iterate through entire field
-	IterateField(callback UnitsIteratorCallback[T])
+	// Get all units in the area.
+	GetUnitsInArea(area *Area) (units *Units[T], err error)
+	// Get all units in the game.
+	GetUnits() (units *Units[T])
+	// Iterate through units in the given area.
+	IterateUnitsInArea(area *Area, callback UnitsIteratorCallback[T]) (err error)
+	// Iterate through all units in the game
+	IterateUnits(callback UnitsIteratorCallback[T])
 }
 
 type gameInfo[T any] struct {
-	size         *Size
-	initialUnit  *T
-	field        *Units[T]
-	unitIterator NextUnitGenerator[T]
-	locker       sync.RWMutex
+	size              *Size
+	initialUnit       *T
+	units             *Units[T]
+	nextUnitGenerator NextUnitGenerator[T]
+	locker            sync.RWMutex
 }
 
 func defaultNextUnitGenerator[T any](coord *Coordinate, unit *T, getAdjacentUnit AdjacentUnitGetter[T]) (nextUnit *T) {
@@ -43,13 +47,13 @@ func NewGame[T any](
 	initialUnit *T,
 ) (Game[T], error) {
 	if size.Width < 0 || size.Height < 0 {
-		return nil, &ErrSizeIsNotValid{size}
+		return nil, &ErrSizeIsInvalid{size}
 	}
 
 	newG := gameInfo[T]{
 		size,
 		initialUnit,
-		createField(size, initialUnit),
+		createInitialUnits(size, initialUnit),
 		defaultNextUnitGenerator[T],
 		sync.RWMutex{},
 	}
@@ -57,20 +61,24 @@ func NewGame[T any](
 	return &newG, nil
 }
 
-func createField[T any](size *Size, initialUnit *T) *Units[T] {
-	field := make(Units[T], size.Width)
+func createInitialUnits[T any](size *Size, initialUnit *T) *Units[T] {
+	units := make(Units[T], size.Width)
 	for x := 0; x < size.Width; x++ {
-		newRowOfField := make([]*T, size.Height)
-		field[x] = &newRowOfField
+		newRowOfUnits := make([]*T, size.Height)
+		units[x] = &newRowOfUnits
 		for y := 0; y < size.Height; y++ {
-			(*field[x])[y] = initialUnit
+			(*units[x])[y] = initialUnit
 		}
 	}
-	return &field
+	return &units
 }
 
-func (g *gameInfo[T]) isCoordinateOutsideField(c *Coordinate) bool {
+func (g *gameInfo[T]) isCoordinateInvalid(c *Coordinate) bool {
 	return c.X < 0 || c.X >= g.size.Width || c.Y < 0 || c.Y >= g.size.Height
+}
+
+func (g *gameInfo[T]) isAreaInvalid(area *Area) bool {
+	return area.From.X > area.To.X || area.From.Y > area.To.Y
 }
 
 func (g *gameInfo[T]) getAdjacentUnit(
@@ -81,7 +89,7 @@ func (g *gameInfo[T]) getAdjacentUnit(
 	targetY := originCoord.Y + relativeCoord.Y
 	var isCrossBorder bool = false
 
-	if (g.isCoordinateOutsideField(&Coordinate{X: targetX, Y: targetY})) {
+	if (g.isCoordinateInvalid(&Coordinate{X: targetX, Y: targetY})) {
 		isCrossBorder = true
 		for targetX < 0 {
 			targetX += g.size.Width
@@ -93,42 +101,42 @@ func (g *gameInfo[T]) getAdjacentUnit(
 		targetY = targetY % g.size.Height
 	}
 
-	return (*(*g.field)[targetX])[targetY], isCrossBorder
+	return (*(*g.units)[targetX])[targetY], isCrossBorder
 }
 
-// ResetField game.
-func (g *gameInfo[T]) ResetField() {
+// ResetUnits game.
+func (g *gameInfo[T]) ResetUnits() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	g.field = createField(g.size, g.initialUnit)
+	g.units = createInitialUnits(g.size, g.initialUnit)
 }
 
-// Generate next field.
-func (g *gameInfo[T]) GenerateNextField() {
+// Generate next units.
+func (g *gameInfo[T]) GenerateNextUnits() {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	nextField := make([][]*T, g.size.Width)
+	nextUnits := make([][]*T, g.size.Width)
 
 	for x := 0; x < g.size.Width; x++ {
-		nextField[x] = make([]*T, g.size.Height)
+		nextUnits[x] = make([]*T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextUnit := g.unitIterator(&coord, (*(*g.field)[x])[y], g.getAdjacentUnit)
-			nextField[x][y] = nextUnit
+			nextUnit := g.nextUnitGenerator(&coord, (*(*g.units)[x])[y], g.getAdjacentUnit)
+			nextUnits[x][y] = nextUnit
 		}
 	}
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			(*(*g.field)[x])[y] = nextField[x][y]
+			(*(*g.units)[x])[y] = nextUnits[x][y]
 		}
 	}
 }
 
 func (g *gameInfo[T]) SetNextUnitGenerator(iterator NextUnitGenerator[T]) {
-	g.unitIterator = iterator
+	g.nextUnitGenerator = iterator
 }
 
 // Update the unit at the given coordinate.
@@ -136,16 +144,16 @@ func (g *gameInfo[T]) SetUnit(c *Coordinate, unit *T) error {
 	g.locker.Lock()
 	defer g.locker.Unlock()
 
-	if g.isCoordinateOutsideField(c) {
-		return &ErrCoordinateIsOutsideField{c}
+	if g.isCoordinateInvalid(c) {
+		return &ErrCoordinateIsInvalid{c}
 	}
-	(*(*g.field)[c.X])[c.Y] = unit
+	(*(*g.units)[c.X])[c.Y] = unit
 
 	return nil
 }
 
-// Get the field size.
-func (g *gameInfo[T]) GetFieldSize() *Size {
+// Get the game size.
+func (g *gameInfo[T]) GetSize() *Size {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -157,26 +165,76 @@ func (g *gameInfo[T]) GetUnit(c *Coordinate) (*T, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	if g.isCoordinateOutsideField(c) {
-		return nil, &ErrCoordinateIsOutsideField{c}
+	if g.isCoordinateInvalid(c) {
+		return nil, &ErrCoordinateIsInvalid{c}
 	}
 
-	return (*(*g.field)[c.X])[c.Y], nil
+	return (*(*g.units)[c.X])[c.Y], nil
 }
 
-// Get the entire genetation, which is a matrix that contains all units.
-func (g *gameInfo[T]) GetField() *Units[T] {
+// Get all units in the game
+func (g *gameInfo[T]) GetUnits() *Units[T] {
+	g.locker.RLock()
+	defer g.locker.RUnlock()
+	return g.units
+}
+
+// Get all units in the given area.
+func (g *gameInfo[T]) GetUnitsInArea(area *Area) (*Units[T], error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
-	return g.field
-}
+	if g.isCoordinateInvalid(&area.From) {
+		return nil, &ErrCoordinateIsInvalid{&area.From}
+	}
 
-// We will iterate field and call the callback func that you passes in.
-func (g *gameInfo[T]) IterateField(callback UnitsIteratorCallback[T]) {
-	for x := 0; x < g.size.Width; x++ {
-		for y := 0; y < g.size.Height; y++ {
-			callback(&Coordinate{X: x, Y: y}, (*(*g.field)[x])[y])
+	if g.isCoordinateInvalid(&area.To) {
+		return nil, &ErrCoordinateIsInvalid{&area.To}
+	}
+
+	if g.isAreaInvalid(area) {
+		return nil, &ErrAreaIsInvalid{area}
+	}
+
+	unitsInArea := make(Units[T], area.To.X-area.From.X+1)
+	for x := area.From.X; x <= area.To.X; x++ {
+		newRow := make([]*T, area.To.Y-area.From.Y+1)
+		unitsInArea[x] = &newRow
+		for y := area.From.Y; y <= area.To.Y; y++ {
+			(*unitsInArea[x])[y] = (*(*g.units)[x])[y]
 		}
 	}
+
+	return &unitsInArea, nil
+}
+
+// We will iterate all units in the game and call the callbacks with coordiante and unit.
+func (g *gameInfo[T]) IterateUnits(callback UnitsIteratorCallback[T]) {
+	for x := 0; x < g.size.Width; x++ {
+		for y := 0; y < g.size.Height; y++ {
+			callback(&Coordinate{X: x, Y: y}, (*(*g.units)[x])[y])
+		}
+	}
+}
+
+// We will iterate all units in the given area and call the callbacks with coordiante and unit.
+func (g *gameInfo[T]) IterateUnitsInArea(area *Area, callback UnitsIteratorCallback[T]) error {
+	if g.isCoordinateInvalid(&area.From) {
+		return &ErrCoordinateIsInvalid{&area.From}
+	}
+
+	if g.isCoordinateInvalid(&area.To) {
+		return &ErrCoordinateIsInvalid{&area.To}
+	}
+
+	if g.isAreaInvalid(area) {
+		return &ErrAreaIsInvalid{area}
+	}
+
+	for x := area.From.X; x <= area.To.X; x++ {
+		for y := area.From.Y; y <= area.To.Y; y++ {
+			callback(&Coordinate{X: x, Y: y}, (*(*g.units)[x])[y])
+		}
+	}
+	return nil
 }

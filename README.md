@@ -66,8 +66,8 @@ func cgolNextUnitGenerator(
         for j := -1; j < 2; j += 1 {
             if !(i == 0 && j == 0) {
                 // Pay attention to "isCrossBorder", if the adjacent unit in the relative coordinate
-                // is on other side of the field, "isCrossBorder" will be true.
-                // So if you want to allow your cells to be able to go through border, ignore "isCrossBorder" here.
+                // is on other side of the map, "isCrossBorder" will be true.
+                // So if you want to allow your cells to be able to go beyond border, ignore "isCrossBorder" here.
                 adjUnit, isCrossBorder := getAdjacentUnit(coord, &ggol.Coordinate{X: i, Y: j})
                 if adjUnit.Alive && !isCrossBorder {
                     liveAdjacentCellsCount += 1
@@ -96,7 +96,7 @@ func cgolNextUnitGenerator(
 }
 
 func main() {
-    // Declare field size.
+    // Declare size of the map in the game.
     size := ggol.Size{Height: 3, Width: 3}
     // Initial status of all units.
     initialCgolUnit := CgolUnit{Alive: false}
@@ -117,9 +117,9 @@ func main() {
     game.SetUnit(&ggol.Coordinate{X: 1, Y: 1}, &CgolUnit{Alive: true})
     game.SetUnit(&ggol.Coordinate{X: 1, Y: 2}, &CgolUnit{Alive: true})
 
-    // This will generate next field, the looking of next field is depending on "cgolNextUnitGenerator"
+    // This will generate next units, the looking of next generation of units is depending on "cgolNextUnitGenerator"
     // you just passed in "SetNextUnitGenerator" above.
-    game.GenerateNextField()
+    game.GenerateNextUnits()
 
     // Let's see if we generate the next status of the Blinker correctly.
     // If it's correct, all units below should have "Alive" attribute as true.

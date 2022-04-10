@@ -11,17 +11,17 @@ import (
 type gameOfMatrixUnit struct {
 	WordsLength int
 	CountWords  int
-	// One column can only have a word stream at a time, so we have this count
-	CountFieldHeight int
+	// One column (height of game size) can only have a word stream at a time, so we have this count
+	CountHeight int
 }
 
 var initialGameOfMatrixUnit gameOfMatrixUnit = gameOfMatrixUnit{
-	WordsLength:      0,
-	CountWords:       0,
-	CountFieldHeight: 50,
+	WordsLength: 0,
+	CountWords:  0,
+	CountHeight: 50,
 }
 
-// A field can only have 20 word of streams in total
+// A game can only have 20 word of streams in total
 var totalWordStreamsCount = 0
 
 func gameOfMatrixNextUnitGenerator(
@@ -31,11 +31,11 @@ func gameOfMatrixNextUnitGenerator(
 ) (nextUnit *gameOfMatrixUnit) {
 	newUnit := *unit
 	if coord.Y == 0 {
-		if unit.CountWords == 0 && unit.CountFieldHeight >= 50 && totalWordStreamsCount < 50 {
+		if unit.CountWords == 0 && unit.CountHeight >= 50 && totalWordStreamsCount < 50 {
 			if rand.Intn(50) == 1 {
 				newUnit.WordsLength = 30 + rand.Intn(40)
 				newUnit.CountWords = 1
-				newUnit.CountFieldHeight = 0
+				newUnit.CountHeight = 0
 				totalWordStreamsCount += 1
 			}
 		} else if unit.CountWords < unit.WordsLength {
@@ -45,7 +45,7 @@ func gameOfMatrixNextUnitGenerator(
 			newUnit.CountWords = 0
 			totalWordStreamsCount -= 1
 		}
-		newUnit.CountFieldHeight += 1
+		newUnit.CountHeight += 1
 		return &newUnit
 	} else {
 		prevUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 0, Y: -1})
@@ -54,7 +54,7 @@ func gameOfMatrixNextUnitGenerator(
 	}
 }
 
-func initializeGameOfMatrixField(g ggol.Game[gameOfMatrixUnit]) {
+func initializeGameOfMatrixUnits(g ggol.Game[gameOfMatrixUnit]) {
 	// Do nothing
 }
 
@@ -80,11 +80,11 @@ func executeGameOfMatrix() {
 	size := ggol.Size{Width: 50, Height: 50}
 	game, _ := ggol.NewGame(&size, &initialGameOfMatrixUnit)
 	game.SetNextUnitGenerator(gameOfMatrixNextUnitGenerator)
-	initializeGameOfMatrixField(game)
+	initializeGameOfMatrixUnits(game)
 
 	previousSteps := 100
 	for i := 0; i < previousSteps; i += 1 {
-		game.GenerateNextField()
+		game.GenerateNextUnits()
 	}
 
 	var gameOfMatrixPalette = []color.Color{
@@ -116,7 +116,7 @@ func executeGameOfMatrix() {
 		}
 		images = append(images, newImage)
 		delays = append(delays, duration)
-		game.GenerateNextField()
+		game.GenerateNextUnits()
 	}
 
 	outputGif("output/game_of_matrix.gif", images, delays)
