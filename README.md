@@ -172,31 +172,28 @@ The rain of code in the movie Matrix.
 
 ## Development
 
-### Run Tests
+We use Makefile to setup develop environments.
+
+### Run Unit Tests
 
 ```bash
-go test -v
+make test
 ```
 
 ### Setup Pre-commit Hook
 
 ```bash
-brew install pre-commit
-pre-commit install
+make setup-pre-commit
 ```
 
-### Run The Code To Build Sample GIFs
+### Build Sample GIFs As Demo
 
 You can refer to sample code in [here](./example/) to build GIFs of your custom games.
 
 ```bash
-git clone https://github.com/DumDumGeniuss/ggol.git
-cd ggol
-go mod tidy
-go run example/*
+make demo
 ```
-
 
 ## License
 
-[MIT](./LICENSE)
+[MIT License](./LICENSE)

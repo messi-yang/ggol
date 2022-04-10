@@ -32,9 +32,14 @@ type FieldSize struct {
 	Height int
 }
 
+type Field[T any] []*[]*T
+
 // This function will be passed into NextAreaGenerator, this is how you can adajcent areas in NextAreaGenerator.
 // Also, 2nd argument "isCrossBorder" tells you if the adjacent area is on ohter side of the field.
 type AdjacentAreaGetter[T any] func(originCoord *Coordinate, relativeCoord *Coordinate) (area *T, isCrossBorder bool)
 
 // NextAreaGenerator tells the game how you're gonna generate next status of the given area.
 type NextAreaGenerator[T any] func(coord *Coordinate, area *T, getAdjacentArea AdjacentAreaGetter[T]) (nextArea *T)
+
+// FieldIteratorCallback will be called when iterating through field.
+type FieldIteratorCallback[T any] func(coord *Coordinate, area *T)

@@ -12,7 +12,7 @@ type Game[T any] interface {
 	// you passed in SetNextAreaGenerator.
 	GenerateNextField()
 	// Set NextAreaGenerator, which tells the game how you want to generate next area of the given area.
-	SetNextAreaGenerator(iterator NextAreaGenerator[T])
+	SetNextAreaGenerator(nextAreaGenerator NextAreaGenerator[T])
 	// Set the status of the area at the given coordinate.
 	SetArea(coord *Coordinate, area *T) (err error)
 	// Get the size of the field.
@@ -20,13 +20,15 @@ type Game[T any] interface {
 	// Get the status of the area at the given coordinate.
 	GetArea(coord *Coordinate) (area *T, err error)
 	// Get the field of the area, it's a matrix that contains all areas in the game.
-	GetField() (field *[]*[]*T)
+	GetField() (field *Field[T])
+	// Iterate through entire field
+	IterateField(callback FieldIteratorCallback[T])
 }
 
 type gameInfo[T any] struct {
 	fieldSize    *FieldSize
 	initialArea  *T
-	field        *[]*[]*T
+	field        *Field[T]
 	areaIterator NextAreaGenerator[T]
 	locker       sync.RWMutex
 }
@@ -55,8 +57,8 @@ func NewGame[T any](
 	return &newG, nil
 }
 
-func createField[T any](fieldSize *FieldSize, initialArea *T) *[]*[]*T {
-	field := make([]*[]*T, fieldSize.Width)
+func createField[T any](fieldSize *FieldSize, initialArea *T) *Field[T] {
+	field := make(Field[T], fieldSize.Width)
 	for x := 0; x < fieldSize.Width; x++ {
 		newRowOfField := make([]*T, fieldSize.Height)
 		field[x] = &newRowOfField
@@ -163,9 +165,18 @@ func (g *gameInfo[T]) GetArea(c *Coordinate) (*T, error) {
 }
 
 // Get the entire genetation, which is a matrix that contains all areas.
-func (g *gameInfo[T]) GetField() *[]*[]*T {
+func (g *gameInfo[T]) GetField() *Field[T] {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
 	return g.field
+}
+
+// We will iterate field and call the callback func that you passes in.
+func (g *gameInfo[T]) IterateField(callback FieldIteratorCallback[T]) {
+	for x := 0; x < g.fieldSize.Width; x++ {
+		for y := 0; y < g.fieldSize.Height; y++ {
+			callback(&Coordinate{X: x, Y: y}, (*(*g.field)[x])[y])
+		}
+	}
 }

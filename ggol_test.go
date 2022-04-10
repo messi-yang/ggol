@@ -412,3 +412,34 @@ func testGetFieldCaseOne(t *testing.T) {
 func TestGetField(t *testing.T) {
 	testGetFieldCaseOne(t)
 }
+
+func testIterateFieldCaseOne(t *testing.T) {
+	width := 3
+	height := 3
+	fieldSize := FieldSize{Width: width, Height: height}
+	g, _ := NewGame(&fieldSize, &initialAreaForTest)
+	g.SetArea(&Coordinate{X: 1, Y: 0}, &areaForTest{hasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 1}, &areaForTest{hasLiveCell: true})
+	g.SetArea(&Coordinate{X: 1, Y: 2}, &areaForTest{hasLiveCell: true})
+	sumsOfXCoord := 0
+	sumsOfYCoord := 0
+	aliveCellCount := 0
+
+	g.IterateField(func(c *Coordinate, area *areaForTest) {
+		sumsOfXCoord += c.X
+		sumsOfYCoord += c.Y
+		if area.hasLiveCell {
+			aliveCellCount += 1
+		}
+	})
+
+	if sumsOfXCoord == 9 && sumsOfYCoord == 9 && aliveCellCount == 3 {
+		t.Log("Passed")
+	} else {
+		t.Fatalf("Did not iterate through field correctly.")
+	}
+}
+
+func TestIterateField(t *testing.T) {
+	testIterateFieldCaseOne(t)
+}

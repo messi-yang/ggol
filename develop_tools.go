@@ -54,7 +54,7 @@ func areTwoAreasHavingLiveCellForTestEqual(a areasHavingLiveCellForTest, b areas
 	return true
 }
 
-func convertAreaForTestMatrixToAreasHavingLiveCellForTest(g *[]*[]*areaForTest) *areasHavingLiveCellForTest {
+func convertAreaForTestMatrixToAreasHavingLiveCellForTest(g *Field[areaForTest]) *areasHavingLiveCellForTest {
 	gMap := make(areasHavingLiveCellForTest, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
