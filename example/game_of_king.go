@@ -8,63 +8,63 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type gameOfKingArea struct {
+type gameOfKingUnit struct {
 	Direction Direction
 	Strength  int
 }
 
-var initialGameOfKingArea gameOfKingArea = gameOfKingArea{
+var initialGameOfKingUnit gameOfKingUnit = gameOfKingUnit{
 	Direction: 0,
 	Strength:  0,
 }
 
-func gameOfKingNextAreaGenerator(
+func gameOfKingNextUnitGenerator(
 	coord *ggol.Coordinate,
-	area *gameOfKingArea,
-	getAdjacentArea ggol.AdjacentAreaGetter[gameOfKingArea],
-) (nextArea *gameOfKingArea) {
-	newArea := *area
-	topAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
-	leftAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: -1, Y: 0})
-	bottomAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
-	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 1, Y: 0})
+	unit *gameOfKingUnit,
+	getAdjacentUnit ggol.AdjacentUnitGetter[gameOfKingUnit],
+) (nextUnit *gameOfKingUnit) {
+	newUnit := *unit
+	topAdjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 0, Y: -1})
+	leftAdjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: -1, Y: 0})
+	bottomAdjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 0, Y: 1})
+	rightAdjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 1, Y: 0})
 
-	newArea.Strength = 0
-	if topAdjArea.Direction == DirectionBottom {
-		newArea.Strength += topAdjArea.Strength
+	newUnit.Strength = 0
+	if topAdjUnit.Direction == DirectionBottom {
+		newUnit.Strength += topAdjUnit.Strength
 	}
-	if leftAdjArea.Direction == DirectionRight {
-		newArea.Strength += leftAdjArea.Strength
+	if leftAdjUnit.Direction == DirectionRight {
+		newUnit.Strength += leftAdjUnit.Strength
 	}
-	if bottomAdjArea.Direction == DirectionTop {
-		newArea.Strength += bottomAdjArea.Strength
+	if bottomAdjUnit.Direction == DirectionTop {
+		newUnit.Strength += bottomAdjUnit.Strength
 	}
-	if rightAdjArea.Direction == DirectionLeft {
-		newArea.Strength += rightAdjArea.Strength
+	if rightAdjUnit.Direction == DirectionLeft {
+		newUnit.Strength += rightAdjUnit.Strength
 	}
-	newArea.Direction = Direction(rand.Intn(4))
+	newUnit.Direction = Direction(rand.Intn(4))
 
-	return &newArea
+	return &newUnit
 }
 
-func initializeGameOfKingField(g ggol.Game[gameOfKingArea]) {
+func initializeGameOfKingField(g ggol.Game[gameOfKingUnit]) {
 	fieldSize := g.GetFieldSize()
 	cellsCount := int((fieldSize.Width * fieldSize.Height) / 2)
 	for i := 0; i < cellsCount; i += 1 {
-		g.SetArea(&ggol.Coordinate{X: rand.Intn(fieldSize.Width), Y: rand.Intn(fieldSize.Height)}, &gameOfKingArea{Strength: 1, Direction: 0})
+		g.SetUnit(&ggol.Coordinate{X: rand.Intn(fieldSize.Width), Y: rand.Intn(fieldSize.Height)}, &gameOfKingUnit{Strength: 1, Direction: 0})
 	}
 }
 
-func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, image *image.Paletted, palette *[]color.Color) {
-	if area.Strength == 0 {
+func drawGameOfKingUnit(coord *ggol.Coordinate, unit *gameOfKingUnit, blockSize int, image *image.Paletted, palette *[]color.Color) {
+	if unit.Strength == 0 {
 		return
 	}
-	for i := 0; i < unit; i += 1 {
-		for j := 0; j < unit; j += 1 {
-			if area.Strength < 8 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[area.Strength])
+	for i := 0; i < blockSize; i += 1 {
+		for j := 0; j < blockSize; j += 1 {
+			if unit.Strength < 8 {
+				image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[unit.Strength])
 			} else {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[8])
+				image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[8])
 			}
 		}
 	}
@@ -72,8 +72,8 @@ func drawGameOfKingArea(coord *ggol.Coordinate, area *gameOfKingArea, unit int, 
 
 func executeGameOfKing() {
 	fieldSize := ggol.FieldSize{Width: 250, Height: 250}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfKingArea)
-	game.SetNextAreaGenerator(gameOfKingNextAreaGenerator)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfKingUnit)
+	game.SetNextUnitGenerator(gameOfKingNextUnitGenerator)
 	initializeGameOfKingField(game)
 
 	var gameOfKingPalette = []color.Color{
@@ -89,17 +89,17 @@ func executeGameOfKing() {
 	}
 	var images []*image.Paletted
 	var delays []int
-	unit := 2
+	blockSize := 2
 	iterationsCount := 100
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), gameOfKingPalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfKingPalette)
 		for x := 0; x < fieldSize.Width; x += 1 {
 			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				area, _ := game.GetArea(coord)
-				drawGameOfKingArea(coord, area, unit, newImage, &gameOfKingPalette)
+				unit, _ := game.GetUnit(coord)
+				drawGameOfKingUnit(coord, unit, blockSize, newImage, &gameOfKingPalette)
 			}
 		}
 		images = append(images, newImage)

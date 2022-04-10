@@ -7,55 +7,55 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type gameOfBlackAndWhiteArea struct {
+type gameOfBlackAndWhiteUnit struct {
 	HasLiveCell bool
 }
 
-var initialGameOfBlackAndWhiteArea gameOfBlackAndWhiteArea = gameOfBlackAndWhiteArea{
+var initialGameOfBlackAndWhiteUnit gameOfBlackAndWhiteUnit = gameOfBlackAndWhiteUnit{
 	HasLiveCell: false,
 }
 
-func gameOfBlackAndWhiteNextAreaGenerator(
+func gameOfBlackAndWhiteNextUnitGenerator(
 	coord *ggol.Coordinate,
-	area *gameOfBlackAndWhiteArea,
-	getAdjacentArea ggol.AdjacentAreaGetter[gameOfBlackAndWhiteArea],
-) (nextArea *gameOfBlackAndWhiteArea) {
-	newArea := *area
+	unit *gameOfBlackAndWhiteUnit,
+	getAdjacentUnit ggol.AdjacentUnitGetter[gameOfBlackAndWhiteUnit],
+) (nextUnit *gameOfBlackAndWhiteUnit) {
+	newUnit := *unit
 
-	if newArea.HasLiveCell {
-		newArea.HasLiveCell = false
-		return &newArea
+	if newUnit.HasLiveCell {
+		newUnit.HasLiveCell = false
+		return &newUnit
 	} else {
-		newArea.HasLiveCell = true
-		return &newArea
+		newUnit.HasLiveCell = true
+		return &newUnit
 	}
 }
 
-func initializeGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteArea]) {
+func initializeGameOfBlackAndWhiteField(g ggol.Game[gameOfBlackAndWhiteUnit]) {
 	fieldSize := g.GetFieldSize()
 	for x := 0; x < fieldSize.Width; x++ {
 		for y := 0; y < fieldSize.Height; y++ {
 			c := ggol.Coordinate{X: x, Y: y}
-			g.SetArea(&c, &gameOfBlackAndWhiteArea{HasLiveCell: (x+y)%3 == 0})
+			g.SetUnit(&c, &gameOfBlackAndWhiteUnit{HasLiveCell: (x+y)%3 == 0})
 		}
 	}
 }
 
-func drawGameOfBlackAndWhiteArea(coord *ggol.Coordinate, area *gameOfBlackAndWhiteArea, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !area.HasLiveCell {
+func drawGameOfBlackAndWhiteUnit(coord *ggol.Coordinate, unit *gameOfBlackAndWhiteUnit, blockSize int, image *image.Paletted, palette *[]color.Color) {
+	if !unit.HasLiveCell {
 		return
 	}
-	for i := 0; i < unit; i += 1 {
-		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
+	for i := 0; i < blockSize; i += 1 {
+		for j := 0; j < blockSize; j += 1 {
+			image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[1])
 		}
 	}
 }
 
 func executeGameOfBlackAndWhite() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfBlackAndWhiteArea)
-	game.SetNextAreaGenerator(gameOfBlackAndWhiteNextAreaGenerator)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfBlackAndWhiteUnit)
+	game.SetNextUnitGenerator(gameOfBlackAndWhiteNextUnitGenerator)
 	initializeGameOfBlackAndWhiteField(game)
 
 	var gameOfBlackAndWhitePalette = []color.Color{
@@ -64,17 +64,17 @@ func executeGameOfBlackAndWhite() {
 	}
 	var images []*image.Paletted
 	var delays []int
-	unit := 10
+	blockSize := 10
 	iterationsCount := 100
 	duration := 100
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), gameOfBlackAndWhitePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfBlackAndWhitePalette)
 		for x := 0; x < fieldSize.Width; x += 1 {
 			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				area, _ := game.GetArea(coord)
-				drawGameOfBlackAndWhiteArea(coord, area, unit, newImage, &gameOfBlackAndWhitePalette)
+				unit, _ := game.GetUnit(coord)
+				drawGameOfBlackAndWhiteUnit(coord, unit, blockSize, newImage, &gameOfBlackAndWhitePalette)
 			}
 		}
 		images = append(images, newImage)

@@ -37,26 +37,26 @@ import (
     "github.com/DumDumGeniuss/ggol"
 )
 
-// Define your area type, in standard Conway's
-// Game of Life, an area can have a live cell at most,
-// so we need the field "HasLiveCell" here.
-type CgolArea struct {
-    HasLiveCell bool
+// Define your unit type, in Conway's
+// Game of Life, the smallest unit refers to a cell,
+// and the only information we need to know is "Alive".
+type CgolUnit struct {
+    Alive bool
 }
 
 // This is the core part of the game, it tells the game
-// how to generate the next status of the given area.
+// how to generate the next status of the given unit.
 // This generator here implements 4 basic rules of Conways Game
 // of Life, if you want, you can add your custom rules here :).
-func cgolNextAreaGenerator(
-    // Coordinate of the given area.
+func cgolNextUnitGenerator(
+    // Coordinate of the given unit.
     coord *ggol.Coordinate,
-    // Pointer to the current area status.
-    area *CgolArea,
-    // A getter for getting adjacent areas, check this type ggol.AdjacentAreaGetter[T] for details.
-    getAdjacentArea ggol.AdjacentAreaGetter[CgolArea],
-) (nextCgolArea *CgolArea) {
-    newArea := *area
+    // Pointer to the current unit status.
+    unit *CgolUnit,
+    // A getter for getting adjacent units, check this type ggol.AdjacentUnitGetter[T] for details.
+    getAdjacentUnit ggol.AdjacentUnitGetter[CgolUnit],
+) (nextCgolUnit *CgolUnit) {
+    nextUnit := *unit
 
     // Get live adjacent cells count
     // We need to to implement 4 basic rules of
@@ -65,68 +65,67 @@ func cgolNextAreaGenerator(
     for i := -1; i < 2; i += 1 {
         for j := -1; j < 2; j += 1 {
             if !(i == 0 && j == 0) {
-                // Pay attention to "isCrossBorder", if the adjacent area in relative coordinate
+                // Pay attention to "isCrossBorder", if the adjacent unit in the relative coordinate
                 // is on other side of the field, "isCrossBorder" will be true.
-                // So if you want to allow your cells to cross border, ignore "isCrossBorder".
-                adjArea, isCrossBorder := getAdjacentArea(coord, &ggol.Coordinate{X: i, Y: j})
-                if adjArea.HasLiveCell && !isCrossBorder {
+                // So if you want to allow your cells to be able to go through border, ignore "isCrossBorder" here.
+                adjUnit, isCrossBorder := getAdjacentUnit(coord, &ggol.Coordinate{X: i, Y: j})
+                if adjUnit.Alive && !isCrossBorder {
                     liveAdjacentCellsCount += 1
                 }
             }
         }
     }
-    if newArea.HasLiveCell {
+    if nextUnit.Alive {
         if liveAdjacentCellsCount == 2 || liveAdjacentCellsCount == 3 {
             // Cell survives due to rule 2.
-            newArea.HasLiveCell = true
-            return &newArea
+            nextUnit.Alive = true
+            return &nextUnit
         } else {
-            // Died of rule 1 or rule 3.
-            newArea.HasLiveCell = false
-            return &newArea
+            // Cell dies of rule 1 or rule 3.
+            nextUnit.Alive = false
+            return &nextUnit
         }
     } else {
         // Cell becomes alive due to rule 4.
         if liveAdjacentCellsCount == 3 {
-            newArea.HasLiveCell = true
-            return &newArea
+            nextUnit.Alive = true
+            return &nextUnit
         }
-        return &newArea
+        return &nextUnit
     }
 }
 
 func main() {
     // Declare field size.
     fieldSize := ggol.FieldSize{Height: 3, Width: 3}
-    // Initial status of all areas.
-    initialCgolArea := CgolArea{HasLiveCell: false}
+    // Initial status of all units.
+    initialCgolUnit := CgolUnit{Alive: false}
 
     // Alrighty, let's create a new game with field size of 3x3,
     // you also need to tell the game what's the initial status
-    // of each area, let's assume all areas are without any live cells at beginning.
-    // At the end, you need to pass in your custom iterator you just declared above.
+    // of each unit, let's say all units are not alive.
     game, _ := ggol.NewGame(
         &fieldSize,
-        &initialCgolArea,
+        &initialCgolUnit,
     )
-    // Set area iterator.
-    game.SetNextAreaGenerator(cgolNextAreaGenerator)
+    // Set generator of next unit.
+    game.SetNextUnitGenerator(cgolNextUnitGenerator)
 
-    // Let's revice 3 cells to form a Blinker pattern :).
+    // Let's bring 3 cells alive to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 0}, &CgolArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 1}, &CgolArea{HasLiveCell: true})
-    game.SetArea(&ggol.Coordinate{X: 1, Y: 2}, &CgolArea{HasLiveCell: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 0}, &CgolUnit{Alive: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 1}, &CgolUnit{Alive: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 2}, &CgolUnit{Alive: true})
 
-    // This will generate next field, the next field is depending on "cgolNextAreaGenerator"
-    // you just passed in "SetNextAreaGenerator" above.
+    // This will generate next field, the looking of next field is depending on "cgolNextUnitGenerator"
+    // you just passed in "SetNextUnitGenerator" above.
     game.GenerateNextField()
 
     // Let's see if we generate the next status of the Blinker correctly.
-    // If it's correct, all areas below should have "HasLiveCell" as true.
+    // If it's correct, all units below should have "Alive" attribute as true.
     for x := 0; x < fieldSize.Width; x += 1 {
-        area, _ := game.GetArea(&ggol.Coordinate{X: x, Y: 1})
-        fmt.Printf("%v ", area.HasLiveCell)
+        unit, _ := game.GetUnit(&ggol.Coordinate{X: x, Y: 1})
+        fmt.Printf("%v ", unit.Alive)
     }
     // true true true
 }

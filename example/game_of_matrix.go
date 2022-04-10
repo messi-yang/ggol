@@ -8,14 +8,14 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type gameOfMatrixArea struct {
+type gameOfMatrixUnit struct {
 	WordsLength int
 	CountWords  int
 	// One column can only have a word stream at a time, so we have this count
 	CountFieldHeight int
 }
 
-var initialGameOfMatrixArea gameOfMatrixArea = gameOfMatrixArea{
+var initialGameOfMatrixUnit gameOfMatrixUnit = gameOfMatrixUnit{
 	WordsLength:      0,
 	CountWords:       0,
 	CountFieldHeight: 50,
@@ -24,52 +24,52 @@ var initialGameOfMatrixArea gameOfMatrixArea = gameOfMatrixArea{
 // A field can only have 20 word of streams in total
 var totalWordStreamsCount = 0
 
-func gameOfMatrixNextAreaGenerator(
+func gameOfMatrixNextUnitGenerator(
 	coord *ggol.Coordinate,
-	area *gameOfMatrixArea,
-	getAdjacentArea ggol.AdjacentAreaGetter[gameOfMatrixArea],
-) (nextArea *gameOfMatrixArea) {
-	newArea := *area
+	unit *gameOfMatrixUnit,
+	getAdjacentUnit ggol.AdjacentUnitGetter[gameOfMatrixUnit],
+) (nextUnit *gameOfMatrixUnit) {
+	newUnit := *unit
 	if coord.Y == 0 {
-		if area.CountWords == 0 && area.CountFieldHeight >= 50 && totalWordStreamsCount < 50 {
+		if unit.CountWords == 0 && unit.CountFieldHeight >= 50 && totalWordStreamsCount < 50 {
 			if rand.Intn(50) == 1 {
-				newArea.WordsLength = 30 + rand.Intn(40)
-				newArea.CountWords = 1
-				newArea.CountFieldHeight = 0
+				newUnit.WordsLength = 30 + rand.Intn(40)
+				newUnit.CountWords = 1
+				newUnit.CountFieldHeight = 0
 				totalWordStreamsCount += 1
 			}
-		} else if area.CountWords < area.WordsLength {
-			newArea.CountWords += 1
-		} else if area.CountWords == area.WordsLength && area.CountWords != 0 {
-			newArea.WordsLength = 0
-			newArea.CountWords = 0
+		} else if unit.CountWords < unit.WordsLength {
+			newUnit.CountWords += 1
+		} else if unit.CountWords == unit.WordsLength && unit.CountWords != 0 {
+			newUnit.WordsLength = 0
+			newUnit.CountWords = 0
 			totalWordStreamsCount -= 1
 		}
-		newArea.CountFieldHeight += 1
-		return &newArea
+		newUnit.CountFieldHeight += 1
+		return &newUnit
 	} else {
-		prevArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: -1})
-		newArea = *prevArea
-		return &newArea
+		prevUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 0, Y: -1})
+		newUnit = *prevUnit
+		return &newUnit
 	}
 }
 
-func initializeGameOfMatrixField(g ggol.Game[gameOfMatrixArea]) {
+func initializeGameOfMatrixField(g ggol.Game[gameOfMatrixUnit]) {
 	// Do nothing
 }
 
-func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit int, image *image.Paletted, palette *[]color.Color) {
-	if area.WordsLength == 0 {
+func drawGameOfMatrixUnit(coord *ggol.Coordinate, unit *gameOfMatrixUnit, blockSize int, image *image.Paletted, palette *[]color.Color) {
+	if unit.WordsLength == 0 {
 		return
 	}
-	for i := 0; i < unit; i += 1 {
-		for j := 0; j < unit; j += 1 {
-			if area.CountWords == 1 {
-				image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
+	for i := 0; i < blockSize; i += 1 {
+		for j := 0; j < blockSize; j += 1 {
+			if unit.CountWords == 1 {
+				image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[1])
 			} else {
-				if (area.CountWords)%2 == 0 {
-					colorIndex := int(float64(area.CountWords-1) / float64(area.WordsLength) * 8)
-					image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[colorIndex+2])
+				if (unit.CountWords)%2 == 0 {
+					colorIndex := int(float64(unit.CountWords-1) / float64(unit.WordsLength) * 8)
+					image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[colorIndex+2])
 				}
 			}
 		}
@@ -78,8 +78,8 @@ func drawGameOfMatrixArea(coord *ggol.Coordinate, area *gameOfMatrixArea, unit i
 
 func executeGameOfMatrix() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfMatrixArea)
-	game.SetNextAreaGenerator(gameOfMatrixNextAreaGenerator)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfMatrixUnit)
+	game.SetNextUnitGenerator(gameOfMatrixNextUnitGenerator)
 	initializeGameOfMatrixField(game)
 
 	previousSteps := 100
@@ -101,17 +101,17 @@ func executeGameOfMatrix() {
 	}
 	var images []*image.Paletted
 	var delays []int
-	unit := 10
+	blockSize := 10
 	iterationsCount := 200
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), gameOfMatrixPalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfMatrixPalette)
 		for x := 0; x < fieldSize.Width; x += 1 {
 			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				area, _ := game.GetArea(coord)
-				drawGameOfMatrixArea(coord, area, unit, newImage, &gameOfMatrixPalette)
+				unit, _ := game.GetUnit(coord)
+				drawGameOfMatrixUnit(coord, unit, blockSize, newImage, &gameOfMatrixPalette)
 			}
 		}
 		images = append(images, newImage)

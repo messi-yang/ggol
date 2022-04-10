@@ -7,79 +7,79 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type conwaysGameOfLifeArea struct {
+type conwaysGameOfLifeUnit struct {
 	HasLiveCell bool
 }
 
-var initialConwaysGameOfLifeArea conwaysGameOfLifeArea = conwaysGameOfLifeArea{
+var initialConwaysGameOfLifeUnit conwaysGameOfLifeUnit = conwaysGameOfLifeUnit{
 	HasLiveCell: false,
 }
 
-func conwaysGameOfLifeNextAreaGenerator(
+func conwaysGameOfLifeNextUnitGenerator(
 	coord *ggol.Coordinate,
-	area *conwaysGameOfLifeArea,
-	getAdjacentArea ggol.AdjacentAreaGetter[conwaysGameOfLifeArea],
-) (nextArea *conwaysGameOfLifeArea) {
-	newArea := *area
+	unit *conwaysGameOfLifeUnit,
+	getAdjacentUnit ggol.AdjacentUnitGetter[conwaysGameOfLifeUnit],
+) (nextUnit *conwaysGameOfLifeUnit) {
+	newUnit := *unit
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
 		for j := -1; j < 2; j += 1 {
 			if !(i == 0 && j == 0) {
-				adjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: i, Y: j})
-				if adjArea.HasLiveCell {
+				adjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: i, Y: j})
+				if adjUnit.HasLiveCell {
 					aliveAdjacentCellsCount += 1
 				}
 			}
 		}
 	}
-	if newArea.HasLiveCell {
+	if newUnit.HasLiveCell {
 		if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
-			newArea.HasLiveCell = false
-			return &newArea
+			newUnit.HasLiveCell = false
+			return &newUnit
 		} else {
-			newArea.HasLiveCell = true
-			return &newArea
+			newUnit.HasLiveCell = true
+			return &newUnit
 		}
 	} else {
 		if aliveAdjacentCellsCount == 3 {
-			newArea.HasLiveCell = true
-			return &newArea
+			newUnit.HasLiveCell = true
+			return &newUnit
 		} else {
-			newArea.HasLiveCell = false
-			return &newArea
+			newUnit.HasLiveCell = false
+			return &newUnit
 		}
 	}
 }
 
-func initializeConwaysGameOfLifeField(g ggol.Game[conwaysGameOfLifeArea]) {
+func initializeConwaysGameOfLifeField(g ggol.Game[conwaysGameOfLifeUnit]) {
 	fieldSize := g.GetFieldSize()
 	for i := 0; i < fieldSize.Height; i += 1 {
 		for j := 0; j < fieldSize.Height; j += 1 {
-			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &conwaysGameOfLifeArea{HasLiveCell: true})
-			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
-			g.SetArea(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &conwaysGameOfLifeArea{HasLiveCell: true})
-			g.SetArea(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, &conwaysGameOfLifeArea{HasLiveCell: true})
-			g.SetArea(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, &conwaysGameOfLifeArea{HasLiveCell: true})
+			g.SetUnit(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 0}, &conwaysGameOfLifeUnit{HasLiveCell: true})
+			g.SetUnit(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 1}, &conwaysGameOfLifeUnit{HasLiveCell: true})
+			g.SetUnit(&ggol.Coordinate{X: i*5 + 2, Y: j*5 + 1}, &conwaysGameOfLifeUnit{HasLiveCell: true})
+			g.SetUnit(&ggol.Coordinate{X: i*5 + 0, Y: j*5 + 2}, &conwaysGameOfLifeUnit{HasLiveCell: true})
+			g.SetUnit(&ggol.Coordinate{X: i*5 + 1, Y: j*5 + 2}, &conwaysGameOfLifeUnit{HasLiveCell: true})
 		}
 	}
 }
 
-func drawConwaysGameOfLifeArea(coord *ggol.Coordinate, area *conwaysGameOfLifeArea, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !area.HasLiveCell {
+func drawConwaysGameOfLifeUnit(coord *ggol.Coordinate, unit *conwaysGameOfLifeUnit, blockSize int, image *image.Paletted, palette *[]color.Color) {
+	if !unit.HasLiveCell {
 		return
 	}
-	for i := 0; i < unit; i += 1 {
-		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
+	for i := 0; i < blockSize; i += 1 {
+		for j := 0; j < blockSize; j += 1 {
+			image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[1])
 		}
 	}
 }
 
 func executeGameOfLife() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialConwaysGameOfLifeArea)
-	game.SetNextAreaGenerator(conwaysGameOfLifeNextAreaGenerator)
+	game, _ := ggol.NewGame(&fieldSize, &initialConwaysGameOfLifeUnit)
+	game.SetNextUnitGenerator(conwaysGameOfLifeNextUnitGenerator)
 	initializeConwaysGameOfLifeField(game)
 
 	var conwaysGameOfLifePalette = []color.Color{
@@ -88,17 +88,17 @@ func executeGameOfLife() {
 	}
 	var images []*image.Paletted
 	var delays []int
-	unit := 10
+	blockSize := 10
 	iterationsCount := 100
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), conwaysGameOfLifePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), conwaysGameOfLifePalette)
 		for x := 0; x < fieldSize.Width; x += 1 {
 			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				area, _ := game.GetArea(coord)
-				drawConwaysGameOfLifeArea(coord, area, unit, newImage, &conwaysGameOfLifePalette)
+				unit, _ := game.GetUnit(coord)
+				drawConwaysGameOfLifeUnit(coord, unit, blockSize, newImage, &conwaysGameOfLifePalette)
 			}
 		}
 		images = append(images, newImage)

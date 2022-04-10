@@ -1,49 +1,49 @@
 package ggol
 
-type areasHavingLiveCellForTest [][]bool
+type unitsHavingLiveCellForTest [][]bool
 
-type areaForTest struct {
+type unitForTest struct {
 	hasLiveCell bool
 }
 
-var initialAreaForTest areaForTest = areaForTest{
+var initialUnitForTest unitForTest = unitForTest{
 	hasLiveCell: false,
 }
 
-func defauAreaForTestIterator(coord *Coordinate, area *areaForTest, getAdjacentArea AdjacentAreaGetter[areaForTest]) *areaForTest {
-	newArea := *area
+func defauUnitForTestIterator(coord *Coordinate, unit *unitForTest, getAdjacentUnit AdjacentUnitGetter[unitForTest]) *unitForTest {
+	newUnit := *unit
 
 	var aliveAdjacentCellsCount int = 0
 	for i := -1; i < 2; i += 1 {
 		for j := -1; j < 2; j += 1 {
 			if !(i == 0 && j == 0) {
-				adjArea, isCrossBorder := getAdjacentArea(coord, &Coordinate{X: i, Y: j})
-				if adjArea.hasLiveCell && !isCrossBorder {
+				adjUnit, isCrossBorder := getAdjacentUnit(coord, &Coordinate{X: i, Y: j})
+				if adjUnit.hasLiveCell && !isCrossBorder {
 					aliveAdjacentCellsCount += 1
 				}
 			}
 		}
 	}
-	if newArea.hasLiveCell {
+	if newUnit.hasLiveCell {
 		if aliveAdjacentCellsCount != 2 && aliveAdjacentCellsCount != 3 {
-			newArea.hasLiveCell = false
-			return &newArea
+			newUnit.hasLiveCell = false
+			return &newUnit
 		} else {
-			newArea.hasLiveCell = true
-			return &newArea
+			newUnit.hasLiveCell = true
+			return &newUnit
 		}
 	} else {
 		if aliveAdjacentCellsCount == 3 {
-			newArea.hasLiveCell = true
-			return &newArea
+			newUnit.hasLiveCell = true
+			return &newUnit
 		} else {
-			newArea.hasLiveCell = false
-			return &newArea
+			newUnit.hasLiveCell = false
+			return &newUnit
 		}
 	}
 }
 
-func areTwoAreasHavingLiveCellForTestEqual(a areasHavingLiveCellForTest, b areasHavingLiveCellForTest) bool {
+func areTwoUnitsHavingLiveCellForTestEqual(a unitsHavingLiveCellForTest, b unitsHavingLiveCellForTest) bool {
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(a[i]); j++ {
 			if a[i][j] != b[i][j] {
@@ -54,8 +54,8 @@ func areTwoAreasHavingLiveCellForTestEqual(a areasHavingLiveCellForTest, b areas
 	return true
 }
 
-func convertAreaForTestMatrixToAreasHavingLiveCellForTest(g *Field[areaForTest]) *areasHavingLiveCellForTest {
-	gMap := make(areasHavingLiveCellForTest, 0)
+func convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g *Field[unitForTest]) *unitsHavingLiveCellForTest {
+	gMap := make(unitsHavingLiveCellForTest, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
 		for y := 0; y < len((*(*g)[x])); y++ {

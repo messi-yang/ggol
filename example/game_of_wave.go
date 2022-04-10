@@ -7,32 +7,32 @@ import (
 	"github.com/DumDumGeniuss/ggol"
 )
 
-type gameOfWaveArea struct {
+type gameOfWaveUnit struct {
 	HasLiveCell bool
 }
 
-var initialGameOfWaveArea gameOfWaveArea = gameOfWaveArea{
+var initialGameOfWaveUnit gameOfWaveUnit = gameOfWaveUnit{
 	HasLiveCell: false,
 }
 
-func gameOfWaveNextAreaGenerator(
+func gameOfWaveNextUnitGenerator(
 	coord *ggol.Coordinate,
-	area *gameOfWaveArea,
-	getAdjacentArea ggol.AdjacentAreaGetter[gameOfWaveArea],
-) (nextArea *gameOfWaveArea) {
-	newArea := *area
-	rightAdjArea, _ := getAdjacentArea(coord, &ggol.Coordinate{X: 0, Y: 1})
+	unit *gameOfWaveUnit,
+	getAdjacentUnit ggol.AdjacentUnitGetter[gameOfWaveUnit],
+) (nextUnit *gameOfWaveUnit) {
+	newUnit := *unit
+	rightAdjUnit, _ := getAdjacentUnit(coord, &ggol.Coordinate{X: 0, Y: 1})
 
-	if rightAdjArea.HasLiveCell {
-		newArea.HasLiveCell = true
-		return &newArea
+	if rightAdjUnit.HasLiveCell {
+		newUnit.HasLiveCell = true
+		return &newUnit
 	} else {
-		newArea.HasLiveCell = false
-		return &newArea
+		newUnit.HasLiveCell = false
+		return &newUnit
 	}
 }
 
-func initializeGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
+func initializeGameOfWaveField(g ggol.Game[gameOfWaveUnit]) {
 	var margin int = 0
 	fieldSize := g.GetFieldSize()
 	for x := 0; x < fieldSize.Width; x++ {
@@ -44,27 +44,27 @@ func initializeGameOfWaveField(g ggol.Game[gameOfWaveArea]) {
 					margin = 10 - x%10
 				}
 				c := ggol.Coordinate{X: x, Y: y + margin}
-				g.SetArea(&c, &gameOfWaveArea{HasLiveCell: true})
+				g.SetUnit(&c, &gameOfWaveUnit{HasLiveCell: true})
 			}
 		}
 	}
 }
 
-func drawGameOfWaveArea(coord *ggol.Coordinate, area *gameOfWaveArea, unit int, image *image.Paletted, palette *[]color.Color) {
-	if !area.HasLiveCell {
+func drawGameOfWaveUnit(coord *ggol.Coordinate, unit *gameOfWaveUnit, blockSize int, image *image.Paletted, palette *[]color.Color) {
+	if !unit.HasLiveCell {
 		return
 	}
-	for i := 0; i < unit; i += 1 {
-		for j := 0; j < unit; j += 1 {
-			image.Set(coord.X*unit+i, coord.Y*unit+j, (*palette)[1])
+	for i := 0; i < blockSize; i += 1 {
+		for j := 0; j < blockSize; j += 1 {
+			image.Set(coord.X*blockSize+i, coord.Y*blockSize+j, (*palette)[1])
 		}
 	}
 }
 
 func executeGameOfWave() {
 	fieldSize := ggol.FieldSize{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&fieldSize, &initialGameOfWaveArea)
-	game.SetNextAreaGenerator(gameOfWaveNextAreaGenerator)
+	game, _ := ggol.NewGame(&fieldSize, &initialGameOfWaveUnit)
+	game.SetNextUnitGenerator(gameOfWaveNextUnitGenerator)
 	initializeGameOfWaveField(game)
 
 	var gameOfWavePalette = []color.Color{
@@ -73,17 +73,17 @@ func executeGameOfWave() {
 	}
 	var images []*image.Paletted
 	var delays []int
-	unit := 10
+	blockSize := 10
 	iterationsCount := 100
 	duration := 0
 
 	for i := 0; i < iterationsCount; i += 1 {
-		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*unit, fieldSize.Height*unit), gameOfWavePalette)
+		newImage := image.NewPaletted(image.Rect(0, 0, fieldSize.Width*blockSize, fieldSize.Height*blockSize), gameOfWavePalette)
 		for x := 0; x < fieldSize.Width; x += 1 {
 			for y := 0; y < fieldSize.Height; y += 1 {
 				coord := &ggol.Coordinate{X: x, Y: y}
-				area, _ := game.GetArea(coord)
-				drawGameOfWaveArea(coord, area, unit, newImage, &gameOfWavePalette)
+				unit, _ := game.GetUnit(coord)
+				drawGameOfWaveUnit(coord, unit, blockSize, newImage, &gameOfWavePalette)
 			}
 		}
 		images = append(images, newImage)
