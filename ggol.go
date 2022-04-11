@@ -196,13 +196,13 @@ func (g *gameInfo[T]) GetUnitsInArea(area *Area) (*Units[T], error) {
 		return nil, &ErrAreaIsInvalid{area}
 	}
 
-	unitsInArea := make(Units[T], area.To.X-area.From.X+1)
+	unitsInArea := make(Units[T], 0)
 	for x := area.From.X; x <= area.To.X; x++ {
-		newRow := make([]*T, area.To.Y-area.From.Y+1)
-		unitsInArea[x] = &newRow
+		newRow := make([]*T, 0)
 		for y := area.From.Y; y <= area.To.Y; y++ {
-			(*unitsInArea[x])[y] = (*(*g.units)[x])[y]
+			newRow = append(newRow, (*(*g.units)[x])[y])
 		}
+		unitsInArea = append(unitsInArea, &newRow)
 	}
 
 	return &unitsInArea, nil

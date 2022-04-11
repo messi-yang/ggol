@@ -421,21 +421,22 @@ func testGetUnitsInAreaCaseOne(t *testing.T) {
 	height := 3
 	size := Size{Width: width, Height: height}
 	g, _ := NewGame(&size, &initialUnitForTest)
-	g.SetNextUnitGenerator(defauUnitForTestIterator)
+	g.SetUnit(&Coordinate{X: 2, Y: 2}, &unitForTest{hasLiveCell: true})
+
 	area := Area{
-		From: Coordinate{X: 0, Y: 0},
-		To:   Coordinate{X: 1, Y: 1},
+		From: Coordinate{X: 1, Y: 1},
+		To:   Coordinate{X: 2, Y: 2},
 	}
 
 	unitsInArea, _ := g.GetUnitsInArea(&area)
 	aliveUnitsMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(unitsInArea)
 
-	expectedUnitsMap := [][]bool{{false, false}, {false, false}}
+	expectedUnitsMap := [][]bool{{false, false}, {false, true}}
 
 	if areTwoUnitsHavingLiveCellForTestEqual(*aliveUnitsMap, expectedUnitsMap) {
 		t.Log("Passed")
 	} else {
-		t.Fatalf("Did not get all units in the given area correctly.")
+		t.Fatalf("Did not get all units in the given area correctly, expected: %v, but got %v.", expectedUnitsMap, aliveUnitsMap)
 	}
 }
 
