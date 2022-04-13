@@ -7,6 +7,7 @@ type ErrSizeIsInvalid struct {
 	Size *Size
 }
 
+// Tell you that the size is invalid.
 func (e *ErrSizeIsInvalid) Error() string {
 	return fmt.Sprintf("The size (%v x %v) is not valid.", e.Size.Width, e.Size.Height)
 }
@@ -16,6 +17,7 @@ type ErrCoordinateIsInvalid struct {
 	Coordinate *Coordinate
 }
 
+// Tell you that the coordinate is invalid.
 func (e *ErrCoordinateIsInvalid) Error() string {
 	return fmt.Sprintf("Coordinate (%v, %v) is outside the border.", e.Coordinate.X, e.Coordinate.Y)
 }
@@ -46,8 +48,6 @@ type Size struct {
 	Width  int
 	Height int
 }
-
-type Units[T any] []*[]*T
 
 // This function will be passed into NextUnitGenerator, this is how you can adajcent units in NextUnitGenerator.
 // Also, 2nd argument "isCrossBorder" tells you if the adjacent unit is on ohter side of the map.

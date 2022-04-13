@@ -54,12 +54,12 @@ func areTwoUnitsHavingLiveCellForTestEqual(a unitsHavingLiveCellForTest, b units
 	return true
 }
 
-func convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g *Units[unitForTest]) *unitsHavingLiveCellForTest {
+func convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g *[][]*unitForTest) *unitsHavingLiveCellForTest {
 	gMap := make(unitsHavingLiveCellForTest, 0)
 	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
-		for y := 0; y < len((*(*g)[x])); y++ {
-			gMap[x] = append(gMap[x], (*(*g)[x])[y].hasLiveCell)
+		for y := 0; y < len((*g)[x]); y++ {
+			gMap[x] = append(gMap[x], (*g)[x][y].hasLiveCell)
 		}
 	}
 
