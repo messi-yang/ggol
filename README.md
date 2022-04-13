@@ -40,7 +40,7 @@ import (
 // Define your unit type, in Conway's
 // Game of Life, the smallest unit refers to a cell,
 // and the only information we need to know is "Alive".
-type CgolUnit struct {
+type CgolCell struct {
     Alive bool
 }
 
@@ -52,10 +52,10 @@ func cgolNextUnitGenerator(
     // Coordinate of the given unit.
     coord *ggol.Coordinate,
     // Pointer to the current unit status.
-    unit *CgolUnit,
+    unit *CgolCell,
     // A getter for getting adjacent units, check this type ggol.AdjacentUnitGetter[T] for details.
-    getAdjacentUnit ggol.AdjacentUnitGetter[CgolUnit],
-) (nextCgolUnit *CgolUnit) {
+    getAdjacentUnit ggol.AdjacentUnitGetter[CgolCell],
+) (nextCgolCell *CgolCell) {
     nextUnit := *unit
 
     // Get live adjacent cells count
@@ -99,23 +99,23 @@ func main() {
     // Declare size of the map in the game.
     size := ggol.Size{Height: 3, Width: 3}
     // Initial status of all units.
-    initialCgolUnit := CgolUnit{Alive: false}
+    initialCgolCell := CgolCell{Alive: false}
 
     // Alrighty, let's create a new game with size of 3x3,
     // you also need to tell the game what's the initial status
     // of each unit, let's say all units are not alive.
     game, _ := ggol.NewGame(
         &size,
-        &initialCgolUnit,
+        &initialCgolCell,
     )
     // Set generator of next unit.
     game.SetNextUnitGenerator(cgolNextUnitGenerator)
 
     // Let's bring 3 cells alive to form a Blinker pattern :).
     // What is Blinker? https://conwaylife.com/wiki/Blinker
-    game.SetUnit(&ggol.Coordinate{X: 1, Y: 0}, &CgolUnit{Alive: true})
-    game.SetUnit(&ggol.Coordinate{X: 1, Y: 1}, &CgolUnit{Alive: true})
-    game.SetUnit(&ggol.Coordinate{X: 1, Y: 2}, &CgolUnit{Alive: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 0}, &CgolCell{Alive: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 1}, &CgolCell{Alive: true})
+    game.SetUnit(&ggol.Coordinate{X: 1, Y: 2}, &CgolCell{Alive: true})
 
     // This will generate next units, the looking of next generation of units is depending on "cgolNextUnitGenerator"
     // you just passed in "SetNextUnitGenerator" above.
