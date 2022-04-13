@@ -20,9 +20,9 @@ type Game[T any] interface {
 	// Get the status of the unit at the given coordinate.
 	GetUnit(coord *Coordinate) (unit *T, err error)
 	// Get all units in the area.
-	GetUnitsInArea(area *Area) (units *[][]*T, err error)
+	GetUnitsInArea(area *Area) (units [][]*T, err error)
 	// Get all units in the game.
-	GetUnits() (units *[][]*T)
+	GetUnits() (units [][]*T)
 	// Iterate through units in the given area.
 	IterateUnitsInArea(area *Area, callback UnitsIteratorCallback[T]) (err error)
 	// Iterate through all units in the game
@@ -32,7 +32,7 @@ type Game[T any] interface {
 type gameInfo[T any] struct {
 	size              *Size
 	initialUnit       *T
-	units             *[][]*T
+	units             [][]*T
 	nextUnitGenerator NextUnitGenerator[T]
 	locker            sync.RWMutex
 }
@@ -61,7 +61,7 @@ func NewGame[T any](
 	return &newG, nil
 }
 
-func createInitialUnits[T any](size *Size, initialUnit *T) *[][]*T {
+func createInitialUnits[T any](size *Size, initialUnit *T) [][]*T {
 	units := make([][]*T, size.Width)
 	for x := 0; x < size.Width; x++ {
 		newRowOfUnits := make([]*T, size.Height)
@@ -70,7 +70,7 @@ func createInitialUnits[T any](size *Size, initialUnit *T) *[][]*T {
 			units[x][y] = initialUnit
 		}
 	}
-	return &units
+	return units
 }
 
 func (g *gameInfo[T]) isCoordinateInvalid(c *Coordinate) bool {
@@ -101,7 +101,7 @@ func (g *gameInfo[T]) getAdjacentUnit(
 		targetY = targetY % g.size.Height
 	}
 
-	return (*g.units)[targetX][targetY], isCrossBorder
+	return g.units[targetX][targetY], isCrossBorder
 }
 
 // ResetUnits game.
@@ -123,14 +123,14 @@ func (g *gameInfo[T]) GenerateNextUnits() {
 		nextUnits[x] = make([]*T, g.size.Height)
 		for y := 0; y < g.size.Height; y++ {
 			coord := Coordinate{X: x, Y: y}
-			nextUnit := g.nextUnitGenerator(&coord, (*g.units)[x][y], g.getAdjacentUnit)
+			nextUnit := g.nextUnitGenerator(&coord, g.units[x][y], g.getAdjacentUnit)
 			nextUnits[x][y] = nextUnit
 		}
 	}
 
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			(*g.units)[x][y] = nextUnits[x][y]
+			g.units[x][y] = nextUnits[x][y]
 		}
 	}
 }
@@ -147,7 +147,7 @@ func (g *gameInfo[T]) SetUnit(c *Coordinate, unit *T) error {
 	if g.isCoordinateInvalid(c) {
 		return &ErrCoordinateIsInvalid{c}
 	}
-	(*g.units)[c.X][c.Y] = unit
+	g.units[c.X][c.Y] = unit
 
 	return nil
 }
@@ -169,18 +169,18 @@ func (g *gameInfo[T]) GetUnit(c *Coordinate) (*T, error) {
 		return nil, &ErrCoordinateIsInvalid{c}
 	}
 
-	return (*g.units)[c.X][c.Y], nil
+	return g.units[c.X][c.Y], nil
 }
 
 // Get all units in the game
-func (g *gameInfo[T]) GetUnits() *[][]*T {
+func (g *gameInfo[T]) GetUnits() [][]*T {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 	return g.units
 }
 
 // Get all units in the given area.
-func (g *gameInfo[T]) GetUnitsInArea(area *Area) (*[][]*T, error) {
+func (g *gameInfo[T]) GetUnitsInArea(area *Area) ([][]*T, error) {
 	g.locker.RLock()
 	defer g.locker.RUnlock()
 
@@ -200,19 +200,19 @@ func (g *gameInfo[T]) GetUnitsInArea(area *Area) (*[][]*T, error) {
 	for x := area.From.X; x <= area.To.X; x++ {
 		newRow := make([]*T, 0)
 		for y := area.From.Y; y <= area.To.Y; y++ {
-			newRow = append(newRow, (*g.units)[x][y])
+			newRow = append(newRow, g.units[x][y])
 		}
 		unitsInArea = append(unitsInArea, newRow)
 	}
 
-	return &unitsInArea, nil
+	return unitsInArea, nil
 }
 
 // We will iterate all units in the game and call the callbacks with coordiante and unit.
 func (g *gameInfo[T]) IterateUnits(callback UnitsIteratorCallback[T]) {
 	for x := 0; x < g.size.Width; x++ {
 		for y := 0; y < g.size.Height; y++ {
-			callback(&Coordinate{X: x, Y: y}, (*g.units)[x][y])
+			callback(&Coordinate{X: x, Y: y}, g.units[x][y])
 		}
 	}
 }
@@ -233,7 +233,7 @@ func (g *gameInfo[T]) IterateUnitsInArea(area *Area, callback UnitsIteratorCallb
 
 	for x := area.From.X; x <= area.To.X; x++ {
 		for y := area.From.Y; y <= area.To.Y; y++ {
-			callback(&Coordinate{X: x, Y: y}, (*g.units)[x][y])
+			callback(&Coordinate{X: x, Y: y}, g.units[x][y])
 		}
 	}
 	return nil
