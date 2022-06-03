@@ -95,19 +95,27 @@ func cgolNextUnitGenerator(
     }
 }
 
+// You have to generate your initial cells.
+func generateInitialCgolCells(width int, height int, cell CgolCell) *[][]CgolCell {
+	cells := make([][]CgolCell, width)
+	for x := 0; x < width; x += 1 {
+		cells[x] = make([]CgolCell, height)
+		for y := 0; y < height; y += 1 {
+			cells[x][y] = cell
+		}
+	}
+
+	return &cells
+}
+
 func main() {
-    // Declare size of the map in the game.
-    size := ggol.Size{Height: 3, Width: 3}
     // Initial status of all units.
     initialCgolCell := CgolCell{Alive: false}
+    initialCgolCells := generateInitialCgolCells(3, 3, initialCgolCell)
 
-    // Alrighty, let's create a new game with size of 3x3,
-    // you also need to tell the game what's the initial status
-    // of each unit, let's say all units are not alive.
-    game, _ := ggol.NewGame(
-        &size,
-        &initialCgolCell,
-    )
+    // Alrighty, let's create a new game with the given cells
+    game, _ := ggol.NewGame(initialCgolCells)
+    size := game.GetSize()
     // Set generator of next unit.
     game.SetNextUnitGenerator(cgolNextUnitGenerator)
 
