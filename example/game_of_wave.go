@@ -32,6 +32,17 @@ func gameOfWaveNextUnitGenerator(
 	}
 }
 
+func generateInitialGameOfWaveUnit(width int, height int, unit gameOfWaveUnit) *[][]gameOfWaveUnit {
+	units := make([][]gameOfWaveUnit, width)
+	for x := 0; x < width; x += 1 {
+		units[x] = make([]gameOfWaveUnit, height)
+		for y := 0; y < height; y += 1 {
+			units[x][y] = unit
+		}
+	}
+	return &units
+}
+
 func initializeGameOfWaveUnits(g ggol.Game[gameOfWaveUnit]) {
 	var margin int = 0
 	size := g.GetSize()
@@ -62,8 +73,9 @@ func drawGameOfWaveUnit(coord *ggol.Coordinate, unit *gameOfWaveUnit, blockSize 
 }
 
 func executeGameOfWave() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&size, &initialGameOfWaveUnit)
+	initialUnits := generateInitialGameOfWaveUnit(50, 50, initialGameOfWaveUnit)
+	game, _ := ggol.NewGame(initialUnits)
+	size := game.GetSize()
 	game.SetNextUnitGenerator(gameOfWaveNextUnitGenerator)
 	initializeGameOfWaveUnits(game)
 

@@ -5,12 +5,11 @@ import (
 	"testing"
 )
 
-func shouldInitializeGameWithCorrectSize(t *testing.T) {
+func shouldInitializeGameWithGivenUnits(t *testing.T) {
 	width := 30
 	height := 10
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
-	g.SetNextUnitGenerator(defauUnitForTestIterator)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 
 	unitLiveMap := *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
 
@@ -21,11 +20,11 @@ func shouldInitializeGameWithCorrectSize(t *testing.T) {
 	}
 }
 
-func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
-	width := -1
-	height := 3
-	size := Size{Width: width, Height: height}
-	_, err := NewGame(&size, &initialUnitForTest)
+func shouldThrowErrorWhenGivenUnitsIsInvalid(t *testing.T) {
+	units := make([][]unitForTest, 2)
+	units[0] = make([]unitForTest, 1)
+	units[1] = make([]unitForTest, 2)
+	_, err := NewGame(&units)
 
 	if err == nil {
 		t.Fatalf("Should get error when giving invalid size.")
@@ -34,15 +33,15 @@ func shouldThrowErrorWhenSizeIsInvalid(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	shouldInitializeGameWithCorrectSize(t)
-	shouldThrowErrorWhenSizeIsInvalid(t)
+	shouldInitializeGameWithGivenUnits(t)
+	shouldThrowErrorWhenGivenUnitsIsInvalid(t)
 }
 
 func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	c := Coordinate{X: 0, Y: 10}
 	err := g.SetUnit(&c, &unitForTest{hasLiveCell: true})
@@ -56,9 +55,9 @@ func shouldThrowErrorWhenCoordinateExceedsBoarder(t *testing.T) {
 func shouldSetUnitCorrectly(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
 	c := Coordinate{X: 1, Y: 1}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	g.SetUnit(&c, &unitForTest{hasLiveCell: true})
 	unit, _ := g.GetUnit(&c)
@@ -79,8 +78,8 @@ func TestSetUnit(t *testing.T) {
 func testBlockPattern(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a block pattern
@@ -88,9 +87,10 @@ func testBlockPattern(t *testing.T) {
 	g.SetUnit(&Coordinate{X: 0, Y: 1}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 0}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 1}, &unitForTest{hasLiveCell: true})
-	g.GenerateNextUnits()
 
-	nexthasLiveCellUnitsMap := *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits := g.GenerateNextUnits()
+
+	nexthasLiveCellUnitsMap := *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	expectedNexthasLiveCellUnitsMap := unitsHavingLiveCellForTest{
 		{true, true, false},
 		{true, true, false},
@@ -107,8 +107,8 @@ func testBlockPattern(t *testing.T) {
 func testBlinkerPattern(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a blinker pattern
@@ -129,14 +129,14 @@ func testBlinkerPattern(t *testing.T) {
 		{false, false, false},
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits := g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedNexthasLiveCellUnitsMapOne) {
 		t.Fatalf("Should generate next unitLiveMap of a blinker, but got %v.", unitLiveMap)
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits = g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedNexthasLiveCellUnitsMapTwo) {
 		t.Fatalf("Should generate 2nd next unitLiveMap of a blinker, but got %v.", unitLiveMap)
 	}
@@ -145,8 +145,8 @@ func testBlinkerPattern(t *testing.T) {
 func testGliderPattern(t *testing.T) {
 	width := 5
 	height := 5
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a glider pattern
@@ -187,26 +187,26 @@ func testGliderPattern(t *testing.T) {
 		{false, false, false, true, false},
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits := g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedhasLiveCellUnitsMapOne) {
 		t.Fatalf("Should generate next unitLiveMap of a glider, but got %v.", unitLiveMap)
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits = g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedhasLiveCellUnitsMapTwo) {
 		t.Fatalf("Should generate 2nd next unitLiveMap of a glider, but got %v.", unitLiveMap)
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits = g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedhasLiveCellUnitsMapThree) {
 		t.Fatalf("Should generate 3rd next next unitLiveMap of a glider, but got %v.", unitLiveMap)
 	}
 
-	g.GenerateNextUnits()
-	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
+	latestUnits = g.GenerateNextUnits()
+	unitLiveMap = *convertUnitForTestMatrixToUnitsHavingLiveCellForTest(latestUnits)
 	if !areTwoUnitsHavingLiveCellForTestEqual(unitLiveMap, expectedhasLiveCellUnitsMapFour) {
 		t.Fatalf("Should generate 4th next next unitLiveMap of a glider, but got %v.", unitLiveMap)
 	}
@@ -217,8 +217,8 @@ func testGliderPattern(t *testing.T) {
 func testGliderPatternWithConcurrency(t *testing.T) {
 	width := 200
 	height := 200
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	// Make a glider pattern
@@ -269,8 +269,8 @@ func TestGenerateNextUnits(t *testing.T) {
 func testGetSizeCaseOne(t *testing.T) {
 	width := 3
 	height := 6
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	if g.GetSize().Width == 3 && g.GetSize().Height == 6 {
@@ -287,9 +287,9 @@ func TestGetSize(t *testing.T) {
 func testGetUnitCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
 	coord := Coordinate{X: 1, Y: 0}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	g.SetUnit(&coord, &unitForTest{hasLiveCell: true})
 	unit, _ := g.GetUnit(&coord)
@@ -304,8 +304,8 @@ func testGetUnitCaseOne(t *testing.T) {
 func testGetUnitCaseTwo(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 	coord := Coordinate{X: 1, Y: 4}
 	_, err := g.GetUnit(&coord)
@@ -322,43 +322,9 @@ func TestGetUnit(t *testing.T) {
 	testGetUnitCaseTwo(t)
 }
 
-func testResetUnitsCaseOne(t *testing.T) {
-	width := 3
-	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
-	g.SetNextUnitGenerator(defauUnitForTestIterator)
-
-	// Make a glider pattern
-	g.SetUnit(&Coordinate{X: 1, Y: 0}, &unitForTest{hasLiveCell: true})
-	g.SetUnit(&Coordinate{X: 1, Y: 1}, &unitForTest{hasLiveCell: true})
-	g.SetUnit(&Coordinate{X: 1, Y: 2}, &unitForTest{hasLiveCell: true})
-
-	g.ResetUnits()
-
-	unitLiveMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
-
-	expectedBinaryBoard := unitsHavingLiveCellForTest{
-		{false, false, false},
-		{false, false, false},
-		{false, false, false},
-	}
-
-	if areTwoUnitsHavingLiveCellForTestEqual(*unitLiveMap, expectedBinaryBoard) {
-		t.Log("Passed")
-	} else {
-		t.Fatalf("Did not reset unitLiveMap correctly.")
-	}
-}
-
-func TestResetUnits(t *testing.T) {
-	testResetUnitsCaseOne(t)
-}
-
 func testSetNextUnitGeneratorCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
 	customNextUnitGenerator := func(coord *Coordinate, unit *unitForTest, getAdjacentUnit AdjacentUnitGetter[unitForTest]) *unitForTest {
 		nextUnit := *unit
 
@@ -371,7 +337,8 @@ func testSetNextUnitGeneratorCaseOne(t *testing.T) {
 			return &nextUnit
 		}
 	}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(customNextUnitGenerator)
 	g.GenerateNextUnits()
 
@@ -397,8 +364,8 @@ func TestSetNextUnitGenerator(t *testing.T) {
 func testGetUnitsCaseOne(t *testing.T) {
 	width := 2
 	height := 2
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetNextUnitGenerator(defauUnitForTestIterator)
 
 	aliveUnitsMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g.GetUnits())
@@ -419,8 +386,8 @@ func TestGetUnits(t *testing.T) {
 func testGetUnitsInAreaCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetUnit(&Coordinate{X: 2, Y: 2}, &unitForTest{hasLiveCell: true})
 
 	area := Area{
@@ -447,8 +414,8 @@ func TestGetUnitsInArea(t *testing.T) {
 func testIterateUnitsCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetUnit(&Coordinate{X: 1, Y: 0}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 1}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 2}, &unitForTest{hasLiveCell: true})
@@ -483,8 +450,8 @@ func TestIterateUnits(t *testing.T) {
 func testIterateUnitsInAreaCaseOne(t *testing.T) {
 	width := 3
 	height := 3
-	size := Size{Width: width, Height: height}
-	g, _ := NewGame(&size, &initialUnitForTest)
+	uniMatrix := generateInitialUnitMatrixForTest(width, height, initialUnitForTest)
+	g, _ := NewGame(uniMatrix)
 	g.SetUnit(&Coordinate{X: 1, Y: 0}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 1}, &unitForTest{hasLiveCell: true})
 	g.SetUnit(&Coordinate{X: 1, Y: 2}, &unitForTest{hasLiveCell: true})

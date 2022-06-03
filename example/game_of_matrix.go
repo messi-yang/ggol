@@ -54,6 +54,17 @@ func gameOfMatrixNextUnitGenerator(
 	}
 }
 
+func generateInitialGameOfMatrixUnit(width int, height int, unit gameOfMatrixUnit) *[][]gameOfMatrixUnit {
+	units := make([][]gameOfMatrixUnit, width)
+	for x := 0; x < width; x += 1 {
+		units[x] = make([]gameOfMatrixUnit, height)
+		for y := 0; y < height; y += 1 {
+			units[x][y] = unit
+		}
+	}
+	return &units
+}
+
 func initializeGameOfMatrixUnits(g ggol.Game[gameOfMatrixUnit]) {
 	// Do nothing
 }
@@ -77,8 +88,9 @@ func drawGameOfMatrixUnit(coord *ggol.Coordinate, unit *gameOfMatrixUnit, blockS
 }
 
 func executeGameOfMatrix() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&size, &initialGameOfMatrixUnit)
+	initialUnits := generateInitialGameOfMatrixUnit(50, 50, initialGameOfMatrixUnit)
+	game, _ := ggol.NewGame(initialUnits)
+	size := game.GetSize()
 	game.SetNextUnitGenerator(gameOfMatrixNextUnitGenerator)
 	initializeGameOfMatrixUnits(game)
 

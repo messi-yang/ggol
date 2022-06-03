@@ -31,7 +31,18 @@ func gameOfBlackAndWhiteNextUnitGenerator(
 	}
 }
 
-func initializeGameOfBlackAndWhiteUnits(g ggol.Game[gameOfBlackAndWhiteUnit]) {
+func generateInitialGameOfBlackAndWhiteUnit(width int, height int, unit gameOfBlackAndWhiteUnit) *[][]gameOfBlackAndWhiteUnit {
+	units := make([][]gameOfBlackAndWhiteUnit, width)
+	for x := 0; x < width; x += 1 {
+		units[x] = make([]gameOfBlackAndWhiteUnit, height)
+		for y := 0; y < height; y += 1 {
+			units[x][y] = unit
+		}
+	}
+	return &units
+}
+
+func setGameOfBlackAndWhiteUnits(g ggol.Game[gameOfBlackAndWhiteUnit]) {
 	size := g.GetSize()
 	for x := 0; x < size.Width; x++ {
 		for y := 0; y < size.Height; y++ {
@@ -53,10 +64,11 @@ func drawGameOfBlackAndWhiteUnit(coord *ggol.Coordinate, unit *gameOfBlackAndWhi
 }
 
 func executeGameOfBlackAndWhite() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&size, &initialGameOfBlackAndWhiteUnit)
+	units := generateInitialGameOfBlackAndWhiteUnit(50, 50, initialGameOfBlackAndWhiteUnit)
+	game, _ := ggol.NewGame(units)
+	size := game.GetSize()
 	game.SetNextUnitGenerator(gameOfBlackAndWhiteNextUnitGenerator)
-	initializeGameOfBlackAndWhiteUnits(game)
+	setGameOfBlackAndWhiteUnits(game)
 
 	var gameOfBlackAndWhitePalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},

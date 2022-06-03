@@ -52,7 +52,18 @@ func conwaysGameOfLifeNextUnitGenerator(
 	}
 }
 
-func initializeConwaysGameOfLifeUnits(g ggol.Game[conwaysGameOfLifeUnit]) {
+func generateInitialConwaysGameOfLifeUnits(width int, height int, unit conwaysGameOfLifeUnit) *[][]conwaysGameOfLifeUnit {
+	units := make([][]conwaysGameOfLifeUnit, width)
+	for x := 0; x < width; x += 1 {
+		units[x] = make([]conwaysGameOfLifeUnit, height)
+		for y := 0; y < height; y += 1 {
+			units[x][y] = unit
+		}
+	}
+	return &units
+}
+
+func setConwaysGameOfLifeUnits(g ggol.Game[conwaysGameOfLifeUnit]) {
 	size := g.GetSize()
 	for i := 0; i < size.Height; i += 1 {
 		for j := 0; j < size.Height; j += 1 {
@@ -77,10 +88,11 @@ func drawConwaysGameOfLifeUnit(coord *ggol.Coordinate, unit *conwaysGameOfLifeUn
 }
 
 func executeGameOfLife() {
-	size := ggol.Size{Width: 50, Height: 50}
-	game, _ := ggol.NewGame(&size, &initialConwaysGameOfLifeUnit)
+	initialUnits := generateInitialConwaysGameOfLifeUnits(50, 50, initialConwaysGameOfLifeUnit)
+	game, _ := ggol.NewGame(initialUnits)
+	size := game.GetSize()
 	game.SetNextUnitGenerator(conwaysGameOfLifeNextUnitGenerator)
-	initializeConwaysGameOfLifeUnits(game)
+	setConwaysGameOfLifeUnits(game)
 
 	var conwaysGameOfLifePalette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},

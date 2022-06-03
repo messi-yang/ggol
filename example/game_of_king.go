@@ -47,6 +47,17 @@ func gameOfKingNextUnitGenerator(
 	return &newUnit
 }
 
+func generateInitialGameOfKingUnit(width int, height int, unit gameOfKingUnit) *[][]gameOfKingUnit {
+	units := make([][]gameOfKingUnit, width)
+	for x := 0; x < width; x += 1 {
+		units[x] = make([]gameOfKingUnit, height)
+		for y := 0; y < height; y += 1 {
+			units[x][y] = unit
+		}
+	}
+	return &units
+}
+
 func initializeGameOfKingUnits(g ggol.Game[gameOfKingUnit]) {
 	size := g.GetSize()
 	cellsCount := int((size.Width * size.Height) / 2)
@@ -71,8 +82,9 @@ func drawGameOfKingUnit(coord *ggol.Coordinate, unit *gameOfKingUnit, blockSize 
 }
 
 func executeGameOfKing() {
-	size := ggol.Size{Width: 250, Height: 250}
-	game, _ := ggol.NewGame(&size, &initialGameOfKingUnit)
+	initialUnits := generateInitialGameOfKingUnit(250, 250, initialGameOfKingUnit)
+	game, _ := ggol.NewGame(initialUnits)
+	size := game.GetSize()
 	game.SetNextUnitGenerator(gameOfKingNextUnitGenerator)
 	initializeGameOfKingUnits(game)
 

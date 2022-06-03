@@ -1,6 +1,7 @@
 package ggol
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -32,9 +33,11 @@ func TestHasLiveCellTestUnitsMapsEqual(t *testing.T) {
 }
 
 func testConvertTestUnitsMatricToHasLiveCellTestUnitsMapCaseOne(t *testing.T) {
-	game, _ := NewGame(&Size{2, 2}, &unitForTest{hasLiveCell: true})
+	uniMatrix := generateInitialUnitMatrixForTest(2, 2, unitForTest{hasLiveCell: true})
+	game, _ := NewGame(uniMatrix)
 	game.SetNextUnitGenerator(defauUnitForTestIterator)
 	allUnits := game.GetUnits()
+	fmt.Println(allUnits)
 	liveUnitsMap := convertUnitForTestMatrixToUnitsHavingLiveCellForTest(allUnits)
 
 	expectedMap := unitsHavingLiveCellForTest{{true, true}, {true, true}}

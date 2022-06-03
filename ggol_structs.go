@@ -3,13 +3,12 @@ package ggol
 import "fmt"
 
 // This error will be thrown when you try to create a new game with invalid size.
-type ErrSizeIsInvalid struct {
-	Size *Size
+type ErrUnitsIsInvalid struct {
 }
 
 // Tell you that the size is invalid.
-func (e *ErrSizeIsInvalid) Error() string {
-	return fmt.Sprintf("The size (%v x %v) is not valid.", e.Size.Width, e.Size.Height)
+func (e *ErrUnitsIsInvalid) Error() string {
+	return fmt.Sprintf("Given units is not valid, the cells in every row should be equal.")
 }
 
 // This error will be thrown when you're trying to set or get an unit with invalid coordinate.

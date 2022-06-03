@@ -10,6 +10,18 @@ var initialUnitForTest unitForTest = unitForTest{
 	hasLiveCell: false,
 }
 
+func generateInitialUnitMatrixForTest(width int, height int, unit unitForTest) *[][]unitForTest {
+	unitMatrix := make([][]unitForTest, width)
+	for x := 0; x < width; x += 1 {
+		unitMatrix[x] = make([]unitForTest, height)
+		for y := 0; y < height; y += 1 {
+			unitMatrix[x][y] = unit
+		}
+	}
+
+	return &unitMatrix
+}
+
 func defauUnitForTestIterator(coord *Coordinate, unit *unitForTest, getAdjacentUnit AdjacentUnitGetter[unitForTest]) *unitForTest {
 	newUnit := *unit
 
@@ -54,12 +66,12 @@ func areTwoUnitsHavingLiveCellForTestEqual(a unitsHavingLiveCellForTest, b units
 	return true
 }
 
-func convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g [][]*unitForTest) *unitsHavingLiveCellForTest {
+func convertUnitForTestMatrixToUnitsHavingLiveCellForTest(g *[][]unitForTest) *unitsHavingLiveCellForTest {
 	gMap := make(unitsHavingLiveCellForTest, 0)
-	for x := 0; x < len(g); x++ {
+	for x := 0; x < len(*g); x++ {
 		gMap = append(gMap, []bool{})
-		for y := 0; y < len(g[x]); y++ {
-			gMap[x] = append(gMap[x], g[x][y].hasLiveCell)
+		for y := 0; y < len((*g)[x]); y++ {
+			gMap[x] = append(gMap[x], (*g)[x][y].hasLiveCell)
 		}
 	}
 
