@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/DumDumGeniuss/ggol"
+	"github.com/dum-dum-genius/ggol"
 )
 
 type gameOfBlackAndWhiteUnit struct {

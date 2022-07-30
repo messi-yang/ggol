@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"math/rand"
 
-	"github.com/DumDumGeniuss/ggol"
+	"github.com/dum-dum-genius/ggol"
 )
 
 type gameOfMatrixUnit struct {

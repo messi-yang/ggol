@@ -1,4 +1,4 @@
-module github.com/DumDumGeniuss/ggol
+module github.com/dum-dum-genius/ggol
 
 go 1.18
 
